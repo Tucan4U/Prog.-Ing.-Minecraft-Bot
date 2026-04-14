@@ -1,4 +1,7 @@
 const mineflayer = require("mineflayer");
+const { getGoldNether, collectGoldNether } = require("./nether_gold_functions.js");
+const {placeCraftingTable, craftGoldenIngots, pickUpTable} = require("./crafting_functions.js")
+
 const {
   pathfinder,
   Movements,
@@ -12,6 +15,18 @@ const bot = mineflayer.createBot({
 });
 
 bot.loadPlugin(pathfinder);
+bot.loadPlugin(require('mineflayer-collectblock').plugin)
+
+bot.once("spawn", () => {
+  const customMoves = new Movements(bot)
+  // To make changes to the behaviour, customize the properties of the instance
+  customMoves.scafoldingBlocks.push(bot.registry.itemsByName.netherrack.id)
+  // Thing to note scaffoldingBlocks are an array while other namespaces are usually sets
+  customMoves.blocksToAvoid.add(bot.registry.blocksByName.magma_block.id)
+
+  // To initialize the new movements use the .setMovements method.
+  bot.pathfinder.setMovements(customMoves)
+});
 
 function loadLogs() {
   let logs = [];
@@ -135,6 +150,9 @@ bot.on("chat", (username, message) => {
   if (message === "break logs") {
     breakLogs();
   }
+  if (message === "get gold nether") {
+    collectGoldNether(bot, GoalNear);
+  }
   if (message === "inventory") {
     console.log(bot.inventory.items());
   }
@@ -146,5 +164,14 @@ bot.on("chat", (username, message) => {
   }
   if (message === "craft crafting table") {
     craftCraftingTable();
+  }
+  if (message === "place crafting table") {
+    placeCraftingTable(bot);
+  }
+  if (message === "craft golden ingots") {
+    craftGoldenIngots(bot);
+  }  
+  if (message === "pick up table") {
+    pickUpTable(bot);
   }
 });

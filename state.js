@@ -3,5 +3,4 @@ module.exports = {
   lootTarget: null,
   lootTimeout: 0,
   attacking: false,
-  equippedWeapon: null
 };

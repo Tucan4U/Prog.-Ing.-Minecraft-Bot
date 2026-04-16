@@ -5,7 +5,7 @@ class MoveToAnimalNode extends Node {
   constructor() {
     super("MoveToAnimal");
 
-    this.lastGoal = null; // cache da ne spamamo pathfinder (iskr neman pojma kako ovo funkcionira ali chat je reka da je jako bitno)
+    this.lastGoal = null; // cache da ne spamamo pathfinder, ako se target pomakne dovoljno da treba novi path, onda se updatea inace ne(velika usteda)
   }
 
   async tick(bot, state) {
@@ -32,6 +32,7 @@ class MoveToAnimalNode extends Node {
 
     // postavi goal SAMO ako se promijenio
     const goal = `${target.position.x}:${target.position.y}:${target.position.z}`;
+    //const goal = target.id; // alternativno, ali može biti problem ako se target pomakne a goal ostane isti jer je baziran na ID-u
 
     if (this.lastGoal !== goal) {
       bot.pathfinder.setGoal(new goals.GoalNear(

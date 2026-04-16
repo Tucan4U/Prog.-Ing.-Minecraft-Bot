@@ -13,6 +13,28 @@ const bot = mineflayer.createBot({
 
 bot.loadPlugin(pathfinder);
 
+// F
+const { enterNether, goToPlayer, giveNetherEquipment } = require("./enterNether");
+const { findNetherFortress } = require("./findFortress");
+
+// F
+const stopController = {
+    stop: false,
+    request() {
+        this.stop = true;
+        console.log("stopping...");
+        bot.chat("Stopping...");
+
+        bot.pathfinder.setGoal(null);
+        bot.clearControlStates();
+
+        bot.stopDigging?.();
+    },
+    reset() {
+        this.stop = false;
+    }
+};
+
 function loadLogs() {
   let logs = [];
   const minecraftData = require("minecraft-data")(bot.version);
@@ -25,10 +47,13 @@ function loadLogs() {
 }
 
 async function breakLogs() {
+  stopController.reset(); //F
   const logs = loadLogs();
   let maxDistance = 64;
 
   while (true) {
+    if (stopController.stop) return; //F
+    
     let cnt = 0;
     bot.inventory.items().forEach((item) => {
       if (item.displayName.endsWith("Log")) {
@@ -61,10 +86,17 @@ async function breakLogs() {
       await bot.pathfinder.goto(
         new GoalNear(block.position.x, block.position.y, block.position.z, 2),
       );
+
+      if (stopController.stop) return; //F
       await bot.dig(block);
+      if (stopController.stop) return; //F
       await bot.waitForTicks(30);
     } catch (err) {
-      console.log("Error breaking log:", err);
+      if (err.message === "Digging aborted"){
+        console.log("Ordered to stop!");
+      } else {
+        console.log("Error breaking log:", err);
+      }
     }
   }
 }
@@ -130,6 +162,10 @@ async function craftCraftingTable() {
   }
 }
 
+bot.once("spawn", () => {
+  giveNetherEquipment(bot);
+});
+
 bot.on("chat", (username, message) => {
   if (username === bot.username) return;
   if (message === "break logs") {
@@ -146,5 +182,22 @@ bot.on("chat", (username, message) => {
   }
   if (message === "craft crafting table") {
     craftCraftingTable();
+  }
+
+  // F
+  if (message === "hi") {
+    bot.chat("Hello " + username);
+  }
+  if (message === "stop") {
+    stopController.request();
+  }
+  if (message === "enter nether") {
+    enterNether(bot);
+  }
+  if (message === "find fortress") {
+    findNetherFortress(bot);
+  }
+  if (message === "come here") {
+    goToPlayer(bot, username);
   }
 });

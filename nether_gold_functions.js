@@ -9,18 +9,8 @@ const {
 const { countItems } = require("./general_functions.js");
 const { piglinBarter } = require("./piglin_functions.js");
 
-function loadGold(bot) {
-  let gold = [];
-  const minecraftData = require("minecraft-data")(bot.version);
-  minecraftData.blocksArray.forEach((block) => {
-    if (block.displayName.endsWith("Gold Ore")) {
-      gold.push(block.id);
-    }
-  });
-  return gold;
-}
-
 async function collectGoldNether(bot, amountToCollect) {
+  //bot continuously mines for gold until the amountToCollect is collected or there is no more gold nearby
   let distance = 10;
   const mcData = require("minecraft-data")(bot.version);
   const goldId = mcData.blocksByName.nether_gold_ore.id;
@@ -33,26 +23,26 @@ async function collectGoldNether(bot, amountToCollect) {
       maxDistance: distance
     });
 
-    // bot.chat(`Tried finding gold`);  
-
     if (gold && gold.position.y > 37) {
       bot.chat(`I found some gold at ${gold.position}`); 
-      try {
-        // bot.chat(`Prije await`);  
+      try { 
         await bot.collectBlock.collect(gold, {
            ignoreNoPath: true
         });
-        distance = 10;
-        // bot.chat(`Pole await`);  
+        distance = 10; 
         const nuggets = countItems(bot, "gold_nugget");
         bot.chat(`I have ${nuggets} gold nuggets.`);
+
         if(nuggets >= 9){
+          //needs to be made into a sequence
           await placeCraftingTable(bot);
           await craftGoldenIngots(bot);
           await pickUpTable(bot);
         }
+
         const ingots = countItems(bot, "gold_ingot");
         bot.chat(`I have ${ingots} gold ingots.`);
+
       } catch (err) {
         console.log("Error collecting gold ore:", err);
         bot.chat("Error collecting gold ore:");
@@ -70,8 +60,6 @@ async function collectGoldNether(bot, amountToCollect) {
         }
     }
   }
-
-  piglinBarter(bot, 500);
 }
 
 module.exports = { collectGoldNether };
@@ -79,3 +67,5 @@ module.exports = { collectGoldNether };
 //sometimes mines into lava
 //stops moving and does nothing
 //if it cant place a crafting table it breaks
+
+//possibly has to be remade without collectBlock

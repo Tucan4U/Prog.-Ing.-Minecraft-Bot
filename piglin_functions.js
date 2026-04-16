@@ -3,6 +3,7 @@ const { GoalFollow } = require("mineflayer-pathfinder").goals;
 const { countItems } = require("./general_functions.js");
 
 function findPiglins(bot, maxDistance = 50) {
+  //function that returns all the piglins closer then maxDistance
   const entities = Object.values(bot.entities);
 
   const piglinEntities = entities
@@ -10,8 +11,6 @@ function findPiglins(bot, maxDistance = 50) {
       return entity.name === "piglin";
     })
     .filter(entity => {
-      // If the bot ever sees piglins with a baby flag, this line filters them out
-      // This is a conservative way: if you have a more precise way (e.g., via metadata), plug it here
       const isBaby = entity.isBaby || (entity.metadata && entity.metadata[15] === 1);
       return !isBaby;
     })
@@ -23,8 +22,8 @@ function findPiglins(bot, maxDistance = 50) {
   return piglinEntities;
 }
 
-// Find the single closest normal piglin
 function findClosestPiglin(bot, maxDistance = 50) {
+  // Find the single closest normal piglin
   const piglins = findPiglins(bot, maxDistance);
   if (piglins.length === 0) return null;
   return piglins.reduce((closest, piglin) => {
@@ -34,10 +33,10 @@ function findClosestPiglin(bot, maxDistance = 50) {
   });
 }
 
-async function goToPiglin(bot, maxDistance = 50) {
+async function goToPiglin(bot, maxDistance = 50) { //<== probbably redundant with the behavior tree approach
+  //bot goes to the position where it found a piglin
   bot.chat("Looking for piglins nearby...");
 
-  // Reuse your findClosestPiglin function (only adults, no brutes, no babies)
   const piglin = findClosestPiglin(bot, maxDistance);
 
   if (!piglin) {
@@ -58,13 +57,13 @@ async function goToPiglin(bot, maxDistance = 50) {
       )
     );
 
-    bot.chat("Arrived near piglin.");
   } catch (err) {
     bot.chat("Failed to go to piglin: " + err.message);
   }
 }
 
 async function followPiglin(bot, maxDistance = 50) {
+  //bot follows the nearest piglin until it reaches them
   bot.chat("Searching for a piglin to follow...");
 
   const piglin = findClosestPiglin(bot, maxDistance);
@@ -77,7 +76,6 @@ async function followPiglin(bot, maxDistance = 50) {
   bot.chat(`Following piglin at ${piglin.position}`);
 
   try {
-    // Follow the piglin, keeping a distance of 1–2 blocks
     await bot.pathfinder.goto(
       new GoalFollow(piglin, 2)   // 2 = max distance, bot stays roughly 2 blocks away
     );
@@ -87,6 +85,7 @@ async function followPiglin(bot, maxDistance = 50) {
 }
 
 async function dropGoldNearPiglin(bot, maxDistance,count = 1) {
+  //if a piglin is nearby the bot drops a gold ingot
   const piglin = findClosestPiglin(bot, maxDistance);
   if (!piglin) {
     bot.chat("No piglin nearby.");
@@ -101,13 +100,13 @@ async function dropGoldNearPiglin(bot, maxDistance,count = 1) {
     return;
   }
 
-  // Use your existing toss helper to drop `count` gold ingots
   await bot.toss(gold.id, null, count);
 
   bot.chat(`Dropped ${count} gold ingot(s) near piglin at ${piglin.position}`);
 }
 
 async function waitPiglinBarter(bot, piglin, timeoutMs = 10_000) {
+  //function that waits for the piglin to finish evaluating the gold ingot during bartering and returns the entity that it picked up
   return new Promise((resolve, reject) => {
     const start = Date.now();
 
@@ -119,14 +118,13 @@ async function waitPiglinBarter(bot, piglin, timeoutMs = 10_000) {
     };
 
     const checkForBarterItem = (entity) => {
+      //often unreliable
       if (!entity || entity.type !== "object" || entity.name !== "experience_orb") {
         return;
       }
 
       const distance = entity.position.distanceTo(piglin.position);
 
-      // If a new barter‑result item appears near the piglin soon after gold,
-      // we can assume bartering finished.
       bot.chat(`Picked up ${entity.getDroppedItem().displayName}`);
       if (distance < 10) {
         cleanup();
@@ -143,7 +141,6 @@ async function waitPiglinBarter(bot, piglin, timeoutMs = 10_000) {
 
     const onPlayerCollect = (collector, collected) => {
       if (collector.username === bot.username) {
-        // Player collected the barter result
         bot.chat(`Collected ${collected.getDroppedItem().displayName}`);
         cleanup();
         resolve(collected);
@@ -161,7 +158,9 @@ async function waitPiglinBarter(bot, piglin, timeoutMs = 10_000) {
   });
 }
 
-async function piglinBarter(bot, maxDistance) {
+async function piglinBarter(bot, maxDistance) { //<== probbably redundant with the behavior tree approach but is a good
+  ////////////////////////////////////////////////////blueprint for the sequence
+  //function that implements the whole bartering loop, from dropping the gold to picking the items up
     const mcData = require("minecraft-data")(bot.version);
 
     await goToPiglin(bot, maxDistance);
@@ -190,3 +189,6 @@ async function piglinBarter(bot, maxDistance) {
 }
 
 module.exports = { piglinBarter };
+
+//baby filter doesn't always work
+//dropping gold shouldn't force piglin to move

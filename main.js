@@ -1,4 +1,7 @@
 const mineflayer = require("mineflayer");
+const { collectGoldNether } = require("./nether_gold_functions.js");
+const { piglinBarter } = require("./piglin_functions.js")
+
 const {
   pathfinder,
   Movements,
@@ -12,6 +15,18 @@ const bot = mineflayer.createBot({
 });
 
 bot.loadPlugin(pathfinder);
+bot.loadPlugin(require('mineflayer-collectblock').plugin)
+
+bot.once("spawn", () => {
+  const customMoves = new Movements(bot)
+  // To make changes to the behaviour, customize the properties of the instance
+  customMoves.scafoldingBlocks.push(bot.registry.itemsByName.netherrack.id)
+  // Thing to note scaffoldingBlocks are an array while other namespaces are usually sets
+  customMoves.blocksToAvoid.add(bot.registry.blocksByName.magma_block.id)
+
+  // To initialize the new movements use the .setMovements method.
+  bot.pathfinder.setMovements(customMoves)
+});
 
 // F
 const { enterNether, goToPlayer, giveNetherEquipment } = require("./enterNether");
@@ -171,6 +186,9 @@ bot.on("chat", (username, message) => {
   if (message === "break logs") {
     breakLogs();
   }
+  if (message === "get gold nether") {
+    collectGoldNether(bot, 64);
+  }
   if (message === "inventory") {
     console.log(bot.inventory.items());
   }
@@ -199,5 +217,8 @@ bot.on("chat", (username, message) => {
   }
   if (message === "come here") {
     goToPlayer(bot, username);
+  }
+  if (message === "barter") {
+    piglinBarter(bot, 500);
   }
 });

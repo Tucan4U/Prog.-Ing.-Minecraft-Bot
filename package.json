@@ -10,6 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "mineflayer-collectblock": "^1.6.0",
     "mineflayer-pathfinder": "^2.4.5"
   }
 }

@@ -175,13 +175,3 @@ function stopAttack() {
   }
 }
 
-// CHAT
-bot.on('chat', (username, message) => {
-  if (message === 'stop') bot.end();
-});
-
-//  ERROR
-bot.on('error', err => console.log(' ERROR:', err.message));
-bot.on('end', () => console.log('Bot disconnect!'));
-
-console.log('=== HUNT BOT 1.21.11 ===');

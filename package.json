@@ -1,7 +1,7 @@
 {
   "name": "mineflayer",
   "version": "1.0.0",
-  "description": "",
+  "description": "Use git clone\r After cloning, you need to run \"npm init\" in the terminal to download all dependencies.",
   "license": "ISC",
   "author": "",
   "type": "commonjs",
@@ -13,5 +13,14 @@
     "minecraft-data": "^3.109.0",
     "mineflayer": "^4.37.0",
     "mineflayer-pathfinder": "^2.4.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tucan4U/Prog.-Ing.-Minecraft-Bot.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/Tucan4U/Prog.-Ing.-Minecraft-Bot/issues"
+  },
+  "homepage": "https://github.com/Tucan4U/Prog.-Ing.-Minecraft-Bot#readme"
 }

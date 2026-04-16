@@ -1,6 +1,6 @@
 const mineflayer = require("mineflayer");
-const { getGoldNether, collectGoldNether } = require("./nether_gold_functions.js");
-const {placeCraftingTable, craftGoldenIngots, pickUpTable} = require("./crafting_functions.js")
+const { collectGoldNether } = require("./nether_gold_functions.js");
+const { piglinBarter } = require("./piglin_functions.js")
 
 const {
   pathfinder,
@@ -151,7 +151,7 @@ bot.on("chat", (username, message) => {
     breakLogs();
   }
   if (message === "get gold nether") {
-    collectGoldNether(bot, GoalNear);
+    collectGoldNether(bot, 64);
   }
   if (message === "inventory") {
     console.log(bot.inventory.items());
@@ -165,13 +165,7 @@ bot.on("chat", (username, message) => {
   if (message === "craft crafting table") {
     craftCraftingTable();
   }
-  if (message === "place crafting table") {
-    placeCraftingTable(bot);
-  }
-  if (message === "craft golden ingots") {
-    craftGoldenIngots(bot);
-  }  
-  if (message === "pick up table") {
-    pickUpTable(bot);
+  if (message === "barter") {
+    piglinBarter(bot, 500);
   }
 });

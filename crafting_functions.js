@@ -40,13 +40,13 @@ async function placeCraftingTable(bot) {
   if (block && block.blockAbove && block.blockAbove.name === "air" && block.blockBelow && block.blockBelow.name !== "air") {
     bot.chat(`${block.blockAbove.position} ${block.blockAbove.name}`); 
     // Place it on the block below
-    bot.chat(`inside if`); 
+    // bot.chat(`inside if`); 
     const below = bot.blockAt(bot.entity.position.offset(0, -1, 1));
     while(true){
         try {
-        bot.chat(`Prije await`);  
+        // bot.chat(`Prije await`);  
         await bot.placeBlock(block.blockBelow, new Vec3(0, 1, 0));
-        bot.chat(`Pole await`);  
+        // bot.chat(`Pole await`);  
       } catch (err) {
         console.log("Error placing crafting table:", err);
         bot.chat("Error placing crafting table:");
@@ -84,7 +84,7 @@ async function craftGoldenIngots(bot) {
 
   // Find a recipe for golden_ingot using gold nuggets, with the table
   const recipe = bot.recipesFor(ingotItem.id, null, 1, table)[0];
-  bot.chat(`${recipe}`);
+//   bot.chat(`${recipe}`);
 
   if (!recipe) {
     bot.chat("No recipe to craft golden ingot with this table.");

@@ -92,6 +92,7 @@ The bot responds to in-game chat commands:
 ├── package-lock.json
 └── docs/
 ```
+In the `docs/` folder are located the WBS and PERT diagrams.
 
 ---
 

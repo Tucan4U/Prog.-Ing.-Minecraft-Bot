@@ -1,21 +1,20 @@
 const Vec3 = require("vec3");
 
 async function findPlaceableSpot(bot) {
+  //this function checks the places around the bot's location for a place to put the crafting table and returns it, null if no places
   const botPos = bot.entity.position;
 
-  // Try a small box around the bot (±2 in x, z)
+
   for (let dx = -2; dx <= 2; dx++) {
     for (let dz = -2; dz <= 2; dz++) {
-      if (dx === 0 && dz === 0) continue; // skip the block the bot is currently on
+      if (dx === 0 && dz === 0) continue;
 
-      // Stand position: just offset from bot
       const standPos = botPos.offset(dx, 0, dz);
       let blockAbove = bot.blockAt(standPos);
         if (blockAbove && blockAbove.name === "air"){
             const posUnder = botPos.offset(dx, -1, dz);
             let blockBelow = bot.blockAt(posUnder);
             if(blockBelow && blockBelow.name!=="air"){
-                // return block;
                 bot.chat(`Will place block at ${blockAbove}`); 
                 return {
                     blockAbove,
@@ -26,10 +25,11 @@ async function findPlaceableSpot(bot) {
       }
     }
     bot.chat(`found no places`); 
-    return null; // no suitable spot found
+    return null;
   }
 
 async function placeCraftingTable(bot) {
+  //places the crafting table at a valid position
   const mcData = require("minecraft-data")(bot.version);
   const craftingTableId = mcData.itemsByName.crafting_table.id;
 
@@ -39,14 +39,10 @@ async function placeCraftingTable(bot) {
 
   if (block && block.blockAbove && block.blockAbove.name === "air" && block.blockBelow && block.blockBelow.name !== "air") {
     bot.chat(`${block.blockAbove.position} ${block.blockAbove.name}`); 
-    // Place it on the block below
-    // bot.chat(`inside if`); 
     const below = bot.blockAt(bot.entity.position.offset(0, -1, 1));
     while(true){
-        try {
-        // bot.chat(`Prije await`);  
+        try {  
         await bot.placeBlock(block.blockBelow, new Vec3(0, 1, 0));
-        // bot.chat(`Pole await`);  
       } catch (err) {
         console.log("Error placing crafting table:", err);
         bot.chat("Error placing crafting table:");
@@ -61,16 +57,16 @@ async function placeCraftingTable(bot) {
 }
 
 async function craftGoldenIngots(bot) {
+  //crafts golden ingot using the nearest crafting table
+  //needs to be made modular for any item in the future
   const mcData = require("minecraft-data")(bot.version);
 
-  // Find the golden_ingot item (output)
   const ingotItem = mcData.itemsByName.gold_ingot;
   if (!ingotItem) {
     bot.chat("golden_ingot not found in data!");
     return;
   }
 
-  // Let the bot search for a crafting table (or workbench) in the world
   const tableId = mcData.blocksByName.crafting_table.id;
   const table = bot.findBlock({
     matching: tableId,
@@ -82,9 +78,7 @@ async function craftGoldenIngots(bot) {
     return;
   }
 
-  // Find a recipe for golden_ingot using gold nuggets, with the table
   const recipe = bot.recipesFor(ingotItem.id, null, 1, table)[0];
-//   bot.chat(`${recipe}`);
 
   if (!recipe) {
     bot.chat("No recipe to craft golden ingot with this table.");
@@ -101,6 +95,7 @@ async function craftGoldenIngots(bot) {
 }
 
 async function pickUpTable(bot) {
+  //mines and picks up the crafting table
   let distance = 10;
   const mcData = require("minecraft-data")(bot.version);
   const tableId = mcData.blocksByName.crafting_table.id;

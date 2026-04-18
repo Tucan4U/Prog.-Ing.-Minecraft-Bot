@@ -20,6 +20,7 @@ async function shearPumpkin(bot, mcData) {
 
     //Equipting shears and shearing the pumpking
     await bot.equip(shears, 'hand')
+    await new Promise(resolve => setTimeout(resolve, 500))
     await bot.lookAt(pumpkinBlock.position.offset(0.5, 0.5, 0.5))
     await bot.activateBlock(pumpkinBlock)
     bot.chat("I sheard the pumpkin!")

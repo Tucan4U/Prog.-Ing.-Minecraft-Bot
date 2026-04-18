@@ -2,13 +2,17 @@ const mineflayer = require('mineflayer')
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder')
 const GoalNear = goals.GoalNear  
 
+// Importing all bot commands from separate files
 const { findAndGetPumpkin } = require("./findAndGetPumpkin.js")
 const { shearPumpkin } = require("./shearPumpkin.js")
 const { breakPumpkin } = require("./breakPumpkin.js")
 const { putOnHead } = require("./putOnHead.js")
+const { findChicken } = require("./findChicken.js")
 const { gatherDirt } = require("./gatherDirt.js")
 const { listInventory } = require("./listInventory.js")
 const { pickupItems, pickupNearbyItems } = require("./pickupNearbyItems.js")
+
+const TARGET_AMOUNT = 64  //Number of blocks need before stopping
 
 
 const bot = mineflayer.createBot({
@@ -20,19 +24,16 @@ const bot = mineflayer.createBot({
 bot.loadPlugin(pathfinder)
 
 let mcData
-
-let stopRequested = false
+let stopRequested = false  //Flag to signal long-running tasks (like gatherDirt) to stop early
 
 function shouldStop() {
     return stopRequested
 }
 
-const TARGET_AMOUNT = 64
 
-
-
+//On spawn - wait for chunks to load, set up movement settings
 bot.once('spawn', async () => {
-    bot.chat("Hello, awaiting comads!")
+    bot.chat("Hello, awaiting commads!")
 
     await new Promise(resolve => setTimeout(resolve, 1500))
 
@@ -42,8 +43,10 @@ bot.once('spawn', async () => {
     bot.pathfinder.setMovements(movements)
 })
 
+//Listen for player chat commands and call the matching function
 bot.on('chat', async (username, message) => {
-    if (username === bot.username) return  // ignore own messages
+    //bot ignores his owmn messages
+    if (username === bot.username) return  
 
     if (message === 'Locate pumpkin') {
         try {
@@ -82,6 +85,15 @@ bot.on('chat', async (username, message) => {
         }
     }
 
+    else if (message === 'Find chicken') {
+        try {
+            await findChicken(bot, mcData)
+        } catch (err) {
+            console.error("Error in the findChicken function:", err)
+            bot.chat("Error happend!")
+        }
+    }
+
     else if (message === 'gather blocks'){
         try{
             await gatherDirt(bot, TARGET_AMOUNT, mcData, shouldStop)
@@ -110,12 +122,10 @@ bot.on('chat', async (username, message) => {
     }
 
     else if (message === 'help') {
-        bot.chat("Komande: 'nadi pumpkin', 'stavi na glavu'")
+        bot.chat("Try some of these commands: 'Locate pumpkin', 'Shear the pumpkin', 'Put the pumpkin on', 'Break the pumpkin', 'Find chicken'.")
     }
 
 })
-
-
 
 
 bot.once('kicked', async() =>{

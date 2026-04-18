@@ -72,16 +72,23 @@ Before running, make sure to configure:
 
 The bot responds to in-game chat commands:
 
-| Command          | Description                      |
-| ---------------- | -------------------------------- |
-| `hi`             | Greets the player                |
-| `stop`           | Stops the current task           |
-| `come here`      | Teleports the bot to the player  |
-| `start hunting`  | Starts hunting animals and collects food|
-| `enter nether`   | Navigates to the Nether          |
-| `find fortress`  | Searches for a Nether fortress   |
-| `get gold nether`| Mines gold in Nether             |
-| `barter`         | Performs piglin bartering        |
+| Command               | Description                             |
+| ----------------      | ----------------------------------------|
+| `hi`                  | Greets the player                       |
+| `stop`                | Stops the current task                  | 
+| `come here`           | Teleports the bot to the player         |
+| `break logs`          | Starts cutting down trees               |
+| `craft wooden pickaxe`| Crafts a wooden pickaxe                 |
+| `find pumpkin`        | Searches for the pumpkin                |
+| `shear the pumpkin`   | Carves the pumpkin                      |
+| `put the pumpkin on`  | Equips the carved pumpkin               |
+| `gather blocks`       | Gathers dirt blocks                     |
+| `inventory`           | Prints bot's inventory                  |
+| `start hunting`       | Starts hunting animals and collects food|
+| `enter nether`        | Navigates to the Nether                 |
+| `find fortress`       | Searches for a Nether fortress          |
+| `get gold nether`     | Mines gold in Nether                    |
+| `barter`              | Performs piglin bartering               |
 
 ---
 

@@ -2,9 +2,8 @@ const {
     goals: { GoalNear },
 } = require("mineflayer-pathfinder");
 
-/**
- * Main function to find and travel to a fortress
- */
+
+//Main function to find and travel to a fortress
 async function findNetherFortress(bot) {
     // 1. Check if we are actually in the nether
     if (!bot.game.dimension.includes('nether')) {
@@ -14,7 +13,7 @@ async function findNetherFortress(bot) {
 
     bot.chat("Locating nearest fortress...");
     
-    // 2. We use a Promise to "wait" for the server to reply to our /locate command
+    // 2. "Wait" for the server to reply to our /locate command
     const coordinates = await locateFortress(bot);
 
     if (!coordinates) {
@@ -30,9 +29,7 @@ async function findNetherFortress(bot) {
     bot.chat("I arrived at the fortress!");
 }
 
-/**
- * Sends /locate and parses the chat response
- */
+// Sends /locate command and parses the chat response
 function locateFortress(bot) {
     return new Promise((resolve) => {
         // Send command
@@ -41,15 +38,14 @@ function locateFortress(bot) {
         // Temporary listener to catch the server's reply
         const messageListener = (jsonMsg) => {
             const message = jsonMsg.toString();
-            
-            // Typical response: "The nearest fortress is at [x, ~, z]"
-            // We use Regex to pull numbers out of the string
+
+            // Using Regex to pull numbers (coordinates x, y, z) out of the string
             const coords = message.match(/\[?(-?\d+),\s*~?,\s*(-?\d+)\]?/);
 
             if (coords) {
                 bot.removeListener('message', messageListener);
                 resolve({
-                    x: parseInt(coords[1]),  //C why not y as well?
+                    x: parseInt(coords[1]),
                     z: parseInt(coords[2])
                 });
             }
@@ -65,11 +61,9 @@ function locateFortress(bot) {
     });
 }
 
-/**
- * Moves the bot in steps of 400 blocks to avoid pathfinding crashes
- */
+// Moves the bot in steps of 400 blocks to avoid pathfinding crashes
 async function travelLongDistance(bot, targetX, targetZ) {
-    const MOVE_STEP = 400; // Keep it under 512 to stay safe
+    const MOVE_STEP = 400; // Under 512 to avoid crash risks
 
     while (true) {
         const currentPos = bot.entity.position;
@@ -77,21 +71,21 @@ async function travelLongDistance(bot, targetX, targetZ) {
         // Calculate distance to final target
         const dx = targetX - currentPos.x;
         const dz = targetZ - currentPos.z;
-        const distance = Math.sqrt(dx * dx + dz * dz); //C shvatit matematiku iza ovog
+        const distance = Math.sqrt(dx * dx + dz * dz);
 
-        // If we are within 5 blocks, we are done
+        // Within 5 block = SUCCESS
         if (distance <= 5) break;
 
         let nextX, nextZ;
 
         if (distance > MOVE_STEP) {
-            // Scale the coordinates down to MOVE_STEP
+            // Scaling the coordinates down
             const ratio = MOVE_STEP / distance;
             nextX = currentPos.x + dx * ratio;
             nextZ = currentPos.z + dz * ratio;
             console.log(`Relay step: Heading toward ${Math.round(nextX)}, ${Math.round(nextZ)}`);
         } else {
-            // We are close enough to go to the final destination
+            // Close enough to go to the final destination
             nextX = targetX;
             nextZ = targetZ;
         }
@@ -99,7 +93,7 @@ async function travelLongDistance(bot, targetX, targetZ) {
         try {
             // Set goal to the next intermediate point
             await bot.pathfinder.goto(new GoalNear(nextX, currentPos.y, nextZ, 2));
-            // Small pause to let the bot "breathe" between relay points
+            // Small pause to let the bot "breathe" between relay points and let server know Bot still present
             await bot.waitForTicks(20);
         } catch (err) {
             console.log("Travel error:", err);

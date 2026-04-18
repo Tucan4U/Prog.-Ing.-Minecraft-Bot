@@ -1,6 +1,9 @@
 const mineflayer = require("mineflayer");
+// Function imports
 const { collectGoldNether } = require("./nether_gold_functions.js");
 const { piglinBarter } = require("./piglin_functions.js")
+const { enterNether, goToPlayer, giveNetherEquipment } = require("./enterNether");
+const { findNetherFortress } = require("./findFortress");
 
 const {
   pathfinder,
@@ -26,13 +29,12 @@ bot.once("spawn", () => {
 
   // To initialize the new movements use the .setMovements method.
   bot.pathfinder.setMovements(customMoves)
+
+  // Provide required equippment for the Nether (development feature only)
+  giveNetherEquipment(bot);
 });
 
-// F
-const { enterNether, goToPlayer, giveNetherEquipment } = require("./enterNether");
-const { findNetherFortress } = require("./findFortress");
-
-// F
+// Controller with functions to stop certain actions
 const stopController = {
     stop: false,
     request() {
@@ -62,12 +64,12 @@ function loadLogs() {
 }
 
 async function breakLogs() {
-  stopController.reset(); //F
+  stopController.reset();
   const logs = loadLogs();
   let maxDistance = 64;
 
   while (true) {
-    if (stopController.stop) return; //F
+    if (stopController.stop) return;
     
     let cnt = 0;
     bot.inventory.items().forEach((item) => {
@@ -102,9 +104,9 @@ async function breakLogs() {
         new GoalNear(block.position.x, block.position.y, block.position.z, 2),
       );
 
-      if (stopController.stop) return; //F
+      if (stopController.stop) return;
       await bot.dig(block);
-      if (stopController.stop) return; //F
+      if (stopController.stop) return;
       await bot.waitForTicks(30);
     } catch (err) {
       if (err.message === "Digging aborted"){
@@ -177,15 +179,12 @@ async function craftCraftingTable() {
   }
 }
 
-bot.once("spawn", () => {
-  giveNetherEquipment(bot);
-});
-
 bot.on("chat", (username, message) => {
   if (username === bot.username) return;
   if (message === "break logs") {
     breakLogs();
   }
+  // Mines for golden nuggets and crafts gold ingots
   if (message === "get gold nether") {
     collectGoldNether(bot, 64);
   }
@@ -202,22 +201,27 @@ bot.on("chat", (username, message) => {
     craftCraftingTable();
   }
 
-  // F
+  // Greets player
   if (message === "hi") {
     bot.chat("Hello " + username);
   }
+  // Stops certain actions
   if (message === "stop") {
     stopController.request();
   }
+  // Checks for equippment, finds active Nether portal and enters dimension
   if (message === "enter nether") {
     enterNether(bot);
   }
+  // Finds Nether fortress and travels there
   if (message === "find fortress") {
     findNetherFortress(bot);
   }
+  // Teleports bot to player's location
   if (message === "come here") {
     goToPlayer(bot, username);
   }
+  // Barters with Piglins in search of Ender pearls
   if (message === "barter") {
     piglinBarter(bot, 500);
   }

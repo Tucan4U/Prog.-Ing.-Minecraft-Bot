@@ -1,19 +1,27 @@
+// Module for handling equipment checks, auto-equipping armor, 
+// and navigating through Nether portals.
+
 const {
   goals: { GoalNear },
 } = require("mineflayer-pathfinder");
 
+
+// Scans inventory and equipped slots to identify missing essentail gear.
+// Returns array of items the bot still needs to find
 function getMissingEquipment(bot) {
+  // 1. Get current inventory
   const items = bot.inventory.items();
 
-  // 2. Get currently equipped armor
+  // 2. Get currently equipped armor from specific armor slots (5-8)
   const armorSlots = [5, 6, 7, 8];
   const equippedArmor = armorSlots
     .map(slot => bot.inventory.slots[slot])
     .filter(item => item !== null);
 
+  // Combine inventory and equipped items for a full list
   const allOwnedItems = [...items, ...equippedArmor];
   
-  // Define what we are looking for
+  // 3. Requirements list
   const requirements = [
     { label: 'Leggings', match: (name) => name.endsWith('_leggings') && (name.includes('iron') || name.includes('diamond') || name.includes('netherite')) },
     { label: 'Boots', match: (name) => name.endsWith('_boots') && (name.includes('iron') || name.includes('diamond') || name.includes('netherite')) },
@@ -22,7 +30,8 @@ function getMissingEquipment(bot) {
     { label: 'Pickaxe', match: (name) => name.endsWith('_pickaxe') && !name.includes('stone') && !name.includes('wooden') && !name.includes('gold') },
     { label: 'Sword', match: (name) => name.endsWith('_sword') && !name.includes('stone') && !name.includes('wooden') && !name.includes('gold') }
   ];
-  // Check which required items are NOT in the inventory
+
+  // 3. Filter requirements to find what is missing from bot's possession
   const missing = requirements
     .filter(req => !allOwnedItems.find(item => req.match(item.name)))
     .map(req => req.label);
@@ -30,11 +39,14 @@ function getMissingEquipment(bot) {
   return missing;
 }
 
+
+// Automatically selects and equips the best available armor from inventory
+// Except for helmet which must be golden
 async function equipArmor(bot) {
-  // Get items
+  // Get inventory
   const items = bot.inventory.items();
 
-  // Helper to find the best item in inventory for a specific keyword
+  // Helper to filter and sort armor by material quality
   const findBest = (keyword) => {
     const candidates = items.filter(i => i.name.endsWith(keyword));
     // Preference order: netherite > diamond > iron
@@ -43,7 +55,7 @@ async function equipArmor(bot) {
            candidates.find(i => i.name.includes('iron'));
   };
 
-  // Map equipment
+  // Define the target layout for equipment
   const armorPlan = [
     { item: items.find(i => i.name === 'golden_helmet'), slot: 5, dest: 'head' },
     { item: findBest('_chestplate'), slot: 6, dest: 'torso' },
@@ -51,7 +63,7 @@ async function equipArmor(bot) {
     { item: findBest('_boots'), slot: 8, dest: 'feet' }
   ];
 
-  // Equip every part of appropriate armor
+  // Loop through the plan and equip items if they aren't already worn
   for (const armor of armorPlan) {
     if (!armor.item) continue;
     
@@ -68,46 +80,40 @@ async function equipArmor(bot) {
   }
 }
 
+//Retrieves the block ID for nether portals based on the current bot version
 function getPortalBlocks(bot) {
   const mcData = require("minecraft-data")(bot.version);
 
-  // Nether portal block
+  // Nether portal block ID
   const portalId = mcData.blocksByName.nether_portal.id;
     
   return portalId;
 }
 
+
+// Main logic to check gear, find a portal, and travel to the Nether
 async function enterNether(bot) {
 
-  // Check equipment and inventory
+  // 1. Check equipment and inventory
   const missingItems = getMissingEquipment(bot);
 
   if (missingItems.length > 0) {
     bot.chat(`I'm not ready! I am missing: ${missingItems.join(', ')}`);
-    return; // Stops enterNether function
+    return; // Stops enterNether function if not ready
   }
 
   bot.chat("It seems I have evrything I need. Let's go!");
 
-  // If Bot has everything, equip everything needed
+  // If Bot has everything needed, equip everything needed
   await equipArmor(bot);  
   
+  // 2. Find active Nether portal
   // Finding closest nether portal
   const portalId = getPortalBlocks(bot);
 
   bot.chat("Searching for Nether portal...");
 
-  // const portalBlock = bot.findBlock({
-  //   matching: portalId,
-  //   maxDistance: 128,
-  // });
-
-  // if (!portalBlock) {
-  //   bot.chat("I can't find a Nether portal nearby.");
-  //   return;
-  // }
-  //stavit da se povecava distance do 512
-
+  // Searches for portal block, widening search area on failed attempt up to 2 times
   let maxDistance = 128;
   let portalBlock = null;
   for (let i = 0; i < 3; i++) {
@@ -120,7 +126,7 @@ async function enterNether(bot) {
     if (!portalBlock) {
       bot.chat("No nether portal found nearby, extending search radius...");
       maxDistance *= 2;
-      // Wait for 1 tick to prevent ECONNRESET
+      // Wait for 1 tick to prevent getting kicked out for weird behavior
       await new Promise(resolve => setTimeout(resolve, 50));
     } else {
       console.log(`Found nether portal block at ${portalBlock.position}`);
@@ -128,6 +134,7 @@ async function enterNether(bot) {
     }
   }
 
+  // If no portal found, give feedback and stop search
   if(!portalBlock) {
     bot.chat("I can't find a Nether portal nearby.");
     return;
@@ -139,8 +146,9 @@ async function enterNether(bot) {
         portalBlock.position.y,
         portalBlock.position.z,);
 
+  // 3. Navigation and Dimension Change
   try {
-    // Move close to portal
+    // navigate to portal
     await bot.pathfinder.goto(
       new GoalNear(
         portalBlock.position.x,
@@ -152,10 +160,11 @@ async function enterNether(bot) {
 
     bot.chat("Entering portal...");
 
-    await bot.waitForTicks(90);
+    // Wait for the required time to enter other dimension
+    await bot.waitForTicks(100);
 
+    // Verify if dimension change was successful
     const currDim = bot.game.dimension;
-    bot.chat(currDim);
     if (currDim === "the_nether") {
       bot.chat("If everything worked, I should be in the Nether!");
     } else {
@@ -164,6 +173,7 @@ async function enterNether(bot) {
 
   } catch (err) {
     
+    // Check if pathfinder algorithm was stopped by error or user/player input
     if (err.message === 'Digging aborted' || err.message === 'Goal changed') {
         bot.chat("Activity stopped by user.");
     } else {
@@ -172,10 +182,14 @@ async function enterNether(bot) {
   }
 }
 
+// Teleports the bot to a specific player's location.
 async function goToPlayer(bot, username){
   bot.chat("/tp @s " + username);
 }
 
+
+// Admin utility to instantly clear inventory and provide required
+// equippment for development purposes
 function giveNetherEquipment(bot){
   bot.chat("/clear Bot");
   bot.chat("/give Bot golden_helmet");

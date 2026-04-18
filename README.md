@@ -9,6 +9,7 @@ This bot can connect to a Minecraft server and perform automated tasks such as n
 
 * Pathfinding and navigation
 * Automated collection of certain blocks
+* Hunting
 * Piglin bartering automation
 * Chat-based command system
 * Multi-environment support (Overworld / Nether / End)

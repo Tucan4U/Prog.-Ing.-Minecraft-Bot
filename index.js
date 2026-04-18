@@ -2,6 +2,12 @@ const mineflayer = require('mineflayer')
 const { pathfinder, Movements, goals } = require('mineflayer-pathfinder')
 const GoalNear = goals.GoalNear  
 
+const { findAndGetPumpkin } = require("./findAndGetPumpkin.js")
+const { shearPumpkin } = require("./shearPumpkin.js")
+const { breakPumpkin } = require("./breakPumpkin.js")
+const { putOnHead } = require("./putOnHead.js")
+
+
 const bot = mineflayer.createBot({
     host: 'localhost',
     port: 25565,
@@ -10,56 +16,67 @@ const bot = mineflayer.createBot({
 
 bot.loadPlugin(pathfinder)
 
+let mcData
 
 
 bot.once('spawn', async () => {
-    bot.chat("Rodio sam se")
+    bot.chat("Hello, awaiting comads!")
 
     await new Promise(resolve => setTimeout(resolve, 1500))
 
-    const mcData = require('minecraft-data')(bot.version)
+    mcData = require('minecraft-data')(bot.version)
     const movements = new Movements(bot, mcData)
     movements.scafoldingBlocks = []
     bot.pathfinder.setMovements(movements)
-
-    
-    //nadi pumpkin
-    const pumpkinBlock = bot.findBlock({
-        matching: mcData.blocksByName.pumpkin.id,
-        maxDistance: 128
-    })
-
-    if (!pumpkinBlock) {
-        bot.chat("Stari moj, tu je nema!")
-        return
-    }
-
-    // x, y, z koridinate pumpkin bloka
-    const x = pumpkinBlock.position.x   
-    const y = pumpkinBlock.position.y
-
-    const z = pumpkinBlock.position.z
-    const goal = new GoalNear(x, y, z, 2.5)
-    bot.pathfinder.setGoal(goal)
-
-
-    //cekaj da dode do te bundeve
-    await new Promise(resolve => bot.once('goal_reached', resolve))
-
-    //equiptaj shears, ako ih ima
-    const shears = bot.inventory.items().find(item => item.name === 'shears')
-    if (!shears) {
-        bot.chat("Nemam škare!")
-        return
-    }
-    await bot.equip(shears, 'hand')
-
-    await bot.lookAt(pumpkinBlock.position.offset(0.5, 0.5, 0.5))
-    await bot.activateBlock(pumpkinBlock)
-    bot.chat("Narezao sam bundevu!")
-
-
 })
+
+bot.on('chat', async (username, message) => {
+    if (username === bot.username) return  // ignore own messages
+
+    if (message === 'Locate pumpkin') {
+        try {
+            await findAndGetPumpkin(bot, mcData)
+        } catch (err) {
+            console.error("Error in the findAndGetPumpkin function:", err)
+            bot.chat("Error happend!")
+        }
+    }
+
+    else if (message === 'Shear the pumpkin') {
+        try {
+            await shearPumpkin(bot, mcData)
+        } catch (err) {
+            console.error("Error in the shearPumpkin function:", err)
+            bot.chat("Error happend!")
+        }
+    }
+
+    else if (message === 'Break the pumpkin') {
+        try {
+            await breakPumpkin(bot, mcData)
+        } catch (err) {
+            console.error("Error in the breakPumpkin function:", err)
+            bot.chat("Error happend!")
+        }
+        
+    }
+
+    else if (message === 'Put the pumpkin on') {
+        try {
+            await putOnHead(bot, mcData)
+        } catch (err) {
+            console.error("Error in the putOnHead function:", err)
+            bot.chat("Error happend!")
+        }
+    }
+
+    else if (message === 'help') {
+        bot.chat("Komande: 'nadi pumpkin', 'stavi na glavu'")
+    }
+})
+
+
+
 
 bot.once('kicked', async() =>{
     bot.chat("Balotelli: Why always me")

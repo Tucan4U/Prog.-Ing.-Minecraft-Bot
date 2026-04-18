@@ -6,6 +6,9 @@ const { findAndGetPumpkin } = require("./findAndGetPumpkin.js")
 const { shearPumpkin } = require("./shearPumpkin.js")
 const { breakPumpkin } = require("./breakPumpkin.js")
 const { putOnHead } = require("./putOnHead.js")
+const { gatherDirt } = require("./gatherDirt.js")
+const { listInventory } = require("./listInventory.js")
+const { pickupItems, pickupNearbyItems } = require("./pickupNearbyItems.js")
 
 
 const bot = mineflayer.createBot({
@@ -17,6 +20,15 @@ const bot = mineflayer.createBot({
 bot.loadPlugin(pathfinder)
 
 let mcData
+
+let stopRequested = false
+
+function shouldStop() {
+    return stopRequested
+}
+
+const TARGET_AMOUNT = 64
+
 
 
 bot.once('spawn', async () => {
@@ -70,9 +82,37 @@ bot.on('chat', async (username, message) => {
         }
     }
 
+    else if (message === 'gather blocks'){
+        try{
+            await gatherDirt(bot, TARGET_AMOUNT, mcData, shouldStop)
+        } catch (err){
+            console.error("Error in the gatherDirt function:", err)
+            bot.chat("Error happend!")
+        }
+    }
+
+    else if (message === 'inventory'){
+        try{
+            await listInventory(bot)
+        } catch (err){
+            console.error("Error in the listInventory function:", err)
+            bot.chat("Error happened!")
+        }
+    }
+
+    else if (message === 'pickup'){
+        try{
+            await pickupNearbyItems(bot, shouldStop)
+        } catch (err){
+            console.error("Error in the pickupItems function:", err)
+            bot.chat("Error happend!")
+        }
+    }
+
     else if (message === 'help') {
         bot.chat("Komande: 'nadi pumpkin', 'stavi na glavu'")
     }
+
 })
 
 

@@ -77,6 +77,7 @@ The bot responds to in-game chat commands:
 | `hi`             | Greets the player                |
 | `stop`           | Stops the current task           |
 | `come here`      | Teleports the bot to the player  |
+| `start hunting`  | Starts hunting animals and collects food|
 | `enter nether`   | Navigates to the Nether          |
 | `find fortress`  | Searches for a Nether fortress   |
 | `get gold nether`| Mines gold in Nether             |

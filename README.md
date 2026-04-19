@@ -52,7 +52,8 @@ npm install
 
 ## Usage
 
-In your Minecraft world 
+In your Minecraft world
+(Make sure game's version is 1.21.11)
 
 Start the bot with:
 

@@ -17,5 +17,7 @@ module.exports = {
     'cooked_beef', 'cooked_porkchop'
   ],
 
-  ANIMALS: ['pig', 'cow', 'sheep', 'chicken']
+  ANIMALS: ['pig', 'cow', 'sheep', 'chicken'],
+
+  LOG_TARGET_COUNT: 10,
 };

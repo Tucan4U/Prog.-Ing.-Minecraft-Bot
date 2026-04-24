@@ -21,6 +21,9 @@ const IdleNode = require('./bt/nodes/idleNode');
 const FindAnimalNode = require('./bt/nodes/findAnimalNode');
 const MoveToAnimalNode = require('./bt/nodes/moveToAnimalNode');
 const AttackNode = require('./bt/nodes/attackNode');
+const FindLogNode = require('./bt/nodes/findLogNode');
+const MoveToLogNode = require('./bt/nodes/moveToLogNode');
+const BreakLogNode = require('./bt/nodes/breakLogNode');
 
 const bot = mineflayer.createBot({
   host: "localhost",
@@ -29,6 +32,7 @@ const bot = mineflayer.createBot({
 });
 
 bot.loadPlugin(pathfinder);
+bot.loadPlugin(require("mineflayer-collectblock").plugin);
 
 // lov na zivotinje razbijen u manje nodeove radi lakšeg razvoja, održavanja i debugganja 
 const huntSequence = new Sequence([
@@ -36,10 +40,17 @@ const huntSequence = new Sequence([
     new MoveToAnimalNode(),
     new AttackNode(),
 ]);
+// sekvencu za sjeckanje logova: pronađi log → dođi do njega → slomi ga
+const breakLogsSequence = new Sequence([
+    new FindLogNode(),
+    new MoveToLogNode(),
+    new BreakLogNode(),
+]);
 // glavno stablo ponašanja, prioritet gre od gore prema dole
 const tree = new Selector([
   new LootNode(),
   huntSequence,
+  breakLogsSequence,
   //new HuntNode(),
   new IdleNode()
 ]);

@@ -1,9 +1,17 @@
-function findFood(bot, FOOD) {
-  return Object.values(bot.entities).find(e => {
+function findItem(bot, filter, itemsOverride) {
+  if (!Array.isArray(filter)) {
+    return null;
+  }
+
+  const entities = Array.isArray(itemsOverride)
+    ? itemsOverride
+    : Object.values(bot.entities);
+
+  return entities.find(e => {
     if (e.name !== 'item') return false;
     const item = e.getDroppedItem?.();
-    return item && FOOD.includes(item.name);
+    return item && filter.includes(item.name);
   });
 }
 
-module.exports = { findFood };
+module.exports = { findItem };

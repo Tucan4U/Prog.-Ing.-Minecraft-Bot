@@ -3,4 +3,7 @@ module.exports = {
   lootTarget: null,
   lootTimeout: 0,
   attacking: false,
+  digTask: null,
+  logTarget: null,
+  maxLogDistance: 4,
 };

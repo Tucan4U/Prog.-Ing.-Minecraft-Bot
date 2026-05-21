@@ -13,10 +13,15 @@ const bot = mineflayer.createBot({
 
 bot.loadPlugin(pathfinder);
 
+bot.once("spawn", () => {
+  const mcData = require("minecraft-data")(bot.version);
+  bot.pathfinder.setMovements(new Movements(bot, mcData));
+  console.log("Bot spawned");
+});
+
 function loadLogs() {
   let logs = [];
-  const minecraftData = require("minecraft-data")(bot.version);
-  minecraftData.blocksArray.forEach((block) => {
+  mcData.blocksArray.forEach((block) => {
     if (block.displayName.endsWith("Log")) {
       logs.push(block.id);
     }

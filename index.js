@@ -1,26 +1,30 @@
-const mineflayer = require('mineflayer');
-const { pathfinder, Movements, goals } = require('mineflayer-pathfinder');
+const mineflayer = require("mineflayer");
+const { pathfinder, Movements, goals } = require("mineflayer-pathfinder");
 
-const StateMachine = require('./fsm');
+const StateMachine = require("./fsm");
 
-const config = require('./config');
-const state = require('./state');
+const config = require("./config");
+const state = require("./state");
 
-const { findFood } = require('./behaviors/loot');
-const { findAnimals } = require('./behaviors/findEnteties');
-const { attackTarget } = require('./behaviors/combat');
+const { findFood } = require("./behaviors/loot");
+const { findAnimals } = require("./behaviors/findEnteties");
+const { attackTarget } = require("./behaviors/combat");
 
-const { equipBestWeapon } = require('./utils/inventory');
-const { getClosestEntity } = require('./utils/target');
+const { equipBestWeapon } = require("./utils/inventory");
+const { getClosestEntity } = require("./utils/target");
 
-const { Selector, Sequence } = require('./bt/behaviorTree');
+const { Selector, Sequence } = require("./bt/behaviorTree");
 
-const LootNode = require('./bt/nodes/lootNode');
-const HuntNode = require('./bt/nodes/huntNode');
-const IdleNode = require('./bt/nodes/idleNode');
-const FindAnimalNode = require('./bt/nodes/findAnimalNode');
-const MoveToAnimalNode = require('./bt/nodes/moveToAnimalNode');
-const AttackNode = require('./bt/nodes/attackNode');
+const LootNode = require("./bt/nodes/lootNode");
+const HuntNode = require("./bt/nodes/huntNode");
+const IdleNode = require("./bt/nodes/idleNode");
+const HasLogsNode = require("./bt/nodes/hasLogsNode");
+const FindAnimalNode = require("./bt/nodes/findAnimalNode");
+const MoveToAnimalNode = require("./bt/nodes/moveToAnimalNode");
+const AttackNode = require("./bt/nodes/attackNode");
+const FindLogNode = require("./bt/nodes/findLogNode");
+const MoveToBlockNode = require("./bt/nodes/moveToBlockNode");
+const BreakLogNode = require("./bt/nodes/breakLogNode");
 
 const bot = mineflayer.createBot({
   host: "localhost",
@@ -30,29 +34,37 @@ const bot = mineflayer.createBot({
 
 bot.loadPlugin(pathfinder);
 
-// lov na zivotinje razbijen u manje nodeove radi lakšeg razvoja, održavanja i debugganja 
+// lov na zivotinje razbijen u manje nodeove radi lakšeg razvoja, održavanja i debugganja
 const huntSequence = new Sequence([
-    new FindAnimalNode(),
-    new MoveToAnimalNode(),
-    new AttackNode(),
+  new FindAnimalNode(),
+  new MoveToAnimalNode(),
+  new AttackNode(),
+]);
+
+const breakLogSequence = new Sequence([
+  new HasLogsNode(),
+  new FindLogNode(),
+  new MoveToBlockNode(),
+  new BreakLogNode(),
 ]);
 // glavno stablo ponašanja, prioritet gre od gore prema dole
 const tree = new Selector([
-  new LootNode(),
-  huntSequence,
+  new LootNode("FOOD"),
+  new LootNode("LOGS"),
+  breakLogSequence,
+  //huntSequence,
   //new HuntNode(),
-  new IdleNode()
+  new IdleNode(),
 ]);
 
-
-bot.once('spawn', () => {
-  const mcData = require('minecraft-data')(bot.version);
+bot.once("spawn", () => {
+  const mcData = require("minecraft-data")(bot.version);
   bot.pathfinder.setMovements(new Movements(bot, mcData));
-  
-  console.log('Bot spawned');
-  
+
+  console.log("Bot spawned");
+
   //fsm.setState('SEARCHING');
-  
+
   startLoop();
 });
 
@@ -64,7 +76,7 @@ async function startLoop() {
       console.log(err);
     }
 
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
   }
 }
 // glavni loop koji ticka behavior tree(BT)
@@ -202,12 +214,12 @@ function lootingState() {
 } */
 
 // CHAT
-bot.on('chat', (username, message) => {
-  if (message === 'stop') bot.end();
+bot.on("chat", (username, message) => {
+  if (message === "stop") bot.end();
 });
 
 //  ERROR
-bot.on('error', err => console.log(' ERROR:', err.message));
-bot.on('end', () => console.log('Bot disconnect!'));
+bot.on("error", (err) => console.log(" ERROR:", err.message));
+bot.on("end", () => console.log("Bot disconnect!"));
 
-console.log('=== BOT 1.21.11 ===');
+console.log("=== BOT 1.21.11 ===");

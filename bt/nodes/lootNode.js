@@ -1,32 +1,37 @@
-const { Node } = require('../behaviorTree');
-const { goals } = require('mineflayer-pathfinder');
-const { findFood } = require('../../behaviors/loot');
+const { Node } = require("../behaviorTree");
+const { goals } = require("mineflayer-pathfinder");
+const { findItem } = require("../../behaviors/loot");
 
 // za sada radi samo sa hranon, treba proširit na drugi loot (npr. iteme koje dropaju mobovi)
 class LootNode extends Node {
-  constructor() {
+  constructor(typeOfLoot) {
     super("LootNode");
+    this.typeOfLoot = typeOfLoot;
+    this.lastGoal = null;
   }
   async tick(bot, state, config) {
-    const food = findFood(bot, config.FOOD);
-    if (!food) return 'FAILURE';
+    const item = findItem(bot, config[this.typeOfLoot]);
+    if (!item) return "FAILURE";
 
-    state.lootTarget = food;
+    state.lootTarget = item;
 
-    bot.pathfinder.setGoal(new goals.GoalBlock(
-      food.position.x,
-      food.position.y,
-      food.position.z
-    ));
+    const goal = `${item.position.x}:${item.position.y}:${item.position.z}`;
 
-    const dist = bot.entity.position.distanceTo(food.position);
+    if (this.lastGoal !== goal) {
+      bot.pathfinder.setGoal(
+        new goals.GoalBlock(item.position.x, item.position.y, item.position.z),
+      );
+      this.lastGoal = goal;
+    }
+
+    const dist = bot.entity.position.distanceTo(item.position);
 
     if (dist < 1.5) {
       state.lootTarget = null;
-      return 'SUCCESS';
+      return "SUCCESS";
     }
 
-    return 'RUNNING';
+    return "RUNNING";
   }
 }
 

@@ -1,9 +1,9 @@
-function findFood(bot, FOOD) {
-  return Object.values(bot.entities).find(e => {
-    if (e.name !== 'item') return false;
+function findItem(bot, ITEM_ARRAY) {
+  return Object.values(bot.entities).find((e) => {
+    if (e.name !== "item") return false;
     const item = e.getDroppedItem?.();
-    return item && FOOD.includes(item.name);
+    return item && ITEM_ARRAY.includes(item.name);
   });
 }
 
-module.exports = { findFood };
+module.exports = { findItem };

@@ -24,14 +24,15 @@ class AttackNode extends Node {
     }
 
     const dist = bot.entity.position.distanceTo(target.position);
+    const attackRange = config?.BT?.ATTACK_RANGE ?? 4;
 
     // predaleko → vrati na Move node
-    if (dist > 4) {
+    if (dist > attackRange) {
       return 'FAILURE';
     }
 
     // opremi weapon (cache već imaš)
-    await equipBestWeapon(bot, config.WEAPONS, state);
+    await equipBestWeapon(bot, config.WEAPONS);
 
     await bot.lookAt(target.position, true);
     // napad (koristi cooldown)

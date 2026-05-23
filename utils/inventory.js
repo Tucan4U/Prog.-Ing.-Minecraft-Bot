@@ -1,18 +1,17 @@
-async function equipBestWeapon(bot, weapons, state) {
+async function equipBestWeapon(bot, weapons) {
   // Equipaj sljedeće najbolje oružje
   const currentItem = bot.heldItem?.name;
 
-  if (currentItem && weapons.includes(currentItem)) {
-    return;
-  }
-
   for (const weapon of weapons) {
-    const item = bot.inventory.items().find(i => i.name === weapon);
-    console.log(`Checking for ${weapon} in inventory...`);
+    const item = bot.inventory.items().find((i) => i.name === weapon);
     if (!item) continue;
-
+    console.log(`Checking for ${weapon} in inventory...`);
     try {
-      await bot.equip(item, 'hand');
+      await bot.equip(item, "hand").then(() => {
+        if (currentItem !== weapon) {
+          bot.chat(`Equipped ${weapon}`);
+        }
+      });
       console.log(`Equipped ${weapon}`);
       return;
     } catch (err) {
@@ -20,8 +19,24 @@ async function equipBestWeapon(bot, weapons, state) {
     }
   }
 
-  console.log('No weapons available');
-  state.equippedWeapon = null;
+  console.log("No weapons available");
 }
 
-module.exports = { equipBestWeapon };
+function needsFood(bot, state, config) {
+  const foodCount = bot.inventory
+    .items()
+    .filter((i) => config.FOOD.includes(i.name))
+    .reduce((sum, i) => sum + i.count, 0);
+
+  return foodCount < 32;
+}
+
+function numOfBlocks(bot, state, config, blocksKey) {
+  const blockCount = bot.inventory
+    .items()
+    .filter((item) => config.BLOCKS[blocksKey]?.names.includes(item.name))
+    .reduce((count, item) => count + item.count, 0);
+  return blockCount || 0;
+}
+
+module.exports = { equipBestWeapon, needsFood, numOfBlocks };

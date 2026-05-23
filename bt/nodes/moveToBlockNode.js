@@ -1,37 +1,49 @@
 const { Node } = require("../behaviorTree");
 const { goals } = require("mineflayer-pathfinder");
+const { chatThrottled } = require("../../utils/throttle");
 
 class MoveToBlockNode extends Node {
-  constructor() {
+  constructor(
+    stateKey = "blockTarget",
+    nearDistance = 1,
+    successDistance = 5,
+    statusThrottleMs = 3000,
+  ) {
     super("MoveToBlock");
-
-    this.lastGoal = null; // cache da ne spamamo pathfinder
+    this.stateKey = stateKey;
+    this.nearDistance = nearDistance;
+    this.successDistance = successDistance;
+    this.statusThrottleMs = statusThrottleMs;
+    this.lastGoal = null;
   }
 
   async tick(bot, state) {
-    const target = state.logTarget;
+    const item = state["lootTarget"];
+    if (item) return "SUCCESS";
 
-    // nema targeta → ne možemo raditi
+    const target = state[this.stateKey];
     if (!target) {
+      console.log("Nema targeta");
+      this.lastGoal = null;
       return "FAILURE";
     }
 
-    // block više ne postoji / nije validan
     const block = bot.blockAt(target.position);
-    if (!block || block.type === 0) {
-      state.logTarget = null;
+    if (block && block.name === "air" && !state["digTask"]) {
+      state[this.stateKey] = null;
+      this.lastGoal = null;
       return "FAILURE";
     }
-
     const dist = bot.entity.position.distanceTo(block.position);
 
-    // dovoljno blizu → gotovo kretanje
-    if (dist < 6) {
+    if (dist <= this.successDistance) {
       return "SUCCESS";
     }
 
-    // postavi goal samo ako se promijenio
-    const goal = `${block.position.x}:${block.position.y}:${block.position.z}`;
+    const goalX = Math.floor(block.position.x);
+    const goalY = Math.floor(block.position.y);
+    const goalZ = Math.floor(block.position.z);
+    const goal = `${goalX}:${goalY}:${goalZ}`;
 
     if (this.lastGoal !== goal) {
       bot.pathfinder.setGoal(
@@ -39,12 +51,19 @@ class MoveToBlockNode extends Node {
           block.position.x,
           block.position.y,
           block.position.z,
-          2,
+          this.nearDistance,
         ),
       );
 
       this.lastGoal = goal;
     }
+
+    chatThrottled(
+      bot,
+      `moveblock:${this.stateKey}:${goal}`,
+      `Moving to ${block.name || "block"} @ ${Math.round(dist)} blocks`,
+      this.statusThrottleMs,
+    );
 
     return "RUNNING";
   }

@@ -1,8 +1,17 @@
-function findItem(bot, ITEM_ARRAY) {
-  return Object.values(bot.entities).find((e) => {
+function findItem(bot, filter, itemsOverride) {
+  if (!Array.isArray(filter)) {
+    return null;
+  }
+  console.log("Filter je array");
+  const entities = Array.isArray(itemsOverride)
+    ? itemsOverride
+    : Object.values(bot.entities);
+
+  return entities.find((e) => {
     if (e.name !== "item") return false;
     const item = e.getDroppedItem?.();
-    return item && ITEM_ARRAY.includes(item.name);
+    console.log(`Ime itema: ${item.name}`);
+    return item && filter.includes(item.name);
   });
 }
 

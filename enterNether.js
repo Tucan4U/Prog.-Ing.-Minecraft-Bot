@@ -114,7 +114,7 @@ async function enterNether(bot) {
   bot.chat("Searching for Nether portal...");
 
   // Searches for portal block, widening search area on failed attempt up to 2 times
-  let maxDistance = 128;
+  let maxDistance = 64;
   let portalBlock = null;
   for (let i = 0; i < 3; i++) {
     console.log(`Searching within: ${maxDistance} blocks`)

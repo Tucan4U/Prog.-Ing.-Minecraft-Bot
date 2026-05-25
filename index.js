@@ -4,12 +4,14 @@ const { pathfinder, Movements } = require("mineflayer-pathfinder");
 
 const config = require("./config");
 const state = require("./state");
+const { giveNetherEquipment } = require('./utils/netherEquipment');
 
 const UtilitySelectorNode = require("./bt/selectors/utilitySelectorNode");
 const { createOverworldProfile } = require("./bt/profiles/overworldProfile");
 const {
   createHostileCombatProfile,
 } = require("./bt/profiles/hostileCombatProfile");
+const { createNetherProfile } = require("./bt/profiles/netherProfile");
 const { startWorldSensors } = require("./sensors/worldSensors");
 
 const bot = mineflayer.createBot({
@@ -24,6 +26,7 @@ let worldSensors = null;
 
 const overworldProfile = createOverworldProfile(config);
 const hostileCombatProfile = createHostileCombatProfile(config);
+const netherProfile = createNetherProfile(config);
 
 const utilityTreesByProfile = {
   [config.PROFILES.OVERWORLD]: new UtilitySelectorNode(
@@ -35,6 +38,11 @@ const utilityTreesByProfile = {
     "HostileCombatUtility",
     hostileCombatProfile.candidates,
     hostileCombatProfile.fallbackNode,
+  ),
+  [config.PROFILES.NETHER]: new UtilitySelectorNode(
+    "NetherUtility",
+    netherProfile.candidates,
+    netherProfile.fallbackNode,
   ),
 };
 
@@ -104,6 +112,14 @@ bot.on("chat", (username, message) => {
     state.mission.activeProfile = config.PROFILES.HOSTILE_COMBAT;
     bot.chat("Profile switched: HOSTILE_COMBAT");
   }
+  if (message === "profile nether") {
+    state.mission.activeProfile = config.PROFILES.NETHER;
+    bot.chat("Profile switched: NETHER");
+  }
+  if (message === "prep") {
+    bot.chat("Giving bot equipment for nether...");
+    giveNetherEquipment(bot);
+  }
   if (message === "entities") {
     const filter = config.SLIMES;
     const allowedNames = new Set(filter.names);
@@ -127,6 +143,19 @@ bot.on("chat", (username, message) => {
   }
   if (message === "inventory") {
     console.log(bot.inventory.items());
+  }
+    if (message === "enter nether") {
+      // If we're already in the Nether, notify and clear the request
+      if (bot.game && bot.game.dimension === 'the_nether') {
+        state.mission.activeProfile = config.PROFILES.NETHER;
+        state.mission.enterNetherRequested = false;
+        bot.chat('I am already in the Nether.');
+      } else {
+        state.mission.activeProfile = config.PROFILES.NETHER;
+        state.mission.enterNetherRequested = true;
+        huntFlag = true;
+        bot.chat('Switching to Nether profile and entering nether.');
+      }
   }
   if (message === "tp") {
     bot.chat("/tp @s " + username);

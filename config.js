@@ -46,6 +46,7 @@ module.exports = {
   PROFILES: {
     OVERWORLD: "OVERWORLD",
     HOSTILE_COMBAT: "HOSTILE_COMBAT",
+    NETHER: "NETHER",
   },
   BLOCKS: {
     LOGS: {
@@ -58,6 +59,10 @@ module.exports = {
         "dark_oak_log",
       ],
       maxBlockDistance: 16,
+    },
+    NETHER_PORTAL: {
+      names: ["nether_portal"],
+      maxBlockDistance: 64,
     },
     PLANKS: {
       names: [
@@ -83,7 +88,7 @@ module.exports = {
   },
 
   HOSTILES: {
-    type: "mob",
+    type: "hostile",
     names: ["zombie", "skeleton", "spider", "creeper"],
   },
   SLIMES: {

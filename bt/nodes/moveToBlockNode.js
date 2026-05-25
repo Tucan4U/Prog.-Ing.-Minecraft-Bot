@@ -2,6 +2,7 @@ const { Node } = require("../behaviorTree");
 const { goals } = require("mineflayer-pathfinder");
 const { chatThrottled } = require("../../utils/throttle");
 
+// Moves the bot toward a target block and detects stale or invalid paths.
 class MoveToBlockNode extends Node {
   constructor(
     stateKey = "blockTarget",
@@ -15,6 +16,9 @@ class MoveToBlockNode extends Node {
     this.successDistance = successDistance;
     this.statusThrottleMs = statusThrottleMs;
     this.lastGoal = null;
+    this.lastDistance = null;
+    this.lastProgressTime = null;
+    this.stuckTimeoutMs = 10000;
   }
 
   async tick(bot, state) {
@@ -23,21 +27,50 @@ class MoveToBlockNode extends Node {
 
     const target = state[this.stateKey];
     if (!target) {
+      // Fail if there is no current target block to move toward.
       console.log("Nema targeta");
-      this.lastGoal = null;
+      this.resetProgress();
       return "FAILURE";
     }
 
     const block = bot.blockAt(target.position);
-    if (block && block.name === "air" && !state["digTask"]) {
+    if (!block) {
+      // Clear an invalid or disappeared block target and retry.
       state[this.stateKey] = null;
-      this.lastGoal = null;
+      this.resetProgress();
       return "FAILURE";
     }
+
+    if (block.name === "air" && !state["digTask"]) {
+      state[this.stateKey] = null;
+      this.resetProgress();
+      return "FAILURE";
+    }
+
     const dist = bot.entity.position.distanceTo(block.position);
 
     if (dist <= this.successDistance) {
+      this.resetProgress();
       return "SUCCESS";
+    }
+
+    //Success returned only after reaching successDistance, but we consider progress if we get within nearDistance
+    if (this.lastDistance === null) {
+      this.lastDistance = dist;
+      this.lastProgressTime = Date.now();
+    } else {
+      const improved = dist < this.lastDistance - 0.5;
+
+      if (improved) {
+        this.lastDistance = dist;
+        this.lastProgressTime = Date.now();
+      } else if (Date.now() - this.lastProgressTime > this.stuckTimeoutMs) {
+        // If the bot is stuck and not making progress, clear the target so it can search again.
+        bot.chat(`Path stale for ${this.stateKey}. Retrying search.`);
+        state[this.stateKey] = null;
+        this.resetProgress();
+        return "FAILURE";
+      }
     }
 
     const goalX = Math.floor(block.position.x);
@@ -46,6 +79,7 @@ class MoveToBlockNode extends Node {
     const goal = `${goalX}:${goalY}:${goalZ}`;
 
     if (this.lastGoal !== goal) {
+      // Only update the pathfinder goal when the target block position changes.
       bot.pathfinder.setGoal(
         new goals.GoalNear(
           block.position.x,
@@ -66,6 +100,12 @@ class MoveToBlockNode extends Node {
     );
 
     return "RUNNING";
+  }
+
+  resetProgress() {
+    this.lastGoal = null;
+    this.lastDistance = null;
+    this.lastProgressTime = null;
   }
 }
 

@@ -144,17 +144,46 @@ bot.on("chat", (username, message) => {
   if (message === "inventory") {
     console.log(bot.inventory.items());
   }
-    if (message === "enter nether") {
-      // If we're already in the Nether, notify and clear the request
+    if (message === "nether") {
+      // Combined unified command: switch to Nether profile, request both enter and fortress search.
+      // BT will first run EnterNether (score 200) to enter the Nether via portal,
+      // then automatically switch to FindFortress (score 150) once in the Nether dimension.
+      state.mission.activeProfile = config.PROFILES.NETHER;
+      state.mission.enterNetherRequested = true;
+      state.mission.findFortressRequested = true;
+      state.mission.fortressTarget = null;
+      huntFlag = true;
+
       if (bot.game && bot.game.dimension === 'the_nether') {
-        state.mission.activeProfile = config.PROFILES.NETHER;
-        state.mission.enterNetherRequested = false;
-        bot.chat('I am already in the Nether.');
+        bot.chat('Nether mode: already in Nether, searching for fortress.');
       } else {
-        state.mission.activeProfile = config.PROFILES.NETHER;
+        bot.chat('Nether mode: switching profile and entering Nether, then search for fortress.');
+      }
+    }
+  if (message === "enter nether") {
+    // If we're already in the Nether, notify and clear the request
+    if (bot.game && bot.game.dimension === 'the_nether') {
+      state.mission.activeProfile = config.PROFILES.NETHER;
+      state.mission.enterNetherRequested = false;
+      bot.chat('I am already in the Nether.');
+    } else {
+      state.mission.activeProfile = config.PROFILES.NETHER;
+      state.mission.enterNetherRequested = true;
+      huntFlag = true;
+      bot.chat('Switching to Nether profile and entering nether.');
+    }
+  }
+  if (message === "find fortress") {
+      state.mission.activeProfile = config.PROFILES.NETHER;
+      state.mission.findFortressRequested = true;
+      state.mission.fortressTarget = null;
+      huntFlag = true;
+
+      if (bot.game && bot.game.dimension === 'the_nether') {
+        bot.chat('Finding fortress in the Nether.');
+      } else {
         state.mission.enterNetherRequested = true;
-        huntFlag = true;
-        bot.chat('Switching to Nether profile and entering nether.');
+        bot.chat('Switching to Nether profile and finding fortress.');
       }
   }
   if (message === "tp") {

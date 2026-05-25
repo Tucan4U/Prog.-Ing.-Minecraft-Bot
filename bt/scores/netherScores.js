@@ -23,4 +23,14 @@ function enterNetherScore(bot, state, config) {
   return 200;
 }
 
-module.exports = { enterNetherScore };
+function findFortressScore(bot, state, config) {
+  // Only active when fortress search is requested AND bot is already in the Nether.
+  // Returns 0 otherwise so other candidates can run.
+  if (!state.mission?.findFortressRequested) return 0;
+  if (!bot.game || bot.game.dimension !== 'the_nether') return 0;
+
+  // Medium-high priority: run after entering Nether but lower than other potential activities.
+  return 150;
+}
+
+module.exports = { enterNetherScore, findFortressScore };

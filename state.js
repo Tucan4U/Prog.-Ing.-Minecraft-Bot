@@ -6,6 +6,13 @@ module.exports = {
   digTask: null, //Dali trenutno bot razbija neki blok, korišteno u MoveToBlockNode i BreakLogNode
   mission: {
     activeProfile: "OVERWORLD",
+    // Nether portal entry request flag.
+    enterNetherRequested: false,
+    // Fortress search and travel request flag.
+    findFortressRequested: false,
+    // Fortress target: { x, y, z } set by LocateFortressNode, used by MoveToFortressNode.
+    // y is the surface level (block.y + 1) so the bot aims for the walkable height.
+    fortressTarget: null,
   },
   sensors: {
     entities: [],

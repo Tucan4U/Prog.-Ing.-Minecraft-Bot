@@ -64,6 +64,10 @@ module.exports = {
       names: ["nether_portal"],
       maxBlockDistance: 64,
     },
+    BLAZE_SPAWNER: {
+      names: ["spawner", "mob_spawner"],
+      maxBlockDistance: 64,
+    },
     PLANKS: {
       names: [
         "oak_planks",

@@ -33,4 +33,18 @@ function findFortressScore(bot, state, config) {
   return 150;
 }
 
-module.exports = { enterNetherScore, findFortressScore };
+function findBlazeSpawnerScore(bot, state, config) {
+  // Only active when blaze spawner search is requested AND bot is already in the Nether.
+  if (!state.mission?.findBlazeSpawnerRequested) return 0;
+  if (!bot.game || bot.game.dimension !== 'the_nether') return 0;
+
+  // If the bot already has 8 or more blaze rods, no need to search.
+  const blazeCount = bot.inventory.items().reduce((s, it) => s + (it.name === 'blaze_rod' ? it.count || it.quantity || 0 : 0), 0);
+  if (blazeCount >= 8) return 0;
+
+  // Lower priority than fortress search because the bot should already be in a fortress.
+  // So it does FOR SURE search for blaze spawner and not other spawners (magma cube)
+  return 100;
+}
+
+module.exports = { enterNetherScore, findFortressScore, findBlazeSpawnerScore };

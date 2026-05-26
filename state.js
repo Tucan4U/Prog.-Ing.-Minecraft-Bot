@@ -10,10 +10,14 @@ module.exports = {
     enterNetherRequested: false,
     // Fortress search and travel request flag.
     findFortressRequested: false,
+    // Blaze spawner search request flag.
+    findBlazeSpawnerRequested: false,
     // Fortress target: { x, y, z } set by LocateFortressNode, used by MoveToFortressNode.
     // y is the surface level (block.y + 1) so the bot aims for the walkable height.
     fortressTarget: null,
   },
+  // Block target specifically for blaze spawner searches.
+  blazeSpawnerBlock: null,
   sensors: {
     entities: [],
     items: [],

@@ -7,12 +7,17 @@ const MoveToBlockNode = require('../nodes/moveToBlockNode');
 const EnterPortalNode = require('../nodes/enterPortalNode');
 const LocateFortressNode = require('../nodes/locateFortressNode');
 const MoveToFortressNode = require('../nodes/moveToFortressNode');
+const MoveToBlazeSpawnerNode = require('../nodes/moveToBlazeSpawnerNode');
 const IdleNode = require('../nodes/idleNode');
-const { enterNetherScore, findFortressScore } = require('../scores/netherScores');
+const { enterNetherScore, findFortressScore, findBlazeSpawnerScore } = require('../scores/netherScores');
+
+// For blaze spawner search we reuse the generic FindBlock and MoveToBlock nodes.
 
 function createNetherProfile(config) {
-  // Nether profile sequence: check dimension and equipment, find a portal, move to it, and enter.
+
   const enterSeq = new Sequence([
+    // Enter Nether sequence: check if already in Nether, 
+    // if not check for required equipment, then find nearest portal and enter it.
     new CheckNetherDimensionNode(),
     new CheckEquipmentNode(),
     new EquipArmorNode(),
@@ -30,14 +35,24 @@ function createNetherProfile(config) {
     new MoveToFortressNode(400, 5),
   ]);
 
+  const blazeSpawnerSeq = new Sequence([
+    // Blaze spawner search sequence: equip gear, then find blaze spawner by looking for spawner blocks, 
+    // then move to it.
+    new CheckEquipmentNode(),
+    new EquipArmorNode(),
+    new FindBlockNode('BLAZE_SPAWNER', 'blazeSpawnerBlock', config.BLOCKS.BLAZE_SPAWNER.maxBlockDistance),
+    new MoveToBlazeSpawnerNode(),
+  ]);
+
   return {
-    // Two main candidates in order of execution priority (decided by scores):
+    // Three main candidates in order of execution priority (decided by scores):
     // 1. EnterNether: finds and enters a Nether portal (score 200 when requested)
     // 2. FindFortress: locates and travels to a fortress (score 150 when in Nether + requested)
-    // Once in Nether, EnterNether score drops to 0, so FindFortress becomes active.
+    // 3. FindBlazeSpawner: looks for blaze spawners (score 100 when in Nether + requested + low blaze rods)
     candidates: [
       { name: 'EnterNether', node: enterSeq, scoreFn: enterNetherScore },
       { name: 'FindFortress', node: fortressSeq, scoreFn: findFortressScore },
+      { name: 'FindBlazeSpawner', node: blazeSpawnerSeq, scoreFn: findBlazeSpawnerScore },
       { name: 'Idle', node: new IdleNode(), scoreFn: () => 1 },
     ],
     fallbackNode: new IdleNode(),

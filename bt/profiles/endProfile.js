@@ -12,9 +12,14 @@ const EquipPumpkinNode = require('../nodes/equipPumpkinNode')
 const FindMobNode = require('../nodes/findMobNode')
 const MoveToMobNode = require('../nodes/moveToMobNode')
 const AttackNode = require('../nodes/attackNode')
+const FindGatherBlockNode = require('../nodes/findGatherBlockNode')
 
-const { getPumpkinHelmetScore } = require('../scores/pumpkinScores')
-const { pickUpEndPrepLootScore,collectFeathersScore, collectStringScore, } = require('../scores/endPrepScores')
+//POKUSAJ TESKI -- gatherBlocks
+const ClearStateNode = require('../nodes/clearStateNode')
+const WaitNode = require('../nodes/waitNode')
+
+//const { getPumpkinHelmetScore } = require('../scores/pumpkinScores')
+const { pickUpEndPrepLootScore,collectFeathersScore, collectStringScore, gatherBlocksScore, getPumpkinHelmetScore} = require('../scores/endPrepScores')
 
 function createEndProfile(config) {
         // KANDIDAT: Nabavi pumpkin helmet (priprema za Endermane)
@@ -25,6 +30,7 @@ function createEndProfile(config) {
         // 2. Ako carved_pumpkin leži na podu, pokupi ga
         new Sequence([
             new PickUpItemNode(['carved_pumpkin']),
+            new WaitNode(500),
             new EquipPumpkinNode(),
         ]),
 
@@ -33,6 +39,10 @@ function createEndProfile(config) {
             new FindBlockNode('CARVED_PUMPKINS', 'blockTarget', config.BLOCKS.CARVED_PUMPKINS.maxBlockDistance),
             new MoveToBlockNode('blockTarget', config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE),
             new BreakBlockNode('blockTarget', config.BT.BREAK_RANGE, 'AXES'),
+            new WaitNode(500),
+            new PickUpItemNode(['carved_pumpkin']),
+            new WaitNode(500),
+            new EquipPumpkinNode(),
         ]),
 
         // 4. Ako ga nema, napravi ga
@@ -41,6 +51,10 @@ function createEndProfile(config) {
             new MoveToBlockNode('blockTarget', config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE),
             new ShearPumpkinNode('blockTarget'),
             new BreakBlockNode('blockTarget', config.BT.BREAK_RANGE, 'AXES'),
+            new WaitNode(500),
+            new PickUpItemNode(['carved_pumpkin']),
+            new WaitNode(500),
+            new EquipPumpkinNode(),
         ]),
 
         
@@ -48,10 +62,8 @@ function createEndProfile(config) {
 
     // KANDIDAT: Pokupi loot od pripreme za End
     const pickUpEndPrepLootNode = new PickUpItemNode([
-        'feather',
-        'chicken',
-        'cooked_chicken',
-        'string',
+        'feather', 'chicken', 'cooked_chicken', 'string', 'dirt', 'cobblestone', 'cobbled_deepslate', 
+        'oak_log', 'birch_log', 'spruce_log', 'jungle_log', 'acacia_log', 'dark_oak_log', 'netherrack','carved_pumpkin'
     ])
 
     // KANDIDAT: Ubijaj kokoši dok ne skupiš 64 feathers
@@ -78,7 +90,28 @@ function createEndProfile(config) {
         new AttackNode('spiderTarget'),
     ])
 
-
+    const gatherBlocksNode = new Sequence([
+        new FindGatherBlockNode(
+            'gatherBlockTarget',
+            config.BLOCKS.GATHER_BLOCKS.maxBlockDistance
+        ),
+        new MoveToBlockNode(
+            'gatherBlockTarget',
+            config.BT.MOVE_NEAR_DISTANCE,
+            config.BT.BREAK_RANGE
+        ),
+        new BreakBlockNode(
+            'gatherBlockTarget',
+            config.BT.BREAK_RANGE,
+            null
+        ),
+        new WaitNode(800),
+        new PickUpItemNode([
+            'dirt', 'cobblestone', 'cobbled_deepslate', 'oak_log', 'birch_log', 'spruce_log', 'jungle_log',
+            'acacia_log', 'dark_oak_log', 'netherrack',
+        ]),
+        new ClearStateNode('gatherBlockTarget'),
+    ])
 
 
     // KASNIJE ĆE OVDJE IĆI:
@@ -109,6 +142,11 @@ function createEndProfile(config) {
             name: 'GetPumpkinHelmet',
             node: getPumpkinHelmetNode,
             scoreFn: getPumpkinHelmetScore,
+        },
+        {
+            name: 'GatherBlocks',
+            node: gatherBlocksNode,
+            scoreFn: gatherBlocksScore,
         },
         {
             name: 'Idle',

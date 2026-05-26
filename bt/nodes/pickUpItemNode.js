@@ -14,7 +14,11 @@ class PickUpItemNode extends Node {
             ? this.configKeyOrItems
             : config?.[this.configKeyOrItems]
 
-        const item = findItem(bot, items, state.sensors?.items)
+        //VEZANO UZ POKSUAJ 2 za findItem, provjerava i state.sensors.items (ako postoji) i bot.entities
+
+        //const item = findItem(bot, items, state.sensors?.items)
+        const item = findItem(bot, items)
+        
         if (!item) { state.lootTarget = null; return 'FAILURE' }
 
         state.lootTarget = item

@@ -5,6 +5,11 @@ module.exports = {
     ],
     
     AXES: ["wooden_axe", "stone_axe", "iron_axe", "diamond_axe"],
+
+    // Dodao sam pickaxe za potrebe BT-a, ali može se koristiti i drugdje
+    PICKAXES: [
+        "wooden_pickaxe", "stone_pickaxe", "iron_pickaxe", "diamond_pickaxe", "netherite_pickaxe"
+    ],
     
     FOOD: ["beef", "porkchop", "chicken", "mutton", "cooked_beef", "cooked_porkchop",  "cooked_chicken", "cooked_mutton"],
     
@@ -56,8 +61,22 @@ module.exports = {
             "oak_planks", "birch_planks", "spruce_planks",
             "netherrack", "end_stone",
         ],
+        GATHER_BLOCKS: {
+            names: [
+                "dirt", "grass_block", "cobblestone", "stone", "cobbled_deepslate", "oak_log", "birch_log", 
+                "spruce_log", "jungle_log", "acacia_log", "dark_oak_log", "netherrack"
+            ],
+            maxBlockDistance: 32,
+        },
+        
 
     },
+
+    GATHER_BLOCK_ITEMS: [
+        "dirt", "cobblestone", "cobbled_deepslate", "oak_log", "birch_log", "spruce_log", 
+        "jungle_log", "acacia_log", "dark_oak_log", "oak_planks", "birch_planks", "spruce_planks", "jungle_planks", 
+        "acacia_planks", "dark_oak_planks", "netherrack"
+    ],
     
     ANIMALS: {
         type: "animal",

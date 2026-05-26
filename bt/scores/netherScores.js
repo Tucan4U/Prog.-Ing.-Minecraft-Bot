@@ -1,7 +1,9 @@
 const { getMissingEquipment } = require('../../utils/netherEquipment');
 
+let blazeCountCache = 0; // Cache for the current blaze rod count to avoid expensive inventory checks every tick.
 // Score function for Nether behavior. Returns high priority only when a Nether request is active and gear is ready.
 function enterNetherScore(bot, state, config) {
+
   if (bot.game && bot.game.dimension === 'the_nether') {
     if (state.mission?.enterNetherRequested) {
       // Clear stale requests when already in the Nether.
@@ -29,6 +31,12 @@ function findFortressScore(bot, state, config) {
   if (!state.mission?.findFortressRequested) return 0;
   if (!bot.game || bot.game.dimension !== 'the_nether') return 0;
 
+  // If the bot already has 8 or more blaze rods, no need to go to the fortress (AUTONOMOUS)
+  if (!checkBlazeNeed(bot, state, config)) {
+    bot.chat(`Already have ${blazeCountCache} blaze rods, skipping search.`);
+    return 0;
+  }
+
   // Medium-high priority: run after entering Nether but lower than other potential activities.
   return 150;
 }
@@ -38,13 +46,35 @@ function findBlazeSpawnerScore(bot, state, config) {
   if (!state.mission?.findBlazeSpawnerRequested) return 0;
   if (!bot.game || bot.game.dimension !== 'the_nether') return 0;
 
-  // If the bot already has 8 or more blaze rods, no need to search.
-  const blazeCount = bot.inventory.items().reduce((s, it) => s + (it.name === 'blaze_rod' ? it.count || it.quantity || 0 : 0), 0);
-  if (blazeCount >= 8) return 0;
+  // If the bot already has 8 or more blaze rods, no need to search. (AUTONOMOUS)
+  if (!checkBlazeNeed(bot, state, config)) {
+    bot.chat(`Already have ${blazeCountCache} blaze rods, skipping search.`);
+    return 0;
+  }
 
   // Lower priority than fortress search because the bot should already be in a fortress.
   // So it does FOR SURE search for blaze spawner and not other spawners (magma cube)
   return 100;
+}
+
+// Function check if there is a need for blaze rods:
+// - there isn't: findFortressScore and findBlazeSpawnerScore will return 0 and flags for those will be resetted to false, 
+//                skipping the Blaze part of the AUTONOMOUS run only
+// - there is: returns true and the scores will return their normal values, triggering the searches.
+function checkBlazeNeed(bot, state, config) {
+  // Count number of blaze rods in posession
+  const blazeRodItem = bot.registry.itemsByName['blaze_rod'];
+  blazeCountCache = blazeRodItem ? bot.inventory.count(blazeRodItem.id, null) : 0;
+
+  if (state.mission.netherMode === config.NETHER_MODES.AUTONOMOUS && blazeCountCache >= 8) {
+    // Clear the requests for findBlazeSpawner and findFortress since we don't need to search anymore.
+    state.mission.findFortressRequested = false; 
+    state.mission.fortressTarget = null;
+    state.mission.findBlazeSpawnerRequested = false;
+    return false; // No need for blaze rods
+  }
+
+  return true; // Needs blaze rods
 }
 
 module.exports = { enterNetherScore, findFortressScore, findBlazeSpawnerScore };

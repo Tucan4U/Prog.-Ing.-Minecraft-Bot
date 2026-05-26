@@ -13,6 +13,9 @@ const {
 const { createNetherProfile } = require("./bt/profiles/netherProfile");
 const { startWorldSensors } = require("./sensors/worldSensors");
 
+// Decorators
+const ConditionNode = require("./bt/decorators/conditionNode");
+
 // Nether utils
 const { giveNetherEquipment } = require('./utils/netherEquipment');
 // Nether commands
@@ -166,13 +169,13 @@ bot.on("chat", (username, message) => {
   }
   // Find nether fortress command
   if (message === "find fortress") {
-      findFortressCommand(bot, state, config);
-      huntFlag = true;
+    findFortressCommand(bot, state, config);
+    huntFlag = true;
   }
   // Find blaze spawner command
   if (message === "find blaze spawner") {
-      findBlazeSpawnerCommand(bot, state, config);
-      huntFlag = true;
+    findBlazeSpawnerCommand(bot, state, config);
+    huntFlag = true;
   }
 
 

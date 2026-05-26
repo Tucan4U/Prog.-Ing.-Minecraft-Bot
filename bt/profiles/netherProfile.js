@@ -11,7 +11,6 @@ const MoveToBlazeSpawnerNode = require('../nodes/moveToBlazeSpawnerNode');
 const IdleNode = require('../nodes/idleNode');
 const { enterNetherScore, findFortressScore, findBlazeSpawnerScore } = require('../scores/netherScores');
 
-// For blaze spawner search we reuse the generic FindBlock and MoveToBlock nodes.
 
 function createNetherProfile(config) {
 
@@ -38,6 +37,7 @@ function createNetherProfile(config) {
   const blazeSpawnerSeq = new Sequence([
     // Blaze spawner search sequence: equip gear, then find blaze spawner by looking for spawner blocks, 
     // then move to it.
+    // For blaze spawner search we reuse the generic FindBlock and MoveToBlock nodes.
     new CheckEquipmentNode(),
     new EquipArmorNode(),
     new FindBlockNode('BLAZE_SPAWNER', 'blazeSpawnerBlock', config.BLOCKS.BLAZE_SPAWNER.maxBlockDistance),

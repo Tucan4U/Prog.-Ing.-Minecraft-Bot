@@ -15,6 +15,8 @@ module.exports = {
     // Fortress target: { x, y, z } set by LocateFortressNode, used by MoveToFortressNode.
     // y is the surface level (block.y + 1) so the bot aims for the walkable height.
     fortressTarget: null,
+    // Mode - AUTONOMOUS or MANUAL
+    netherMode : null,
   },
   // Block target specifically for blaze spawner searches.
   blazeSpawnerBlock: null,

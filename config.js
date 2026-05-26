@@ -48,6 +48,10 @@ module.exports = {
     HOSTILE_COMBAT: "HOSTILE_COMBAT",
     NETHER: "NETHER",
   },
+  NETHER_MODES: {
+    AUTONOMOUS: "AUTONOMOUS",
+    MANUAL: "MANUAL",
+  },
   BLOCKS: {
     LOGS: {
       names: [

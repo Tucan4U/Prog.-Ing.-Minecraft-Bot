@@ -6,7 +6,7 @@ module.exports = {
     
     AXES: ["wooden_axe", "stone_axe", "iron_axe", "diamond_axe"],
     
-    FOOD: ["beef", "porkchop", "chicken", "mutton", "cooked_beef", "cooked_porkchop"],
+    FOOD: ["beef", "porkchop", "chicken", "mutton", "cooked_beef", "cooked_porkchop",  "cooked_chicken", "cooked_mutton"],
     
     // Parametri koji utječu na SUCCESS/FAILURE u BT
     BT: {
@@ -62,6 +62,16 @@ module.exports = {
     ANIMALS: {
         type: "animal",
         names: ["pig", "cow", "sheep", "chicken"],
+    },
+    //RADI lakse implemetacije findAndKillChicken i Spider
+    CHICKENS: {
+        type: "animal",
+        names: ["chicken"],
+    },
+
+    SPIDERS: {
+        type: "mob",
+        names: ["spider", "cave_spider"],
     },
     HOSTILES: {
         type: "mob",

@@ -9,9 +9,21 @@ function findMobs(bot, filter, entitiesOverride) {
         ? entitiesOverride
         : Object.values(bot.entities)
 
-    return entities.filter(entity =>
-        entity && entity.type === filter.type && allowedNames.has(entity.name)
-    )
+
+    // Filtriraj entitete koji su tipa mob/animal i imaju dozvoljeno ime (npr. "chicken", "cow", "pig" za ANIMALS, ili "zombie", "skeleton" za HOSTILES)
+    return entities
+        .filter(entity => {
+            if (!entity) return false
+            if (!entity.position) return false
+            if (entity === bot.entity) return false
+
+            return allowedNames.has(entity.name)
+        })
+        .sort((a, b) => {
+            const distA = bot.entity.position.distanceTo(a.position)
+            const distB = bot.entity.position.distanceTo(b.position)
+            return distA - distB
+        })
 }
 
 module.exports = { findMobs }

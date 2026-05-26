@@ -39,4 +39,12 @@ function numOfBlocks(bot, state, config, blocksKey) {
     return blockCount || 0
 }
 
-module.exports = { equipBestWeapon, needsFood, numOfBlocks }
+function numOfItems(bot, itemNames) {
+    return bot.inventory
+        .items()
+        .filter(item => itemNames.includes(item.name))
+        .reduce((sum, item) => sum + item.count, 0)
+}
+
+
+module.exports = { equipBestWeapon, needsFood, numOfBlocks, numOfItems }

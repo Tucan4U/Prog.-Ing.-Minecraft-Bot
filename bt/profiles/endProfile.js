@@ -9,7 +9,12 @@ const BreakBlockNode = require('../nodes/breakBlockNode')
 const ShearPumpkinNode = require('../nodes/shearPumpkinNode')
 const EquipPumpkinNode = require('../nodes/equipPumpkinNode')
 
+const FindMobNode = require('../nodes/findMobNode')
+const MoveToMobNode = require('../nodes/moveToMobNode')
+const AttackNode = require('../nodes/attackNode')
+
 const { getPumpkinHelmetScore } = require('../scores/pumpkinScores')
+const { pickUpEndPrepLootScore,collectFeathersScore, collectStringScore, } = require('../scores/endPrepScores')
 
 function createEndProfile(config) {
         // KANDIDAT: Nabavi pumpkin helmet (priprema za Endermane)
@@ -37,7 +42,44 @@ function createEndProfile(config) {
             new ShearPumpkinNode('blockTarget'),
             new BreakBlockNode('blockTarget', config.BT.BREAK_RANGE, 'AXES'),
         ]),
+
+        
     ])
+
+    // KANDIDAT: Pokupi loot od pripreme za End
+    const pickUpEndPrepLootNode = new PickUpItemNode([
+        'feather',
+        'chicken',
+        'cooked_chicken',
+        'string',
+    ])
+
+    // KANDIDAT: Ubijaj kokoši dok ne skupiš 64 feathers
+    const huntChickensNode = new Sequence([
+        new FindMobNode('CHICKENS', 'chickenTarget'),
+        new MoveToMobNode(
+            'chickenTarget',
+            config.BT.MOVE_NEAR_DISTANCE,
+            config.BT.MOVE_SUCCESS_DISTANCE,
+            config.BT.MOVE_STATUS_THROTTLE_MS
+        ),
+        new AttackNode('chickenTarget'),
+    ])
+
+    // KANDIDAT: Ubijaj pauke dok ne skupiš 64 string
+    const huntSpidersNode = new Sequence([
+        new FindMobNode('SPIDERS', 'spiderTarget'),
+        new MoveToMobNode(
+            'spiderTarget',
+            config.BT.MOVE_NEAR_DISTANCE,
+            config.BT.MOVE_SUCCESS_DISTANCE,
+            config.BT.MOVE_STATUS_THROTTLE_MS
+        ),
+        new AttackNode('spiderTarget'),
+    ])
+
+
+
 
     // KASNIJE ĆE OVDJE IĆI:
     // - fightEnderman
@@ -46,13 +88,36 @@ function createEndProfile(config) {
     // - escapeDragonBreath
     // 
 
-    return {
-        candidates: [
-            { name: 'GetPumpkinHelmet', node: getPumpkinHelmetNode, scoreFn: getPumpkinHelmetScore },
-            { name: 'Idle', node: new IdleNode(), scoreFn: () => 1 },
-        ],
-        fallbackNode: new IdleNode(),
-    }
+   return {
+    candidates: [
+        {
+            name: 'PickUpEndPrepLoot',
+            node: pickUpEndPrepLootNode,
+            scoreFn: pickUpEndPrepLootScore,
+        },
+        {
+            name: 'CollectFeathers',
+            node: huntChickensNode,
+            scoreFn: collectFeathersScore,
+        },
+        {
+            name: 'CollectString',
+            node: huntSpidersNode,
+            scoreFn: collectStringScore,
+        },
+        {
+            name: 'GetPumpkinHelmet',
+            node: getPumpkinHelmetNode,
+            scoreFn: getPumpkinHelmetScore,
+        },
+        {
+            name: 'Idle',
+            node: new IdleNode(),
+            scoreFn: () => 1,
+        },
+    ],
+    fallbackNode: new IdleNode(),
+}
 }
 
 module.exports = { createEndProfile }

@@ -8,7 +8,13 @@ const EnterPortalNode = require('../nodes/enterPortalNode');
 const LocateFortressNode = require('../nodes/locateFortressNode');
 const MoveToFortressNode = require('../nodes/moveToFortressNode');
 const IdleNode = require('../nodes/idleNode');
-const { enterNetherScore, findFortressScore } = require('../scores/netherScores');
+const BreakBlockNode = require("../nodes/breakBlockNode");
+const PickUpItemNode = require("../nodes/pickUpItemNode");
+const FindInteractiveBlockPlacementNode = require('../nodes/findInteractiveBlockPlaceNode');
+const PlaceBlockNode = require("../nodes/placeBlockNode");
+const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
+const { enterNetherScore, findFortressScore, getGoldNetherScore, craftGoldNetherScore } = require('../scores/netherScores');
+const { ITEMS } = require('../../config');
 
 function createNetherProfile(config) {
   // Nether profile sequence: check dimension and equipment, find a portal, move to it, and enter.
@@ -30,13 +36,49 @@ function createNetherProfile(config) {
     new MoveToFortressNode(400, 5),
   ]);
 
+  const goldSeq = new Sequence([
+    new FindBlockNode('GOLD', 
+      'blockTarget', 
+      config.BLOCKS.GOLD.maxBlockDistance),
+
+    new MoveToBlockNode('blockTarget', 
+      config.BT.MOVE_NEAR_DISTANCE,
+      config.BT.BREAK_RANGE,),
+
+    new BreakBlockNode("blockTarget", 
+      config.BT.BREAK_RANGE, 
+      "PICKAXES"),
+
+    new PickUpItemNode(config.ITEMS.GOLD.names),
+  ]);
+
+  const goldCraftingSeq = new Sequence([
+    //find placement
+    new FindInteractiveBlockPlacementNode(),
+    //place block
+    new PlaceBlockNode("crafting_table"),
+    //craft item
+    new CraftItemUsingTableNode("gold_ingot"),
+    //find crafting table
+    new FindBlockNode("crafting_table"),
+    //break crafting table
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+    //pick up crafting table
+    new PickUpItemNode(config,ITEMS.CRAFTING_TABLE.names),
+
+    //bot isnt picking up the crafting table after breaking it
+  ]);
+
   return {
     // Two main candidates in order of execution priority (decided by scores):
     // 1. EnterNether: finds and enters a Nether portal (score 200 when requested)
-    // 2. FindFortress: locates and travels to a fortress (score 150 when in Nether + requested)
+    // 2. CollectGoldNether: finds and collects gold in the Nether
+    // 3. FindFortress: locates and travels to a fortress (score 150 when in Nether + requested)
     // Once in Nether, EnterNether score drops to 0, so FindFortress becomes active.
     candidates: [
       { name: 'EnterNether', node: enterSeq, scoreFn: enterNetherScore },
+      { name: 'CollectNetherGold', node: goldSeq, scoreFn: getGoldNetherScore },
+      { name: 'CraftNetherGold', node: goldCraftingSeq, scoreFn: craftGoldNetherScore },
       { name: 'FindFortress', node: fortressSeq, scoreFn: findFortressScore },
       { name: 'Idle', node: new IdleNode(), scoreFn: () => 1 },
     ],

@@ -50,6 +50,10 @@ module.exports = {
     HOSTILE_COMBAT: "HOSTILE_COMBAT",
     NETHER: "NETHER",
   },
+  NETHER_MODES: {
+    AUTONOMOUS: "AUTONOMOUS",
+    MANUAL: "MANUAL",
+  },
   BLOCKS: {
     LOGS: {
       names: [
@@ -64,6 +68,10 @@ module.exports = {
     },
     NETHER_PORTAL: {
       names: ["nether_portal"],
+      maxBlockDistance: 64,
+    },
+    BLAZE_SPAWNER: {
+      names: ["spawner", "mob_spawner"],
       maxBlockDistance: 64,
     },
     PLANKS: {

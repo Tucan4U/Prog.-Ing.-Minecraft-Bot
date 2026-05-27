@@ -87,6 +87,7 @@ function giveNetherEquipment(bot) {
     bot.chat('/give ' + bot.username + ' iron_boots');
     bot.chat('/give ' + bot.username + ' iron_pickaxe');
     bot.chat('/give ' + bot.username + ' iron_sword');
+    bot.chat('/give ' + bot.username + ' dirt 64'); // For building temporary structures if needed.
   } catch (err) {
     // ignore
   }

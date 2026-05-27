@@ -3,7 +3,9 @@ const mineflayer = require("mineflayer");
 const { pathfinder, Movements } = require("mineflayer-pathfinder");
 
 const config = require("./config");
+// State
 const state = require("./state");
+const resetState = require("./utils/resetState");
 
 const UtilitySelectorNode = require("./bt/selectors/utilitySelectorNode");
 const { createOverworldProfile } = require("./bt/profiles/overworldProfile");
@@ -31,7 +33,7 @@ const bot = mineflayer.createBot({
 });
 
 bot.loadPlugin(pathfinder);
-let huntFlag = false; // kontrola da li bot treba loviti ili ne
+let startFlag = false; // kontrola da li bot treba loviti ili ne
 let worldSensors = null;
 
 const overworldProfile = createOverworldProfile(config);
@@ -92,7 +94,7 @@ async function startLoop() {
 // glavni loop koji ticka behavior tree(BT)
 // Ako nije ništa postavljeno, OVERWORLD profil se koristi kao default.
 async function loop() {
-  if (huntFlag) {
+  if (startFlag) {
     const profileKey =
       state.mission?.activeProfile || config.PROFILES.OVERWORLD;
     const activeTree =
@@ -108,11 +110,13 @@ bot.on("chat", (username, message) => {
   if (message === "stop") {
     bot.chat("Stopping hunt!");
     bot.pathfinder.setGoal(null);
-    huntFlag = false;
+    startFlag = false;
+    // Reset state vars and pathfinder
+    resetState(bot);
   }
-  if (message === "start hunting") {
-    bot.chat(`Starting hunt!`);
-    huntFlag = true;
+  if (message === "start") {
+    bot.chat(`Starting BT!`);
+    startFlag = true;
   }
   if (message === "profile overworld") {
     state.mission.activeProfile = config.PROFILES.OVERWORLD;
@@ -160,22 +164,22 @@ bot.on("chat", (username, message) => {
   // MAIN Nether run
   if (message === "nether") {
     netherMain(bot, state, config);
-    huntFlag = true;
+    startFlag = true;
   }
   // Enter nether command
   if (message === "enter nether") {
     enterNetherCommand(bot, state, config);
-    huntFlag = true;
+    startFlag = true;
   }
   // Find nether fortress command
   if (message === "find fortress") {
     findFortressCommand(bot, state, config);
-    huntFlag = true;
+    startFlag = true;
   }
   // Find blaze spawner command
   if (message === "find blaze spawner") {
     findBlazeSpawnerCommand(bot, state, config);
-    huntFlag = true;
+    startFlag = true;
   }
 
 

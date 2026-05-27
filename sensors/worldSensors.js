@@ -8,6 +8,18 @@ function updateWorldSensors(bot, state) {
 
   state.sensors.entities = entities;
   state.sensors.items = items;
+  // Detect dimension changes and announce Nether entry
+  const currentDim = bot.game ? bot.game.dimension : null;
+  const lastDim = state.sensors.lastDimension || null;
+  if (lastDim !== currentDim && currentDim === 'the_nether') {
+    // Announce only when the bot has newly entered the Nether dimension.
+    try {
+      bot.chat('I am in the Nether');
+    } catch (err) {
+      // ignore chat failures
+    }
+  }
+  state.sensors.lastDimension = currentDim;
   state.sensors.lastUpdatedAt = Date.now();
 }
 

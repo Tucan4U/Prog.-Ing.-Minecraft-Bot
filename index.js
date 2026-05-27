@@ -3,14 +3,28 @@ const mineflayer = require("mineflayer");
 const { pathfinder, Movements } = require("mineflayer-pathfinder");
 
 const config = require("./config");
+// State
 const state = require("./state");
+const resetState = require("./utils/resetState");
 
 const UtilitySelectorNode = require("./bt/selectors/utilitySelectorNode");
 const { createOverworldProfile } = require("./bt/profiles/overworldProfile");
 const {
   createHostileCombatProfile,
 } = require("./bt/profiles/hostileCombatProfile");
+const { createNetherProfile } = require("./bt/profiles/netherProfile");
 const { startWorldSensors } = require("./sensors/worldSensors");
+
+// Decorators
+const ConditionNode = require("./bt/decorators/conditionNode");
+
+// Nether utils
+const { giveNetherEquipment } = require('./utils/netherEquipment');
+// Nether commands
+const { netherMain,
+  enterNetherCommand,
+  findFortressCommand,
+  findBlazeSpawnerCommand } = require("./commands/netherCommands");
 
 const bot = mineflayer.createBot({
   host: "localhost",
@@ -19,11 +33,12 @@ const bot = mineflayer.createBot({
 });
 
 bot.loadPlugin(pathfinder);
-let huntFlag = false; // kontrola da li bot treba loviti ili ne
+let startFlag = false; // kontrola da li bot treba loviti ili ne
 let worldSensors = null;
 
 const overworldProfile = createOverworldProfile(config);
 const hostileCombatProfile = createHostileCombatProfile(config);
+const netherProfile = createNetherProfile(config);
 
 const utilityTreesByProfile = {
   [config.PROFILES.OVERWORLD]: new UtilitySelectorNode(
@@ -35,6 +50,11 @@ const utilityTreesByProfile = {
     "HostileCombatUtility",
     hostileCombatProfile.candidates,
     hostileCombatProfile.fallbackNode,
+  ),
+  [config.PROFILES.NETHER]: new UtilitySelectorNode(
+    "NetherUtility",
+    netherProfile.candidates,
+    netherProfile.fallbackNode,
   ),
 };
 
@@ -74,7 +94,7 @@ async function startLoop() {
 // glavni loop koji ticka behavior tree(BT)
 // Ako nije ništa postavljeno, OVERWORLD profil se koristi kao default.
 async function loop() {
-  if (huntFlag) {
+  if (startFlag) {
     const profileKey =
       state.mission?.activeProfile || config.PROFILES.OVERWORLD;
     const activeTree =
@@ -90,11 +110,13 @@ bot.on("chat", (username, message) => {
   if (message === "stop") {
     bot.chat("Stopping hunt!");
     bot.pathfinder.setGoal(null);
-    huntFlag = false;
+    startFlag = false;
+    // Reset state vars and pathfinder
+    resetState(bot);
   }
-  if (message === "start hunting") {
-    bot.chat(`Starting hunt!`);
-    huntFlag = true;
+  if (message === "start") {
+    bot.chat(`Starting BT!`);
+    startFlag = true;
   }
   if (message === "profile overworld") {
     state.mission.activeProfile = config.PROFILES.OVERWORLD;
@@ -104,23 +126,27 @@ bot.on("chat", (username, message) => {
     state.mission.activeProfile = config.PROFILES.HOSTILE_COMBAT;
     bot.chat("Profile switched: HOSTILE_COMBAT");
   }
+  if (message === "profile nether") {
+    state.mission.activeProfile = config.PROFILES.NETHER;
+    bot.chat("Profile switched: NETHER");
+  }
   if (message === "entities") {
     const filter = config.SLIMES;
     const allowedNames = new Set(filter.names);
     const entities = state.sensors?.entities || Object.values(bot.entities);
-
+    
     bot.chat(
       `Entities: ${entities
         .filter(
           (entity) =>
             entity &&
-            entity.type === filter.type &&
-            allowedNames.has(entity.name),
+          entity.type === filter.type &&
+          allowedNames.has(entity.name),
         )
         .map((e) => e.name)
         .join(", ")}`,
-    );
-
+      );
+      
     const nearest = bot.nearestEntity();
     bot.chat(`${nearest?.name || "none"}`);
     bot.chat(`Type: ${nearest?.type || "none"}`);
@@ -128,6 +154,35 @@ bot.on("chat", (username, message) => {
   if (message === "inventory") {
     console.log(bot.inventory.items());
   }
+
+  // NETHER
+  // Give nether equipment for testing purposes. In a real scenario, the bot would gather or craft this gear itself.
+  if (message === "prep") {
+    bot.chat("Giving bot equipment for nether...");
+    giveNetherEquipment(bot);
+  }
+  // MAIN Nether run
+  if (message === "nether") {
+    netherMain(bot, state, config);
+    startFlag = true;
+  }
+  // Enter nether command
+  if (message === "enter nether") {
+    enterNetherCommand(bot, state, config);
+    startFlag = true;
+  }
+  // Find nether fortress command
+  if (message === "find fortress") {
+    findFortressCommand(bot, state, config);
+    startFlag = true;
+  }
+  // Find blaze spawner command
+  if (message === "find blaze spawner") {
+    findBlazeSpawnerCommand(bot, state, config);
+    startFlag = true;
+  }
+
+
   if (message === "tp") {
     bot.chat("/tp @s " + username);
   }

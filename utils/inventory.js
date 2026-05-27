@@ -39,4 +39,14 @@ function numOfBlocks(bot, state, config, blocksKey) {
   return blockCount || 0;
 }
 
-module.exports = { equipBestWeapon, needsFood, numOfBlocks };
+function needsGold(bot, state, config) {
+  const goldCount = bot.inventory
+    .items()
+    .filter((i) => config.ITEMS.GOLD.names.includes(i.name))
+    .reduce((sum, i) => sum + i.count, 0);
+
+  bot.chat(goldCount);
+  return goldCount < 9;
+} //temp value
+
+module.exports = { equipBestWeapon, needsFood, numOfBlocks, needsGold };

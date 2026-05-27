@@ -21,6 +21,8 @@ module.exports = {
 
   AXES: ["wooden_axe", "stone_axe", "iron_axe", "diamond_axe", "golden_axe"],
 
+  PICKAXES: ["wooden_pickaxe", "stone_pickaxe", "iron_pickaxe", "diamond_pickaxe", "golden_pickaxe"],
+
   FOOD: [
     "beef",
     "porkchop",
@@ -83,6 +85,25 @@ module.exports = {
         "mangrove_planks",
         "warped_planks",
       ],
+    },
+    GOLD: {
+      names: [
+        "nether_gold_ore",
+        "gold_ore",
+      ],
+      maxBlockDistance: 64,
+    },
+  },
+  ITEMS: {
+    GOLD: {
+      names: [
+      "gold_nugget",
+      ]
+    },
+    CRAFTING_TABLE: {
+      names: [
+        "crafting_table",
+      ]
     },
   },
   // MOBOVI

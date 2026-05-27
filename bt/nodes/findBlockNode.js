@@ -23,7 +23,7 @@ class FindBlockNode extends Node {
       console.log("Block invalid");
       state[this.stateKey] = null;
     }
-    //console.log(block);
+
     if (block) {
       return "SUCCESS";
     }

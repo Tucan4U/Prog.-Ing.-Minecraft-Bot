@@ -5,21 +5,21 @@ async function equipBestWeapon(bot, weapons) {
   for (const weapon of weapons) {
     const item = bot.inventory.items().find((i) => i.name === weapon);
     if (!item) continue;
-    console.log(`Checking for ${weapon} in inventory...`);
-    try {
-      await bot.equip(item, "hand").then(() => {
-        if (currentItem !== weapon) {
+    console.log(`Checking for ${weapon} in hand...`);
+    if (currentItem !== weapon) {
+      try {
+        await bot.equip(item, "hand").then(() => {
           bot.chat(`Equipped ${weapon}`);
-        }
-      });
-      console.log(`Equipped ${weapon}`);
-      return;
-    } catch (err) {
-      console.log(`Couldn't equip ${weapon}:`, err.message);
+        });
+        console.log(`Equipped ${weapon}`);
+        return;
+      } catch (err) {
+        console.log(`Couldn't equip ${weapon}:`, err.message);
+      }
     }
-  }
 
-  console.log("No weapons available");
+    console.log("No weapons available");
+  }
 }
 
 function needsFood(bot, state, config) {
@@ -34,7 +34,7 @@ function needsFood(bot, state, config) {
 function numOfBlocks(bot, state, config, blocksKey) {
   const blockCount = bot.inventory
     .items()
-    .filter((item) => config.BLOCKS[blocksKey]?.names.includes(item.name))
+    .filter((item) => config.BLOCKS[blocksKey]?.names?.includes(item.name))
     .reduce((count, item) => count + item.count, 0);
   return blockCount || 0;
 }

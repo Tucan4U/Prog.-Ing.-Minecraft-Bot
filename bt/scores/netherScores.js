@@ -131,4 +131,4 @@ function checkBlazeNeed(bot, state, config) {
   return true; // Needs blaze rods
 }
 
-module.exports = { enterNetherScore, findFortressScore, findBlazeSpawnerScore };
+module.exports = { enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore };

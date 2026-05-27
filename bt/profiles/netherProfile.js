@@ -14,9 +14,8 @@ const PickUpItemNode = require("../nodes/pickUpItemNode");
 const FindInteractiveBlockPlacementNode = require('../nodes/findInteractiveBlockPlaceNode');
 const PlaceBlockNode = require("../nodes/placeBlockNode");
 const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
-const { enterNetherScore, findFortressScore, getGoldNetherScore, craftGoldNetherScore } = require('../scores/netherScores');
+const { enterNetherScore, findFortressScore, getGoldNetherScore, craftGoldNetherScore, findBlazeSpawnerScore } = require('../scores/netherScores');
 const { ITEMS } = require('../../config');
-const { enterNetherScore, findFortressScore, findBlazeSpawnerScore } = require('../scores/netherScores');
 
 
 function createNetherProfile(config) {
@@ -70,6 +69,7 @@ function createNetherProfile(config) {
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
     //pick up crafting table
     new PickUpItemNode(config,ITEMS.CRAFTING_TABLE.names),
+    ]);
 
     //bot isnt picking up the crafting table after breaking it
   const blazeSpawnerSeq = new Sequence([

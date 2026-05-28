@@ -32,7 +32,6 @@ class PickUpItemNode extends Node {
     const dist = bot.entity.position.distanceTo(item.position);
 
     if (dist < 1.5) {
-      state.lootTarget = null;
       return "SUCCESS";
     }
 

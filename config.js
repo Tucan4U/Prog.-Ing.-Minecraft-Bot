@@ -21,7 +21,13 @@ module.exports = {
 
   AXES: ["wooden_axe", "stone_axe", "iron_axe", "diamond_axe", "golden_axe"],
 
-  PICKAXES: ["wooden_pickaxe", "stone_pickaxe", "iron_pickaxe", "diamond_pickaxe", "golden_pickaxe"],
+  PICKAXES: [
+    "wooden_pickaxe",
+    "stone_pickaxe",
+    "iron_pickaxe",
+    "diamond_pickaxe",
+    "golden_pickaxe",
+  ],
 
   FOOD: [
     "beef",
@@ -33,14 +39,11 @@ module.exports = {
   ],
   //Parametri koji utječu na SUCCESS ili FAILURE unutar BT-a, zbog toga i ime "BT"
   BT: {
-    MOVE_NEAR_DISTANCE: 2,
+    MOVE_NEAR_DISTANCE: 4,
     MOVE_SUCCESS_DISTANCE: 5,
     ATTACK_RANGE: 4,
     MOVE_STATUS_THROTTLE_MS: 3000,
     BREAK_RANGE: 5,
-    BREAK_LOG: {
-      BREAK_RANGE: 5,
-    },
   },
   SENSORS: {
     WORLD_UPDATE_MS: 500,
@@ -76,6 +79,7 @@ module.exports = {
     },
     PLANKS: {
       names: [
+        "acacia_planks",
         "oak_planks",
         "spruce_planks",
         "birch_planks",
@@ -87,23 +91,16 @@ module.exports = {
       ],
     },
     GOLD: {
-      names: [
-        "nether_gold_ore",
-        "gold_ore",
-      ],
+      names: ["nether_gold_ore", "gold_ore"],
       maxBlockDistance: 64,
     },
   },
   ITEMS: {
     GOLD: {
-      names: [
-      "gold_nugget",
-      ]
+      names: ["gold_nugget"],
     },
     CRAFTING_TABLE: {
-      names: [
-        "crafting_table",
-      ]
+      names: ["crafting_table"],
     },
   },
   // MOBOVI

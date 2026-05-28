@@ -8,6 +8,8 @@ function resetState(bot) {
         state.mission[key] = false;
     }
   }
+  state.mission.craftedItems = null;
+  state.mission.placedItems = null;
   for (const key in state.sensors) {
     if (Array.isArray(state.sensors[key])) {
         state.sensors[key] = [];

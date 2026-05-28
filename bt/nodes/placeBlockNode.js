@@ -11,6 +11,12 @@ class PlaceBlockNode extends Node {
   }
 
   async tick(bot, state, config) {
+    if (!state.mission.placedItems) {
+      state.mission.placedItems = {};
+    }
+
+    if (state.mission.placedItems[this.configKey]) return "SUCCESS";
+
     if (!this.mcData) {
       this.mcData = mcData(bot.version);
     }
@@ -23,27 +29,37 @@ class PlaceBlockNode extends Node {
     bot.chat(`${blockToPlaceId}`);
     let blockBelow = bot.blockAt(blockAbove.position.offset(0, -1, 0));
 
-    try{
-        await bot.equip(blockToPlaceId, "hand");
-    }catch{
-        console.log("No block in inventory:", err);
-        bot.chat("No block in inventory");
+    if (!bot.inventory.items().some((item) => item.name === this.configKey)) {
+      console.log(`No ${this.configKey} in inventory!`);
+      return "FAILURE";
     }
-    
+    try {
+      await bot.equip(blockToPlaceId, "hand");
+    } catch (err) {
+      console.log("No block in inventory:", err);
+      bot.chat("No block in inventory");
+    }
 
-    if (blockAbove && blockBelow && blockAbove.name === "air" && blockBelow.name !== "air") {
-        try {  
-            await bot.placeBlock(blockBelow, new Vec3(0, 1, 0));
-          } catch (err) {
-            console.log("Error placing block:", err);
-            bot.chat("Error placing block");
-          }
-          let newBlock = bot.blockAt(blockAbove.position);
-          if(newBlock.name === this.configKey){
+    if (
+      blockAbove &&
+      blockBelow &&
+      blockAbove.name === "air" &&
+      blockBelow.name !== "air"
+    ) {
+      try {
+        await bot.placeBlock(blockBelow, new Vec3(0, 1, 0)).then(() => {
+          const newBlock = bot.blockAt(blockAbove.position);
+          if (newBlock.name === this.configKey) {
+            state.mission.placedItems[this.configKey] = 1;
             return "SUCCESS";
-          }else return "FAILURE";
-
-      }else return "FAILURE";
+          }
+        });
+      } catch (err) {
+        console.log("Error placing block:", err);
+        bot.chat("Error placing block");
+      }
+    } else return "FAILURE";
+    return "RUNNING";
   }
 }
 

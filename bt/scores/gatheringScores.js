@@ -3,9 +3,11 @@ const { numOfBlocks } = require("../../utils/inventory");
 function breakLogsScore(bot, state, cfg) {
   const logCount = numOfBlocks(bot, state, cfg, "LOGS");
 
-  if (logCount <= 10) return 130;
+  if (logCount <= 2) state.hasEnoughLogs = false;
 
-  if (state["blockTarget"]) return 130;
+  if (logCount >= 10) state.hasEnoughLogs = true;
+
+  if (!state.hasEnoughLogs) return 130;
 
   return 0;
 }

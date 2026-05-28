@@ -49,4 +49,14 @@ function needsGold(bot, state, config) {
   return goldCount < 9;
 } //temp value
 
-module.exports = { equipBestWeapon, needsFood, numOfBlocks, needsGold };
+function hasItemInInventory(bot, itemName) {
+  return bot.inventory.items().some((item) => item.name === itemName);
+}
+
+module.exports = {
+  equipBestWeapon,
+  needsFood,
+  numOfBlocks,
+  needsGold,
+  hasItemInInventory,
+};

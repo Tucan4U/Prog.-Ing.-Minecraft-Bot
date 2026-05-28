@@ -50,6 +50,7 @@ class BreakBlockNode extends Node {
         state[this.stateKey] = null;
         return "SUCCESS";
       }
+      console.log("We are still digging.");
       return "RUNNING";
     }
     //console.log(block);

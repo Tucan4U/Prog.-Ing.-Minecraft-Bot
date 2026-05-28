@@ -6,6 +6,7 @@ module.exports = {
   digTask: null, //Dali trenutno bot razbija neki blok, korišteno u MoveToBlockNode i BreakLogNode
   // Block target specifically for blaze spawner searches.
   blazeSpawnerBlock: null,
+  hasEnoughLogs: false,
   mission: {
     activeProfile: "OVERWORLD",
     // Nether portal entry request flag.
@@ -18,7 +19,13 @@ module.exports = {
     // y is the surface level (block.y + 1) so the bot aims for the walkable height.
     fortressTarget: null,
     // Mode - AUTONOMOUS or MANUAL
-    netherMode : null,
+    netherMode: null,
+    // Craft-sequence progress cache used to survive repeated BT ticks.
+    craftedItems: null,
+    // Placed-block progress cache used by block placement sequences.
+    placedItems: null,
+
+    craftWoodenPickaxeRequested: false,
   },
   sensors: {
     entities: [],

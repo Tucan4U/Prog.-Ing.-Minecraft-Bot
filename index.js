@@ -19,12 +19,14 @@ const { startWorldSensors } = require("./sensors/worldSensors");
 const ConditionNode = require("./bt/decorators/conditionNode");
 
 // Nether utils
-const { giveNetherEquipment } = require('./utils/netherEquipment');
+const { giveNetherEquipment } = require("./utils/netherEquipment");
 // Nether commands
-const { netherMain,
+const {
+  netherMain,
   enterNetherCommand,
   findFortressCommand,
-  findBlazeSpawnerCommand } = require("./commands/netherCommands");
+  findBlazeSpawnerCommand,
+} = require("./commands/netherCommands");
 
 const bot = mineflayer.createBot({
   host: "localhost",
@@ -75,6 +77,7 @@ bot.once("spawn", () => {
   });
 
   console.log("Bot spawned");
+  console.log("");
 
   startLoop();
 });
@@ -118,6 +121,11 @@ bot.on("chat", (username, message) => {
     bot.chat(`Starting BT!`);
     startFlag = true;
   }
+  if (message === "logs") {
+    bot.chat("/clear");
+    bot.chat("/give @s minecraft:diamond_axe");
+    startFlag = true;
+  }
   if (message === "profile overworld") {
     state.mission.activeProfile = config.PROFILES.OVERWORLD;
     bot.chat("Profile switched: OVERWORLD");
@@ -134,19 +142,19 @@ bot.on("chat", (username, message) => {
     const filter = config.SLIMES;
     const allowedNames = new Set(filter.names);
     const entities = state.sensors?.entities || Object.values(bot.entities);
-    
+
     bot.chat(
       `Entities: ${entities
         .filter(
           (entity) =>
             entity &&
-          entity.type === filter.type &&
-          allowedNames.has(entity.name),
+            entity.type === filter.type &&
+            allowedNames.has(entity.name),
         )
         .map((e) => e.name)
         .join(", ")}`,
-      );
-      
+    );
+
     const nearest = bot.nearestEntity();
     bot.chat(`${nearest?.name || "none"}`);
     bot.chat(`Type: ${nearest?.type || "none"}`);
@@ -181,7 +189,6 @@ bot.on("chat", (username, message) => {
     findBlazeSpawnerCommand(bot, state, config);
     startFlag = true;
   }
-
 
   if (message === "tp") {
     bot.chat("/tp @s " + username);

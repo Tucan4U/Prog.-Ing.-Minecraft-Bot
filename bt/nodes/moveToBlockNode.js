@@ -6,7 +6,7 @@ const { chatThrottled } = require("../../utils/throttle");
 class MoveToBlockNode extends Node {
   constructor(
     stateKey = "blockTarget",
-    nearDistance = 1,
+    nearDistance = 3,
     successDistance = 5,
     statusThrottleMs = 3000,
   ) {
@@ -50,6 +50,7 @@ class MoveToBlockNode extends Node {
     const dist = bot.entity.position.distanceTo(block.position);
 
     if (dist <= this.successDistance) {
+      bot.pathfinder.setGoal(null);
       this.resetProgress();
       return "SUCCESS";
     }

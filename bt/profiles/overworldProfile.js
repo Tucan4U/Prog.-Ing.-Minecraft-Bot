@@ -11,6 +11,13 @@ const FindBlockNode = require("../nodes/findBlockNode");
 const MoveToBlockNode = require("../nodes/moveToBlockNode");
 const BreakBlockNode = require("../nodes/breakBlockNode");
 
+const PrepareFurnaceMaterialsNode = require("../nodes/prepareFurnaceMaterialsNode");
+const DigPitNode = require("../nodes/digPitNode");
+const PlaceBlockNode = require("../nodes/placeBlockNode");
+const PlaceCoverBlockNode = require("../nodes/placeCoverBlockNode");
+const LoadFurnaceNode = require("../nodes/loadFurnaceNode");
+const WaitFurnaceNode = require("../nodes/waitFurnaceNode");
+const ResetFurnaceWorkflowNode = require("../nodes/resetFurnaceWorkflowNode");
 //const CraftItemNode = require("../nodes/craftItemNode");
 
 const { pickUpFoodScore } = require("../scores/survivalScores");
@@ -19,7 +26,7 @@ const { breakLogsScore } = require("../scores/gatheringScores");
 //const { craftCraftingTableScore } = require("../scores/craftingScores");
 
 function createOverworldProfile(config) {
-  const pickUpFoodNode = new PickUpItemNode("FOOD");
+  const pickUpFoodNode = new PickUpItemNode("RAWFOOD");
   const huntAnimalsNode = new Sequence([
     new FindMobNode("ANIMALS"),
     new MoveToMobNode(
@@ -46,6 +53,17 @@ function createOverworldProfile(config) {
     new PickUpItemNode(config.BLOCKS.LOGS.names),
   ]);
 
+  const smeltItemsNode = new Sequence([
+    new PrepareFurnaceMaterialsNode("RAWFOOD", config.FURNACE.FUEL.names),
+    new DigPitNode(3), // improvizirana "furnace setup" sekvenca - iskopaj rupu, baci stvari unutra, pokrij zemljom
+    new PlaceBlockNode("furnace"),
+    new PlaceCoverBlockNode(),
+    new LoadFurnaceNode(),
+    new WaitFurnaceNode(2000),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new ResetFurnaceWorkflowNode(),
+  ]);
+
   // const craftCraftingTable = new Sequence([
   //   new CraftItemNode(config.BLOCKS.PLANKS.names),
   //   new CraftItemNode(["crafting_table"]),
@@ -53,6 +71,11 @@ function createOverworldProfile(config) {
 
   return {
     candidates: [
+      {
+        name: "SmeltItems",
+        node: smeltItemsNode,
+        scoreFn: () => 1000,
+      },
       {
         name: "BreakLogs",
         node: breakLogsNode,

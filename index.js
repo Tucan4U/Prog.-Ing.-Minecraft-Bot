@@ -92,8 +92,12 @@ bot.on("chat", (username, message) => {
     bot.pathfinder.setGoal(null);
     huntFlag = false;
   }
-  if (message === "start hunting") {
-    bot.chat(`Starting hunt!`);
+  if (message === "clear") {
+    bot.chat('/clear ' + bot.username);
+    bot.chat("Cleared inventory!");
+  }
+  if (message === "start") {
+    bot.chat(`Starting BT!`);
     huntFlag = true;
   }
   if (message === "profile overworld") {

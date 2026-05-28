@@ -19,15 +19,35 @@ module.exports = {
     "wooden_pickaxe",
   ],
 
-  AXES: ["wooden_axe", "stone_axe", "iron_axe", "diamond_axe", "golden_axe"],
+  AXES: [
+    "diamond_axe",
+    "iron_axe",
+    "golden_axe",
+    "stone_axe",
+    "wooden_axe",
+    ],
 
-  FOOD: [
+  PICKAXES: [
+    "diamond_pickaxe",
+    "iron_pickaxe",
+    "golden_pickaxe",
+    "stone_pickaxe",
+    "wooden_pickaxe",
+  ],
+
+  SHOVELS: [
+    "diamond_shovel",
+    "iron_shovel",
+    "golden_shovel",
+    "stone_shovel",
+    "wooden_shovel",
+  ],
+
+  RAWFOOD: [
     "beef",
     "porkchop",
     "chicken",
     "mutton",
-    "cooked_beef",
-    "cooked_porkchop",
   ],
   //Parametri koji utječu na SUCCESS ili FAILURE unutar BT-a, zbog toga i ime "BT"
   BT: {
@@ -71,7 +91,20 @@ module.exports = {
         "warped_planks",
       ],
     },
+    FURNACE: {
+      names: ["furnace"],
+    },
   },
+  // Furnace / smelting related config
+  FURNACE: {
+    FUEL: {
+      names: ["coal"],
+    },
+    ITEMS_PER_FUEL_UNIT: 8,
+    TIME_PER_ITEM_MS: 10000,
+    BURN_MS_PER_FUEL_UNIT: 1600,
+  },
+  
   // MOBOVI
   // Tu se nalaze liste mobova koje se koriste kao argumenti u FindMobNode-u
   // Svaki entry ima tip(npr. animal, hostile, mob) i listu imena mobova.

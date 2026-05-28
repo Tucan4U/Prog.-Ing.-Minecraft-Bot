@@ -7,6 +7,24 @@ module.exports = {
   mission: {
     activeProfile: "OVERWORLD",
   },
+  // Furnace workflow state (reserved by PrepareFurnaceMaterialsNode)
+  furnaceWorkflowStarted: false,
+  furnacePlaced: false,
+  selectedFurnaceItems: null,
+  reservedFuel: null,
+  furnaceExpectedCompleteAt: null,
+  furnaceLoadPhase: null,
+  furnaceLoadDone: false,
+  furnaceLoadedAt: null,
+  furnaceLoadedInputCount: 0,
+  furnaceLoadedFuelCount: 0,
+  furnaceContainer: null,
+  // Pit digging workflow state
+  pitDigTask: null,
+  pitStartY: null,
+  pitTargetY: null,
+  inPit: false,
+
   sensors: {
     entities: [],
     items: [],

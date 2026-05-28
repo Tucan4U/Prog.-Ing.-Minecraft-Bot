@@ -5,7 +5,7 @@ function hasNearbyFoodItem(state, config) {
   const items = state.sensors?.items || [];
   if (!Array.isArray(items) || !items.length) return false;
 
-  const foodSet = new Set(config.FOOD || []);
+  const foodSet = new Set(config.RAWFOOD || []);
   return items.some((entity) => {
     const item = entity.getDroppedItem?.();
     return item && foodSet.has(item.name);

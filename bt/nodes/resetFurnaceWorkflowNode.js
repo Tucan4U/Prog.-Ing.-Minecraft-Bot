@@ -32,6 +32,8 @@ class ResetFurnaceWorkflowNode extends Node {
     state.furnaceLoadedAt = null;
     state.furnaceLoadedInputCount = 0;
     state.furnaceLoadedFuelCount = 0;
+    state.furnaceCurrentInputName = null;
+    state.furnaceCurrentBatchCount = 0;
     state.furnacePlaced = false;
     state.blockTarget = null;
     state.digTask = null;

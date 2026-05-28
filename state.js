@@ -18,6 +18,8 @@ module.exports = {
   furnaceLoadedAt: null,
   furnaceLoadedInputCount: 0,
   furnaceLoadedFuelCount: 0,
+  furnaceCurrentInputName: null,
+  furnaceCurrentBatchCount: 0,
   furnaceContainer: null,
   // Pit digging workflow state
   pitDigTask: null,

@@ -35,7 +35,7 @@ class PrepareFurnaceMaterialsNode extends Node {
   }
 
   async tick(bot, state, config) {
-    if (state.furnaceWorkflowStarted || state.furnaceLoadPhase || state.furnaceLoadDone) {
+    if (state.furnaceWorkflowStarted || state.furnaceLoadPhase) {
       return "SUCCESS";
     }
 
@@ -77,6 +77,7 @@ class PrepareFurnaceMaterialsNode extends Node {
     const totalMs = totalItems * msPerItem;
     const itemsPerFuelUnit = config?.FURNACE?.ITEMS_PER_FUEL_UNIT || 8;
     const fuelNeededUnits = Math.max(1, Math.ceil(totalItems / itemsPerFuelUnit));
+    const safetyExtra = 1; // reserve one extra unit to avoid mid-session fuel starve
 
     // Ukupna količina goriva u inventaru, bez obzira na pojedini stack.
     const fuelTotal = countItemsByNames(bot, fuelNames);
@@ -89,15 +90,16 @@ class PrepareFurnaceMaterialsNode extends Node {
     }
 
     // Ako goriva ukupno nema dovoljno, baci FAILURE prije daljnjih koraka.
-    if (fuelTotal < fuelNeededUnits) {
-      bot.chat(`Not enough fuel: need ${fuelNeededUnits} units, have ${fuelTotal} units total.`);
+    const requiredWithExtra = fuelNeededUnits + safetyExtra;
+    if (fuelTotal < requiredWithExtra) {
+      bot.chat(`Not enough fuel: need ${requiredWithExtra} units (including extra), have ${fuelTotal} units total.`);
       return "FAILURE"; // nema dovoljno goriva ukupno
     }
 
     // 7) Rezerviraj u state kako bi drugi nodovi znali da su resursi zauzeti
     state.furnaceWorkflowStarted = true;
     state.selectedFurnaceItems = selected;
-    state.reservedFuel = { name: bestFuel.name, count: fuelNeededUnits };
+    state.reservedFuel = { name: bestFuel.name, count: fuelNeededUnits + safetyExtra };
     state.furnaceExpectedCompleteAt = Date.now() + totalMs;
 
     // 8) Debug/log poruka - korisno za testiranje

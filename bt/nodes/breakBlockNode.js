@@ -17,9 +17,10 @@ class BreakBlockNode extends Node {
 
     const block = bot.blockAt(targetBlock.position);
 
-    if (block.name === "air") {
+    if (!block || (block.name && block.name.includes("air"))) {
       state["digTask"] = null;
       state[this.stateKey] = null;
+      bot.chat("SUCCESS: Block is already air or missing.");
       return "SUCCESS";
     }
 
@@ -38,16 +39,28 @@ class BreakBlockNode extends Node {
       state["digTask"] = bot.dig(block).catch((err) => {
         console.error("Dig error:", err);
         state["digTask"] = null;
+      }).then(() => {
+        state["digTask"] = null;
       });
       console.log("Postavili smo digTask", state["digTask"]);
+      // re-check in case block disappeared immediately
+      const afterBlock = bot.blockAt(targetBlock.position);
+      if (!afterBlock || (afterBlock.name && afterBlock.name.includes("air"))) {
+        state["digTask"] = null;
+        state[this.stateKey] = null;
+        bot.chat("SUCCESS: Block became air immediately.");
+        return "SUCCESS";
+      }
       return "RUNNING";
     }
 
     // ako je dig još u toku
     if (state["digTask"]) {
-      if (block.name === "air") {
+      const cur = bot.blockAt(targetBlock.position);
+      if (!cur || (cur.name && cur.name.includes("air"))) {
         state["digTask"] = null;
         state[this.stateKey] = null;
+        bot.chat("SUCCESS: Block became air.");
         return "SUCCESS";
       }
       console.log("We are still digging.");

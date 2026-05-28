@@ -23,7 +23,7 @@ const { breakLogsScore } = require("../scores/gatheringScores");
 //const { craftCraftingTableScore } = require("../scores/craftingScores");
 
 // Pumpkin part 2
-const { getPumpkinHelmetScore } = require('../scores/pumpkinScores')
+const { getPumpkinHelmetScore } = require('../scores/oldPumpkinScores')
 
 function createOverworldProfile(config) {
   const pickUpFoodNode = new PickUpItemNode("FOOD");

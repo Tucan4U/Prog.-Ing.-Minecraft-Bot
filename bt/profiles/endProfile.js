@@ -14,12 +14,18 @@ const MoveToMobNode = require('../nodes/moveToMobNode')
 const AttackNode = require('../nodes/attackNode')
 const FindGatherBlockNode = require('../nodes/findGatherBlockNode')
 
+const LocateStrongholdNode = require('../nodes/locateStrongholdNode')
+const EquipGearNode = require('../nodes/equipGearNode')
+const MarkStateNode = require('../nodes/markStateNode')
+
+
 //POKUSAJ TESKI -- gatherBlocks
 const ClearStateNode = require('../nodes/clearStateNode')
 const WaitNode = require('../nodes/waitNode')
 
 //const { getPumpkinHelmetScore } = require('../scores/pumpkinScores')
-const { pickUpEndPrepLootScore,collectFeathersScore, collectStringScore, gatherBlocksScore, getPumpkinHelmetScore} = require('../scores/endPrepScores')
+const { pickUpEndPrepLootScore,collectFeathersScore, collectStringScore, gatherBlocksScore, 
+    getPumpkinHelmetScore, locateStrongholdScore, equipGearScore, findEndPortalScore} = require('../scores/endPrepScores')
 
 function createEndProfile(config) {
         // KANDIDAT: Nabavi pumpkin helmet (priprema za Endermane)
@@ -63,7 +69,7 @@ function createEndProfile(config) {
     // KANDIDAT: Pokupi loot od pripreme za End
     const pickUpEndPrepLootNode = new PickUpItemNode([
         'feather', 'chicken', 'cooked_chicken', 'string', 'dirt', 'cobblestone', 'cobbled_deepslate', 
-        'oak_log', 'birch_log', 'spruce_log', 'jungle_log', 'acacia_log', 'dark_oak_log', 'netherrack','carved_pumpkin'
+        'oak_log', 'birch_log', 'spruce_log', 'jungle_log', 'acacia_log', 'dark_oak_log', 'netherrack','carved_pumpkin', 'ender_eye',
     ])
 
     // KANDIDAT: Ubijaj kokoši dok ne skupiš 64 feathers
@@ -113,6 +119,20 @@ function createEndProfile(config) {
         new ClearStateNode('gatherBlockTarget'),
     ])
 
+    const findEndPortalNode = new Sequence([
+        new FindBlockNode(
+            'END_PORTAL_FRAMES',
+            'endPortalFrameTarget',
+            config.BLOCKS.END_PORTAL_FRAMES.maxBlockDistance
+        ),
+        new MoveToBlockNode(
+            'endPortalFrameTarget',
+            config.BT.MOVE_NEAR_DISTANCE,
+            4,
+            config.BT.MOVE_STATUS_THROTTLE_MS
+        ),
+        //new MarkStateNode(['endPortal', 'found'], true),
+    ])
 
     // KASNIJE ĆE OVDJE IĆI:
     // - fightEnderman
@@ -147,6 +167,21 @@ function createEndProfile(config) {
             name: 'GatherBlocks',
             node: gatherBlocksNode,
             scoreFn: gatherBlocksScore,
+        },
+        {
+            name: 'LocateStronghold',
+            node: new LocateStrongholdNode(),
+            scoreFn: locateStrongholdScore,
+        },
+        {
+            name: 'EquipGear',
+            node: new EquipGearNode(),
+            scoreFn: equipGearScore,
+        },
+        {
+            name: 'FindEndPortal',
+            node: findEndPortalNode,
+            scoreFn: findEndPortalScore,
         },
         {
             name: 'Idle',

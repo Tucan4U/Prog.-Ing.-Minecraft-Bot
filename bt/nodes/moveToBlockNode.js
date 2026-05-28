@@ -29,7 +29,7 @@ class MoveToBlockNode extends Node {
         if (dist <= this.successDistance) return 'SUCCESS'
 
         const goal = `${Math.floor(block.position.x)}:${Math.floor(block.position.y)}:${Math.floor(block.position.z)}`
-        if (this.lastGoal !== goal) {
+        if (this.lastGoal !== goal || bot.pathfinder.goal === null) {
             bot.pathfinder.setGoal(new goals.GoalNear(
                 block.position.x, block.position.y, block.position.z, this.nearDistance
             ))

@@ -37,7 +37,7 @@ function hasDroppedItem(bot, state, itemNames) {
 function pickUpEndPrepLootScore(bot, state, config) {
     const importantLoot = [
         'feather', 'chicken', 'cooked_chicken', 'string', 'dirt', 'cobblestone', 'cobbled_deepslate', 'oak_log',
-        'birch_log', 'spruce_log', 'jungle_log', 'acacia_log', 'dark_oak_log', 'netherrack', 'carved_pumpkin'
+        'birch_log', 'spruce_log', 'jungle_log', 'acacia_log', 'dark_oak_log', 'netherrack', 'carved_pumpkin', 'ender_eye',
     ]
 
     if (hasDroppedItem(bot, state, importantLoot)) {
@@ -82,7 +82,7 @@ function gatherBlocksScore(bot, state, config) {
         return 0
     }
 
-    return 100
+    return 30
 }
 
 // Score funkcija koja procjenjuje treba li bot ići po pumpkin helmet
@@ -107,4 +107,121 @@ function getPumpkinHelmetScore(bot, state, config) {
     return 140
 }
 
-module.exports = { pickUpEndPrepLootScore, collectFeathersScore, collectStringScore, gatherBlocksScore, getPumpkinHelmetScore }
+function hasEquippedArmor(bot) {
+    const helmet = bot.inventory.slots[5]
+    const chestplate = bot.inventory.slots[6]
+    const leggings = bot.inventory.slots[7]
+    const boots = bot.inventory.slots[8]
+
+    const hasHelmet = helmet && (
+        helmet.name.endsWith('_helmet') ||
+        helmet.name === 'carved_pumpkin'
+    )
+
+    const hasChestplate = chestplate && chestplate.name.endsWith('_chestplate')
+    const hasLeggings = leggings && leggings.name.endsWith('_leggings')
+    const hasBoots = boots && boots.name.endsWith('_boots')
+
+    return hasHelmet && hasChestplate && hasLeggings && hasBoots
+}
+
+function hasAnyInventoryItem(bot, itemNames) {
+    return bot.inventory.items().some(item =>
+        itemNames.includes(item.name)
+    )
+}
+
+function hasStrongholdTools(bot, config) {
+    return hasAnyInventoryItem(bot, config.WEAPONS ?? []) &&
+        hasAnyInventoryItem(bot, config.PICKAXES ?? [])
+}
+
+
+/*
+let lastStrongholdMissingChatAt = 0
+function chatStrongholdMissing(bot, message) {
+    if (Date.now() - lastStrongholdMissingChatAt < 5000) return
+
+    bot.chat(message)
+    lastStrongholdMissingChatAt = Date.now()
+}
+*/
+
+function locateStrongholdScore(bot, state, config) {
+    if (state.strongholdSearch?.found) {
+        return 0
+    }
+
+    const hasEyeOfEnder = bot.inventory.items().some(item =>
+        item.name === 'ender_eye'
+    )
+
+    if (!hasEyeOfEnder) {
+        //chatStrongholdMissing(bot, 'I need eyes of ender to find the stronghold.')
+        return 0
+    }
+
+    if (!hasEquippedArmor(bot)) {
+        //chatStrongholdMissing(bot, 'Missing armor to explore the stronghold.')
+        return 0
+    }
+
+    if (!hasStrongholdTools(bot, config)) {
+        //chatStrongholdMissing(bot, 'Missing stronghold tools to explore the stronghold.')
+        return 0
+    }
+
+    return 90
+}
+
+function hasGearToEquip(bot) {
+    const armorSlots = [
+        { suffix: '_helmet', slot: 5 },
+        { suffix: '_chestplate', slot: 6 },
+        { suffix: '_leggings', slot: 7 },
+        { suffix: '_boots', slot: 8 },
+    ]
+
+    for (const armorSlot of armorSlots) {
+        const equipped = bot.inventory.slots[armorSlot.slot]
+
+        if (armorSlot.slot === 5 && equipped?.name === 'carved_pumpkin') {
+            continue
+        }
+
+        const hasArmor = bot.inventory.items().some(item =>
+            item.name.endsWith(armorSlot.suffix)
+        )
+
+        if (hasArmor && !equipped) {
+            return true
+        }
+    }
+
+    const offhand = bot.inventory.slots[45]
+    const hasShield = bot.inventory.items().some(item => item.name === 'shield')
+
+    return hasShield && offhand?.name !== 'shield'
+}
+
+function equipGearScore(bot, state, config) {
+    return hasGearToEquip(bot) ? 180 : 0
+}
+
+function findEndPortalScore(bot, state, config) {
+    if (!state.strongholdSearch?.found) {
+        return 0
+    }
+
+    if (state.endPortal?.found) {
+        return 0
+    }
+
+    return 100
+}
+
+
+
+
+
+module.exports = { pickUpEndPrepLootScore, collectFeathersScore, collectStringScore, gatherBlocksScore, getPumpkinHelmetScore, locateStrongholdScore, equipGearScore, findEndPortalScore }

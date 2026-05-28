@@ -1,6 +1,6 @@
 module.exports = {
     WEAPONS: [
-        "diamond_sword", "iron_sword", "stone_sword", "wooden_sword",
+        "netherite_sword", "diamond_sword", "iron_sword", "stone_sword", "wooden_sword",
         "diamond_axe", "iron_axe", "stone_axe", "wooden_axe"
     ],
     
@@ -68,7 +68,10 @@ module.exports = {
             ],
             maxBlockDistance: 32,
         },
-        
+        END_PORTAL_FRAMES: {
+            names: ["end_portal_frame"],
+            maxBlockDistance: 96,
+        },
 
     },
 

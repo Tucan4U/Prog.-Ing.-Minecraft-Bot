@@ -16,6 +16,8 @@ const FindGatherBlockNode = require('../nodes/findGatherBlockNode')
 
 const LocateStrongholdNode = require('../nodes/locateStrongholdNode')
 const EquipGearNode = require('../nodes/equipGearNode')
+
+const MoveToVisibleBlockNode = require('../nodes/moveToVisibleBlockNode')
 const MarkStateNode = require('../nodes/markStateNode')
 
 
@@ -23,9 +25,14 @@ const MarkStateNode = require('../nodes/markStateNode')
 const ClearStateNode = require('../nodes/clearStateNode')
 const WaitNode = require('../nodes/waitNode')
 
+const FillEndPortalFramesNode = require('../nodes/fillEndPortalFramesNode')
+
+const EnterEndPortalNode = require('../nodes/enterEndPortalNode')
+
 //const { getPumpkinHelmetScore } = require('../scores/pumpkinScores')
 const { pickUpEndPrepLootScore,collectFeathersScore, collectStringScore, gatherBlocksScore, 
-    getPumpkinHelmetScore, locateStrongholdScore, equipGearScore, findEndPortalScore} = require('../scores/endPrepScores')
+    getPumpkinHelmetScore, locateStrongholdScore, equipGearScore, findEndPortalScore, 
+    activateEndPortalScore, enterEndPortalScore } = require('../scores/endPrepScores')
 
 function createEndProfile(config) {
         // KANDIDAT: Nabavi pumpkin helmet (priprema za Endermane)
@@ -125,13 +132,21 @@ function createEndProfile(config) {
             'endPortalFrameTarget',
             config.BLOCKS.END_PORTAL_FRAMES.maxBlockDistance
         ),
-        new MoveToBlockNode(
+        new MoveToVisibleBlockNode(
             'endPortalFrameTarget',
-            config.BT.MOVE_NEAR_DISTANCE,
+            1,
             4,
             config.BT.MOVE_STATUS_THROTTLE_MS
         ),
-        //new MarkStateNode(['endPortal', 'found'], true),
+        new MarkStateNode(['endPortal', 'found'], true),
+    ])
+
+    const activateEndPortalNode = new Sequence([
+        new FillEndPortalFramesNode(12),
+    ])
+
+    const enterEndPortalNode = new Sequence([
+        new EnterEndPortalNode(12),
     ])
 
     // KASNIJE ĆE OVDJE IĆI:
@@ -182,6 +197,16 @@ function createEndProfile(config) {
             name: 'FindEndPortal',
             node: findEndPortalNode,
             scoreFn: findEndPortalScore,
+        },
+        {
+            name: 'ActivateEndPortal',
+            node: activateEndPortalNode,
+            scoreFn: activateEndPortalScore,
+        },
+        {
+            name: 'EnterEndPortal',
+            node: enterEndPortalNode,
+            scoreFn: enterEndPortalScore,
         },
         {
             name: 'Idle',

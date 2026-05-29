@@ -1,11 +1,30 @@
 const { Node } = require('../behaviorTree')
 const { goals } = require('mineflayer-pathfinder')
 
+
+
 class LocateStrongholdNode extends Node {
     constructor() {
         super('LocateStronghold')
         this.isThrowing = false
         this.currentGoalKey = null
+        // Dodoano
+        this.lastPortalFrameScanAt = 0
+    }
+
+    findNearbyEndPortalFrame(bot, maxDistance) {
+        const frameId = bot.registry.blocksByName.end_portal_frame?.id
+        if (!frameId) return null
+
+        const frames = bot.findBlocks({
+            matching: frameId,
+            maxDistance,
+            count: 1,
+        })
+
+        if (!frames.length) return null
+
+        return bot.blockAt(frames[0])
     }
 
     async tick(bot, state, config) {
@@ -19,6 +38,38 @@ class LocateStrongholdNode extends Node {
         }
 
         const search = state.strongholdSearch
+
+        /*STARO
+        const portalFrame = this.findNearbyEndPortalFrame(bot, 200)
+
+        if (portalFrame) {
+            search.found = true
+            search.targetX = null
+            search.targetZ = null
+            this.currentGoalKey = null
+            state.endPortalFrameTarget = portalFrame
+            bot.pathfinder.setGoal(null)
+            bot.chat('End portal frame detected nearby.')
+            return 'SUCCESS'
+        }
+            */
+        let portalFrame = null
+
+        if (Date.now() - this.lastPortalFrameScanAt > 5000) {
+            portalFrame = this.findNearbyEndPortalFrame(bot, 200)
+            this.lastPortalFrameScanAt = Date.now()
+        }
+
+        if (portalFrame) {
+            search.found = true
+            search.targetX = null
+            search.targetZ = null
+            this.currentGoalKey = null
+            state.endPortalFrameTarget = portalFrame
+            bot.pathfinder.setGoal(null)
+            bot.chat('End portal frame detected nearby.')
+            return 'SUCCESS'
+        }
 
         if (search.found) {
             bot.chat('Stronghold should be below/near us.')
@@ -41,9 +92,13 @@ class LocateStrongholdNode extends Node {
                 return 'RUNNING'
             }
 
+            search.found = true
             search.targetX = null
             search.targetZ = null
             this.currentGoalKey = null
+            bot.pathfinder.setGoal(null)
+            bot.chat('Stronghold search area reached.')
+            return 'SUCCESS'
         }
 
         if (Date.now() - search.lastThrowAt < 3000 || this.isThrowing) {
@@ -86,6 +141,7 @@ class LocateStrongholdNode extends Node {
             this.isThrowing = false
         }
     }
+
 
     async throwEyeAndTrack(bot) {
         const eye = bot.inventory.items().find(item => item.name === 'ender_eye')

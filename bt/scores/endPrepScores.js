@@ -219,9 +219,79 @@ function findEndPortalScore(bot, state, config) {
 
     return 100
 }
+function hasEmptyEndPortalFrame(bot, maxDistance = 8) {
+    const frameId = bot.registry.blocksByName.end_portal_frame?.id
+    if (!frameId) return false
+
+    const positions = bot.findBlocks({
+        matching: frameId,
+        maxDistance,
+        count: 12,
+    })
+
+    return positions.some(pos => {
+        const block = bot.blockAt(pos)
+        if (!block || block.name !== 'end_portal_frame') return false
+
+        const props = block.getProperties?.()
+        return props?.eye === false
+    })
+}
+
+
+function activateEndPortalScore(bot, state, config) {
+    if (!state.endPortal?.found) {
+        return 0
+    }
+
+    const hasEyeOfEnder = bot.inventory.items().some(item =>
+        item.name === 'ender_eye'
+    )
+
+    if (!hasEyeOfEnder) {
+        return 0
+    }
+
+    if (!hasEmptyEndPortalFrame(bot, 8)) {
+        return 0
+    }
+
+    return 120
+}
+
+function hasEndPortalBlock(bot, maxDistance = 12) {
+    const portalId = bot.registry.blocksByName.end_portal?.id
+    if (!portalId) return false
+
+    const positions = bot.findBlocks({
+        matching: portalId,
+        maxDistance,
+        count: 1,
+    })
+
+    return positions.length > 0
+}
+
+function enterEndPortalScore(bot, state, config) {
+    if (!state.endPortal?.found) {
+        return 0
+    }
+
+    if (state.enteredEndPortal) {
+        return 0
+    }
+
+    if (!hasEndPortalBlock(bot, 12)) {
+        return 0
+    }
+
+    return 130
+}
 
 
 
 
 
-module.exports = { pickUpEndPrepLootScore, collectFeathersScore, collectStringScore, gatherBlocksScore, getPumpkinHelmetScore, locateStrongholdScore, equipGearScore, findEndPortalScore }
+module.exports = { pickUpEndPrepLootScore, collectFeathersScore, collectStringScore, gatherBlocksScore, 
+                    getPumpkinHelmetScore, locateStrongholdScore, equipGearScore,  findEndPortalScore, 
+                    activateEndPortalScore, enterEndPortalScore }

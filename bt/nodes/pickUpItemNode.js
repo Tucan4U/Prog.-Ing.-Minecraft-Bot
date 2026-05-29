@@ -17,7 +17,7 @@ class PickUpItemNode extends Node {
       : config?.[this.configKeyOrItems];
 
     const item = findItem(bot, items, itemsCache);
-    //console.log("PickupItemNode looking for items:", items, "Found:", item);
+    console.log("PickupItemNode looking for items:", items, "Found:", item);
     if (!item) {
       state["lootTarget"] = null; //Ovo koriste findBlockNode, moveToBlockNode, breakLogNode
       return "FAILURE";

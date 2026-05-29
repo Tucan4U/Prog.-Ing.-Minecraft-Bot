@@ -21,7 +21,14 @@ const PickUpItemNode = require('../nodes/pickUpItemNode');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { getClosestEntity, isTargetFloating } = require('../../utils/target');
 
-const { enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore } = require('../scores/netherScores');
+const { enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, } = require('../scores/netherScores');
+
+// Gold collection and crafting nodes
+const BreakBlockNode = require("../nodes/breakBlockNode");
+const FindInteractiveBlockPlacementNode = require('../nodes/findInteractiveBlockPlaceNode');
+const PlaceBlockNode = require("../nodes/placeBlockNode");
+const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
+const { ITEMS } = require('../../config');
 
 
 function createNetherProfile(config) {
@@ -45,6 +52,40 @@ function createNetherProfile(config) {
     new LocateFortressNode(20000),
     new MoveToFortressNode(400, 5),
   ]);
+
+  const goldSeq = new Sequence([
+    new FindBlockNode('GOLD', 
+      'blockTarget', 
+      config.BLOCKS.GOLD.maxBlockDistance),
+
+    new MoveToBlockNode('blockTarget', 
+      config.BT.MOVE_NEAR_DISTANCE,
+      config.BT.BREAK_RANGE,),
+
+    new BreakBlockNode("blockTarget", 
+      config.BT.BREAK_RANGE, 
+      "PICKAXES"),
+
+    new PickUpItemNode(config.ITEMS.GOLD.names),
+  ]);
+
+  const goldCraftingSeq = new Sequence([
+    //find placement
+    new FindInteractiveBlockPlacementNode(),
+    //place block
+    new PlaceBlockNode("crafting_table"),
+    //craft item
+    new CraftItemUsingTableNode("gold_ingot"),
+    //find crafting table
+    new FindBlockNode("crafting_table"),
+    //break crafting table
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+    //pick up crafting table
+    new PickUpItemNode(config,ITEMS.CRAFTING_TABLE.names),
+    ]);
+
+    //bot isnt picking up the crafting table after breaking it
+
 
   const blazeSpawnerSeq = new Sequence([
     // Blaze spawner search sequence: equip gear, then find blaze spawner by looking for spawner blocks, 
@@ -75,6 +116,8 @@ function createNetherProfile(config) {
   return {
     candidates: [
       { name: 'EnterNether', node: enterSeq, scoreFn: enterNetherScore },
+      { name: 'CollectNetherGold', node: goldSeq, scoreFn: getGoldNetherScore },
+      { name: 'CraftNetherGold', node: goldCraftingSeq, scoreFn: craftGoldNetherScore },
       { name: 'FindFortress', node: fortressSeq, scoreFn: findFortressScore },
       { name: 'LootBlazeRod', node: lootRodSeq, scoreFn: lootBlazeRodsScore },
 

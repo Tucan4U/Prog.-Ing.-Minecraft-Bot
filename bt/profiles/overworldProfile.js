@@ -11,9 +11,15 @@ const FindBlockNode = require("../nodes/findBlockNode");
 const MoveToBlockNode = require("../nodes/moveToBlockNode");
 const BreakBlockNode = require("../nodes/breakBlockNode");
 
+const PrepareFurnaceMaterialsNode = require("../nodes/prepareFurnaceMaterialsNode");
+const DigPitNode = require("../nodes/digPitNode");
+const PlaceBlockNode = require("../nodes/placeBlockNode");
+const PlaceCoverBlockNode = require("../nodes/placeCoverBlockNode");
+const LoadFurnaceNode = require("../nodes/loadFurnaceNode");
+const WaitFurnaceNode = require("../nodes/waitFurnaceNode");
+const ResetFurnaceWorkflowNode = require("../nodes/resetFurnaceWorkflowNode");
 const CraftItemNode = require("../nodes/craftItemNode");
 const FindInteractiveBlockPlacementNode = require("../nodes/findInteractiveBlockPlaceNode");
-const PlaceBlockNode = require("../nodes/placeBlockNode");
 const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
 const ResetStateNode = require("../nodes/resetStateNode");
 
@@ -23,7 +29,7 @@ const { breakLogsScore } = require("../scores/gatheringScores");
 const { craftWoodenPickaxeScore } = require("../scores/craftingScores");
 
 function createOverworldProfile(config) {
-  const pickUpFoodNode = new PickUpItemNode("FOOD");
+  const pickUpFoodNode = new PickUpItemNode("RAWFOOD");
   const huntAnimalsSeq = new Sequence([
     new FindMobNode("ANIMALS"),
     new MoveToMobNode(
@@ -50,6 +56,28 @@ function createOverworldProfile(config) {
     new PickUpItemNode(config.BLOCKS.LOGS.names),
   ]);
 
+  const smeltItemsSeq = new Sequence([
+    new PrepareFurnaceMaterialsNode("RAWFOOD", config.FURNACE.FUEL.names),
+    new DigPitNode(3), // improvizirana "furnace setup" sekvenca - iskopaj rupu, baci stvari unutra, pokrij zemljom
+    new PlaceBlockNode("furnace"),
+    new PlaceCoverBlockNode(),
+    new LoadFurnaceNode(),
+    new WaitFurnaceNode(2000),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new ResetFurnaceWorkflowNode(),
+  ]);
+
+  const smeltItemsNode = new Sequence([
+    new PrepareFurnaceMaterialsNode("RAWFOOD", config.FURNACE.FUEL.names),
+    new DigPitNode(3), // improvizirana "furnace setup" sekvenca - iskopaj rupu, baci stvari unutra, pokrij zemljom
+    new PlaceBlockNode("furnace"),
+    new PlaceCoverBlockNode(),
+    new LoadFurnaceNode(),
+    new WaitFurnaceNode(2000),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new ResetFurnaceWorkflowNode(),
+  ]);
+
   const craftCraftingSeq = new Sequence([
     //Hard-coded sequence for crafting the crafting table
     new CraftItemNode(config.BLOCKS.PLANKS.names, 12),
@@ -71,6 +99,11 @@ function createOverworldProfile(config) {
 
   return {
     candidates: [
+      {
+        name: "SmeltItems",
+        node: smeltItemsNode,
+        scoreFn: () => 1000,
+      },
       {
         name: "BreakLogs",
         node: breakLogsSeq,

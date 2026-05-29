@@ -51,6 +51,7 @@ const utilityTreesByProfile = {
 state.mission.activeProfile = config.PROFILES.END
 
 bot.once('spawn', () => {
+    
     const mcData = require('minecraft-data')(bot.version)
     const defaultMove = new Movements(bot, mcData)
 
@@ -73,6 +74,26 @@ bot.once('spawn', () => {
 
     startLoop()
 })
+
+bot.on('spawn', () => {
+    console.log('[DIMENSION]', bot.game.dimension)
+
+    if (bot.game.dimension === 'the_end') {
+        state.mission.phase = 'END_FIGHT'
+        state.mission.activeProfile = config.PROFILES.END
+        bot.chat('Entered The End. Switching to End fight phase.')
+    }
+})
+
+
+bot.on('entityHurt', (entity, source) => {
+    if (entity !== bot.entity) return
+    if (!source) return
+
+    state.attackerTarget = source
+    console.log('[DEFENSE] Attacked by:', source.name)
+})
+
 
 // Loop koji svake 500ms tika aktivno BT stablo
 async function startLoop() {
@@ -124,6 +145,19 @@ bot.on('chat', (username, message) => {
 
 // CLEANUP
 bot.on('error', (err) => console.log('ERROR:', err.message))
+bot.on('kicked', (reason, loggedIn) => {
+    console.log('KICKED:', reason)
+    console.log('loggedIn:', loggedIn)
+})
+
+bot._client.on('end', (reason) => {
+    console.log('CLIENT END:', reason)
+})
+
+bot._client.on('error', (err) => {
+    console.log('CLIENT ERROR:', err)
+})
+
 bot.on('end', () => {
     if (worldSensors) {
         worldSensors.stop()

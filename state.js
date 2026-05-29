@@ -6,6 +6,7 @@ module.exports = {
   digTask: null, //Dali trenutno bot razbija neki blok, korišteno u MoveToBlockNode i BreakLogNode
   mission: {
     activeProfile: "END",
+    phase: "END_PREP",
   },
   sensors: {
     entities: [],

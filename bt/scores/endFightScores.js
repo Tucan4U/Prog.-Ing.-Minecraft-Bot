@@ -1,4 +1,8 @@
 function destroyEndCrystalScore(bot, state, config) {
+    if (state.mission?.phase !== 'END_FIGHT') {
+        return 0
+    }
+    
 
     const crystals = Object.values(bot.entities).filter(entity =>
         entity &&

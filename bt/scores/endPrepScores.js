@@ -36,8 +36,7 @@ function hasDroppedItem(bot, state, itemNames) {
 
 function pickUpEndPrepLootScore(bot, state, config) {
     const importantLoot = [
-        'feather', 'chicken', 'cooked_chicken', 'string', 'dirt', 'cobblestone', 'cobbled_deepslate', 'oak_log',
-        'birch_log', 'spruce_log', 'jungle_log', 'acacia_log', 'dark_oak_log', 'netherrack', 'carved_pumpkin', 'ender_eye',
+        'feather', 'string', 'carved_pumpkin', 'ender_eye',
     ]
 
     if (hasDroppedItem(bot, state, importantLoot)) {
@@ -85,27 +84,60 @@ function gatherBlocksScore(bot, state, config) {
 
     return 30
 }
+function hasItem(bot, itemName) {
+    return bot.inventory.items().some(item => item.name === itemName)
+}
+function hasDroppedItemNearby(bot, itemName) {
+    return Object.values(bot.entities).some(entity => {
+        if (!entity || entity.name !== 'item') return false
+
+        const item = entity.getDroppedItem?.()
+        return item?.name === itemName
+    })
+}
+
+function hasNearbyBlock(bot, blockName, maxDistance = 64) {
+    const blockId = bot.registry.blocksByName[blockName]?.id
+    if (!blockId) return false
+
+    const blocks = bot.findBlocks({
+        matching: blockId,
+        maxDistance,
+        count: 1,
+    })
+
+    return blocks.length > 0
+}
 
 // Score funkcija koja procjenjuje treba li bot ići po pumpkin helmet
 function getPumpkinHelmetScore(bot, state, config) {
     const helmetSlot = bot.inventory.slots[5]
 
-    // ako ima pumpkin helmet, nema potrebe da ga traži
     if (helmetSlot && helmetSlot.name === 'carved_pumpkin') {
         return 0
     }
 
-    // ako nema pumpkin helmet, ali ima carved_pumpkin u inventoryju, treba ga obuci
-    const hasPumpkinInInventory = bot.inventory.items().some(item =>
-        item.name === 'carved_pumpkin'
-    )
-
-    if (hasPumpkinInInventory) {
+    if (hasItem(bot, 'carved_pumpkin')) {
         return 140
     }
 
-    //inace treba ići po pumpkin
-    return 140
+    if (hasDroppedItemNearby(bot, 'carved_pumpkin')) {
+        return 140
+    }
+
+    if (hasNearbyBlock(bot, 'carved_pumpkin', config.BLOCKS.CARVED_PUMPKINS.maxBlockDistance)) {
+        return 140
+    }
+
+    if (!hasItem(bot, 'shears')) {
+        return 0
+    }
+
+    if (hasNearbyBlock(bot, 'pumpkin', config.BLOCKS.PUMPKINS.maxBlockDistance)) {
+        return 140
+    }
+
+    return 0
 }
 
 function hasEquippedArmor(bot) {
@@ -147,9 +179,27 @@ function chatStrongholdMissing(bot, message) {
     lastStrongholdMissingChatAt = Date.now()
 }
 */
+function hasNearbyEndPortalFrame(bot, maxDistance = 200) {
+    const frameId = bot.registry.blocksByName.end_portal_frame?.id
+    if (!frameId) return false
+
+    const positions = bot.findBlocks({
+        matching: frameId,
+        maxDistance,
+        count: 1,
+    })
+
+    return positions.length > 0
+}
+
 
 function locateStrongholdScore(bot, state, config) {
     if (state.strongholdSearch?.found) {
+        return 0
+    }
+    if (hasNearbyEndPortalFrame(bot, 200)) {
+        state.strongholdSearch ??= {}
+        state.strongholdSearch.found = true
         return 0
     }
 
@@ -289,10 +339,19 @@ function enterEndPortalScore(bot, state, config) {
     return 130
 }
 
+function defendSelfScore(bot, state, config) {
+    const target = state.attackerTarget
 
+    if (!target) return 0
 
+    if (!bot.entities[target.id]) {
+        state.attackerTarget = null
+        return 0
+    }
 
+    return 500
+}
 
 module.exports = { pickUpEndPrepLootScore, collectFeathersScore, collectStringScore, gatherBlocksScore, 
                     getPumpkinHelmetScore, locateStrongholdScore, equipGearScore,  findEndPortalScore, 
-                    activateEndPortalScore, enterEndPortalScore }
+                    activateEndPortalScore, enterEndPortalScore, defendSelfScore }

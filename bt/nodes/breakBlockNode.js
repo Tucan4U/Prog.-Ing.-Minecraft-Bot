@@ -30,13 +30,14 @@ class BreakBlockNode extends Node {
             
             // DODANO; nije mi radilo kopanje pumpkina
             await bot.lookAt(block.position.offset(0.5, 0.5, 0.5))
-            state.digTask = bot.dig(block)
-                .then(() => { 
-                    state.digTask = null 
+           state.digTask = bot.dig(block)
+                .then(() => {
+                    state.digTask = null
+                    state[this.stateKey] = null
                 })
-                .catch(err => { 
+                .catch(err => {
                     console.log("Dig error:", err.message)
-                    state.digTask = null 
+                    state.digTask = null
                 })
 
             return 'RUNNING'

@@ -14,12 +14,12 @@ const MoveToMobNode = require('../nodes/moveToMobNode')
 const AttackNode = require('../nodes/attackNode')
 const FindGatherBlockNode = require('../nodes/findGatherBlockNode')
 
+//SVE NOVO
 const LocateStrongholdNode = require('../nodes/locateStrongholdNode')
 const EquipGearNode = require('../nodes/equipGearNode')
 
 const MoveToVisibleBlockNode = require('../nodes/moveToVisibleBlockNode')
 const MarkStateNode = require('../nodes/markStateNode')
-
 
 //POKUSAJ TESKI -- gatherBlocks
 const ClearStateNode = require('../nodes/clearStateNode')
@@ -35,7 +35,7 @@ const FindEntityNode = require('../nodes/findEntityNode')
 //const { getPumpkinHelmetScore } = require('../scores/pumpkinScores')
 const { pickUpEndPrepLootScore,collectFeathersScore, collectStringScore, gatherBlocksScore, 
     getPumpkinHelmetScore, locateStrongholdScore, equipGearScore, findEndPortalScore, 
-    activateEndPortalScore, enterEndPortalScore } = require('../scores/endPrepScores')
+    activateEndPortalScore, enterEndPortalScore,defendSelfScore, } = require('../scores/endPrepScores')
 
 const { destroyEndCrystalScore } = require('../scores/endFightScores')
 
@@ -97,8 +97,17 @@ function createEndProfile(config) {
 
     // KANDIDAT: Pokupi loot od pripreme za End
     const pickUpEndPrepLootNode = new PickUpItemNode([
-        'feather', 'chicken', 'cooked_chicken', 'string', 'dirt', 'cobblestone', 'cobbled_deepslate', 
-        'oak_log', 'birch_log', 'spruce_log', 'jungle_log', 'acacia_log', 'dark_oak_log', 'netherrack','carved_pumpkin', 'ender_eye',
+        'feather',  'string', 'carved_pumpkin', 'ender_eye',
+    ])
+
+    const defendSelfNode = new Sequence([
+        new MoveToMobNode(
+            'attackerTarget',
+            config.BT.MOVE_NEAR_DISTANCE,
+            config.BT.MOVE_SUCCESS_DISTANCE,
+            config.BT.MOVE_STATUS_THROTTLE_MS
+        ),
+        new AttackNode('attackerTarget'),
     ])
 
     // KANDIDAT: Ubijaj kokoši dok ne skupiš 64 feathers
@@ -234,6 +243,11 @@ function createEndProfile(config) {
             name: 'DestroyEndCrystals',
             node: destroyEndCrystalNode,
             scoreFn: destroyEndCrystalScore,
+        },
+        {
+            name: 'DefendSelf',
+            node: defendSelfNode,
+            scoreFn: defendSelfScore,
         },
         {
             name: 'Idle',

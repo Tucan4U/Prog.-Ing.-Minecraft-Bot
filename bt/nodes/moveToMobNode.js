@@ -26,7 +26,7 @@ class MoveToMobNode extends Node {
 
         const goal = `${Math.floor(target.position.x)}:${Math.floor(target.position.y)}:${Math.floor(target.position.z)}`
 
-        if (this.lastGoal !== goal) {
+        if (this.lastGoal !== goal || bot.pathfinder.goal === null) {
             bot.pathfinder.setGoal(new goals.GoalNear(
                 target.position.x, target.position.y, target.position.z,
                 this.nearDistance

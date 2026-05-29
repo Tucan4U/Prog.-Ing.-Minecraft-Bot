@@ -10,17 +10,31 @@ class MoveToVisibleBlockNode extends Node {
         this.successDistance = successDistance
         this.statusThrottleMs = statusThrottleMs
         this.lastGoal = null
+        // FIKS ZA PLIVANJE 
+        this.startedAt = null
+        this.timeoutMs = 15000
     }
 
     async tick(bot, state) {
         const target = state[this.stateKey]
         if (!target) {
+            console.log('[MoveToVisibleBlock] no target:', this.stateKey)
             this.lastGoal = null
             return 'FAILURE'
         }
 
+        if (this.startedAt === null) {
+        this.startedAt = Date.now()
+        }   
+
         const block = bot.blockAt(target.position)
         if (!block || block.name === 'air') {
+            console.log('[MoveToVisibleBlock] invalid block:', {
+                stateKey: this.stateKey,
+                targetPos: target.position,
+                block: block?.name,
+            })
+
             state[this.stateKey] = null
             this.lastGoal = null
             return 'FAILURE'
@@ -28,6 +42,15 @@ class MoveToVisibleBlockNode extends Node {
 
         const dist = bot.entity.position.distanceTo(block.position)
         const canSee = bot.canSeeBlock(block)
+
+        if (Date.now() - this.startedAt > this.timeoutMs) {
+            console.log('[MoveToVisibleBlock] stuck, clearing target:', this.stateKey)
+            state[this.stateKey] = null
+            this.lastGoal = null
+            this.startedAt = null
+            bot.pathfinder.setGoal(null)
+            return 'FAILURE'
+        }
 
         if (dist <= this.successDistance && canSee) {
             return 'SUCCESS'

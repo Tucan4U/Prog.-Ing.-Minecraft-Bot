@@ -41,6 +41,7 @@ function pickUpEndPrepLootScore(bot, state, config) {
     ]
 
     if (hasDroppedItem(bot, state, importantLoot)) {
+        console.log("[LOOT] Loot detected")
         return 200
     }
 

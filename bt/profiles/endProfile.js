@@ -29,12 +29,31 @@ const FillEndPortalFramesNode = require('../nodes/fillEndPortalFramesNode')
 
 const EnterEndPortalNode = require('../nodes/enterEndPortalNode')
 
+//Entity je zasad samo end crystal
+const FindEntityNode = require('../nodes/findEntityNode')
+
 //const { getPumpkinHelmetScore } = require('../scores/pumpkinScores')
 const { pickUpEndPrepLootScore,collectFeathersScore, collectStringScore, gatherBlocksScore, 
     getPumpkinHelmetScore, locateStrongholdScore, equipGearScore, findEndPortalScore, 
     activateEndPortalScore, enterEndPortalScore } = require('../scores/endPrepScores')
 
+const { destroyEndCrystalScore } = require('../scores/endFightScores')
+
 function createEndProfile(config) {
+        const destroyEndCrystalNode = new Sequence([
+            new FindEntityNode('end_crystal', 'endCrystalTarget'),
+
+            new MoveToMobNode(
+                'endCrystalTarget',
+                config.BT.MOVE_NEAR_DISTANCE,
+                config.BT.MOVE_SUCCESS_DISTANCE,
+                config.BT.MOVE_STATUS_THROTTLE_MS
+            ),
+
+            new AttackNode('endCrystalTarget'),
+        ])
+
+
         // KANDIDAT: Nabavi pumpkin helmet (priprema za Endermane)
         const getPumpkinHelmetNode = new Selector([
             // 1. Ako već imamo pumpkin, equipaj
@@ -69,6 +88,9 @@ function createEndProfile(config) {
             new WaitNode(500),
             new EquipPumpkinNode(),
         ]),
+
+
+
 
         
     ])
@@ -207,6 +229,11 @@ function createEndProfile(config) {
             name: 'EnterEndPortal',
             node: enterEndPortalNode,
             scoreFn: enterEndPortalScore,
+        },
+        {
+            name: 'DestroyEndCrystals',
+            node: destroyEndCrystalNode,
+            scoreFn: destroyEndCrystalScore,
         },
         {
             name: 'Idle',

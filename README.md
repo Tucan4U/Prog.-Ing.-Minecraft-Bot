@@ -1,48 +1,195 @@
-# Minecraft Bot with Mineflayer
+# Minecraft BT Bot with Mineflayer
 
-A Node.js-based Minecraft bot built using the Mineflayer framework.
-This bot can connect to a Minecraft server and perform automated tasks such as navigation, resource collection, and executing commands via in-game chat.
+An autonomous or semi-autonomous Minecraft bot built with Node.js and the Mineflayer framework.
 
----
+The project combines behavior trees, combat AI, pathfinding, resource gathering, crafting automation, smelting system and multi-dimensional navigation into a modular intelligent agent capable of assisting players throughout Minecraft progression — from early-game survival to Ender Dragon preparation.
 
-## Features
-
-* Pathfinding and navigation
-* Automated collection of certain blocks
-* Hunting
-* Piglin bartering automation
-* Chat-based command system
-* Multi-environment support (Overworld / Nether / End)
-
----
-
-## Documentation
-
-Detailed documentation, including system design, Work Breakdown Structure (WBS), and PERT diagrams, is available in the Wiki:
+More detailed documentation is available in the Wiki:
 
 https://github.com/Tucan4U/Prog.-Ing.-Minecraft-Bot/wiki
 
 ---
 
-## Technologies and libraries used
+# Features
 
-* Node.js
-* Mineflayer
-* mineflayer-pathfinder
-* mineflayer-collectblock
+## AI & Behavior System
+
+* Modular **Behavior Tree (BT)** architecture
+* Autonomous decision-making system
+* State task execution and interruption handling
+* Dynamic target selection and action prioritization
 
 ---
 
-## Installation
+## Combat System
 
-### 1. Clone the repository
+### Melee Combat
+
+* PvP combat using `mineflayer-pvp`
+* Automatic target tracking
+* Combat disengagement and recovery handling with `minefayer-auto-eat`
+
+### Ranged Combat
+
+* Bow combat using `minecrafthawkeye`
+* Line-of-sight visibility checks
+* Ammo and weapon validation
+* Safe ranged engagement logic
+* Cooldown-controlled attacks
+
+---
+
+## Navigation & Movement
+
+* Intelligent pathfinding with `mineflayer-pathfinder`
+* Multi-environment support:
+
+  * Overworld
+  * Nether
+  * End
+* Automatic obstacle avoidance
+* Scaffold and tower movement handling
+* Environment-aware movement safety
+
+---
+
+## Automation Systems
+
+* Tree farming and log collection
+* Automated mining and block gathering
+* Animal hunting and food collection
+* Crafting of simple tools
+* Gold mining in Nether dimesnion
+* Piglin bartering automation
+* Inventory management
+* Equipment handling
+* Blaze killing and blaze rod collection
+
+---
+
+## Chat Command Interface
+
+The bot can be controlled directly through Minecraft chat commands.
+
+Examples:
+
+* Resource gathering
+* Inventory checks
+* Nether progression tasks
+* Developer auxiliary commands
+
+---
+
+# Architecture Overview
+
+The bot is built around a modular AI architecture consisting of:
+
+## Core Systems
+
+* **Behavior Tree Engine**
+* **Task System**
+* **Combat Manager**
+* **Movement Manager**
+* **Inventory Utilities**
+* **Environment Detection**
+* **Chat Command Parser**
+
+---
+
+## Behavior Tree Workflow
+
+The bot continuously evaluates its state and executes behaviors based on priorities.
+
+Example workflow:
+
+```text
+Player Command
+      ↓
+State Update
+      ↓
+Behavior Tree Tick
+      ↓
+Condition Checks
+      ↓
+Task Selection
+      ↓
+Action Execution
+      ↓
+World Feedback
+      ↓
+Repeat
+```
+
+---
+
+## Combat Workflow
+
+### Ranged Combat Flow
+
+```text
+Target Detection
+      ↓
+Distance Validation
+      ↓
+Line-of-Sight Check
+      ↓
+Weapon & Ammo Validation
+      ↓
+Aim Target
+      ↓
+Shoot
+      ↓
+Cooldown Handling
+```
+
+### Melee Combat Flow
+
+```text
+Target Detection
+      ↓
+Pathfinding
+      ↓
+Attack Range Check
+      ↓
+PvP Engagement
+      ↓
+Combat Monitoring
+```
+
+---
+
+# Technologies & Libraries
+
+## Core
+
+* Node.js
+* JavaScript (CommonJS)
+
+## Mineflayer plugins and libraries
+
+* `mineflayer`
+* `mineflayer-pathfinder`
+* `mineflayer-pvp`
+* `mineflayer-collectblock`
+* `minecrafthawkeye`
+* `mineflayer-auto-eat`
+* `mineflayer-tool`
+* `mineflayer-utils`
+
+---
+
+# Installation
+
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Tucan4U/Prog.-Ing.-Minecraft-Bot.git
 cd Prog.-Ing.-Minecraft-Bot
 ```
 
-### 2. Install dependencies
+---
+
+## 2. Install Dependencies
 
 ```bash
 npm install
@@ -50,76 +197,111 @@ npm install
 
 ---
 
-## Usage
+# Configuration
 
-In your Minecraft world
-(Make sure game's version is 1.21.11)
+Before running the bot, configure these inside 'index.js' file:
+
+* Minecraft server host (We used "localhost")
+* Port (We used 25565)
+* Bot username
+
+---
+
+# Usage
+
+In your Minecraft world (Make sure game's version is 1.21.11)
 
 Start the bot with:
 
 ```bash
-node main.js
+node index.js
 ```
-
-Before running, make sure to configure:
-
-* Minecraft server port (We used 25565)
-* Bot username
-* Any other required settings in `main.js`
 
 ---
 
-## Available Commands
+# Available Commands
 
-The bot responds to in-game chat commands:
-
-| Command               | Description                             |
-| ----------------      | ----------------------------------------|
-| `hi`                  | Greets the player                       |
-| `stop`                | Stops the current task                  | 
-| `come here`           | Teleports the bot to the player         |
-| `break logs`          | Starts cutting down trees               |
-| `craft wooden pickaxe`| Crafts a wooden pickaxe                 |
-| `find pumpkin`        | Searches for the pumpkin                |
-| `shear the pumpkin`   | Carves the pumpkin                      |
-| `put the pumpkin on`  | Equips the carved pumpkin               |
-| `gather blocks`       | Gathers dirt blocks                     |
-| `inventory`           | Prints bot's inventory                  |
-| `start hunting`       | Starts hunting animals and collects food|
-| `enter nether`        | Navigates to the Nether                 |
-| `find fortress`       | Searches for a Nether fortress          |
-| `get gold nether`     | Mines gold in Nether                    |
-| `barter`              | Performs piglin bartering               |
+| Command              | Description                                          |
+| -------------------- | ---------------------------------------------------- |
+| `start`              | Starts the Behavior Tree main loop                   |
+| `stop`               | Stops all current bot activities and resets state    |
+| `profile overworld`  | Switches active AI profile to Overworld mode         |
+| `profile hostile`    | Switches active AI profile to Hostile Combat mode    |
+| `profile nether`     | Switches active AI profile to Nether mode            |
+| `inventory`          | Prints the bot inventory to terminal                 |
+| `entities`           | Displays nearby filtered entities for debugging      |
+| `prep`               | Gives the bot Nether equipment (testing command)     |
+| `nether`             | Starts the complete Nether progression workflow      |
+| `enter nether`       | Navigates and enters the Nether portal               |
+| `find fortress`      | Searches for a Nether fortress                       |
+| `find blaze spawner` | Searches for a Blaze spawner inside fortress         |
+| `collect rods x`     | Kills Blazes and collects `x` blaze rods             |
+| `tp`                 | Teleports the bot to the player (operator/debug use) |
 
 ---
 
-## Project Structure
+# Project Structure
 
-```
+```text
 .
-├── main.js
+├── index.js
 ├── package.json
 ├── package-lock.json
-└── docs/
+├── physics.js
+├── config.js
+├── state.js
+├── behaviors/
+├── bt/ 
+│   ├── behaviorTree.js
+│   ├── decorators/
+│   ├── nodes/
+│   ├── profiles/
+│   ├── scores/
+│   ├── selectors/
+├── utils/
+├── commands/ 
+├── sensors/ 
+├── utils/
+├── docs/
 ```
-In the `docs/` folder are located the WBS and PERT diagrams.
 
 ---
 
-## Dependencies
+# Documentation
 
-Main libraries used:
+Additional and detailed project documentation is available in the GitHub Wiki, including:
 
-* `mineflayer` – Core bot framework
-* `mineflayer-pathfinder` – Navigation and movement
-* `mineflayer-collectblock` – Block collection automation
+* System architecture
+* Behavior Tree design
+* Bot Functionalities
+* Code profiling
+* Development workflow
+* Installation and Usage
+* WBS and PERT diagrams
+
+GitHub Wiki:
+
+https://github.com/Tucan4U/Prog.-Ing.-Minecraft-Bot/wiki
 
 ---
 
-## Overview
+# Development Goals
 
-The bot is meant to assist the player in his quest to kill the Ender Dragon.
-It listens for chat commands and executes actions accordingly.
-It uses pathfinding algorithms to navigate the Minecraft world and interact with entities and blocks.
+The long-term goal of the project is to create a fully autonomous Minecraft assistant capable of:
+
+* Surviving independently
+* Progressing through the game
+* Gathering resources intelligently
+* Fighting hostile entities
+* Navigating all dimensions
+* Assisting players dynamically
 
 ---
+
+# Future Improvements
+
+Planned improvements include:
+
+* Full survival progression AI
+* Better combat prediction
+* Individualization of tasks

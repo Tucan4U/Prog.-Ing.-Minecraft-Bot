@@ -25,7 +25,7 @@ async function equipBestWeapon(bot, weapons) {
 function needsFood(bot, state, config) {
   const foodCount = bot.inventory
     .items()
-    .filter((i) => config.FOOD.includes(i.name)) //TODOO
+    .filter((i) => config.RAWFOOD.includes(i.name)) //TODOO
     .reduce((sum, i) => sum + i.count, 0);
 
   return foodCount < 32;

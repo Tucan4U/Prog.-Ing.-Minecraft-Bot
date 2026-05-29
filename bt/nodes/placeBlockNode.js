@@ -51,6 +51,9 @@ class PlaceBlockNode extends Node {
           const newBlock = bot.blockAt(blockAbove.position);
           if (newBlock.name === this.configKey) {
             state.mission.placedItems[this.configKey] = 1;
+            if (this.configKey === "crafting_table") {
+              state.mission.hasCraftingTable = true;
+            }
             return "SUCCESS";
           }
         });

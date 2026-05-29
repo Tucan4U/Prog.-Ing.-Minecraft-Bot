@@ -17,9 +17,10 @@ class PickUpItemNode extends Node {
       : config?.[this.configKeyOrItems];
 
     const item = findItem(bot, items, itemsCache);
-    console.log("PickupItemNode looking for items:", items, "Found:", item);
+
     if (!item) {
-      state["lootTarget"] = null; //Ovo koriste findBlockNode, moveToBlockNode, breakLogNode
+      //Ovo koriste findBlockNode, moveToBlockNode, breakLogNode
+      state["lootTarget"] = null;
       return "FAILURE";
     }
 
@@ -32,6 +33,8 @@ class PickUpItemNode extends Node {
     const dist = bot.entity.position.distanceTo(item.position);
 
     if (dist < 1.5) {
+      state["lootTarget"] = null;
+      state["blockTarget"] = null;
       return "SUCCESS";
     }
 

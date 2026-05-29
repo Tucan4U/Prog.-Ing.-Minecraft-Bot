@@ -70,6 +70,10 @@ module.exports = {
       ],
       maxBlockDistance: 16,
     },
+    STONE: {
+      names: ["cobblestone", "stone"],
+      maxBlockDistance: 16,
+    },
     NETHER_PORTAL: {
       names: ["nether_portal"],
       maxBlockDistance: 64,
@@ -93,6 +97,10 @@ module.exports = {
     },
     FURNACE: {
       names: ["furnace"],
+    },
+    DIRT: {
+      names: ["dirt"],
+      maxBlockDistance: 16,
     },
   },
   // Furnace / smelting related config

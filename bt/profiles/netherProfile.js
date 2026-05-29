@@ -48,23 +48,23 @@ function createNetherProfile(config) {
     new MoveToFortressNode(400, 5),
   ]);
 
-  const goldSeq = new Sequence([
-    new FindBlockNode(
-      "GOLD",
-      "blockTarget",
-      config.BLOCKS.GOLD.maxBlockDistance,
-    ),
+  // const goldSeq = new Sequence([
+  //   new FindBlockNode(
+  //     "GOLD",
+  //     "blockTarget",
+  //     config.BLOCKS.GOLD.maxBlockDistance,
+  //   ),
 
-    new MoveToBlockNode(
-      "blockTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,
-    ),
+  //   new MoveToBlockNode(
+  //     "blockTarget",
+  //     config.BT.MOVE_NEAR_DISTANCE,
+  //     config.BT.BREAK_RANGE,
+  //   ),
 
-    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+  //   new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
 
-    new PickUpItemNode(config.ITEMS.GOLD.names),
-  ]);
+  //   new PickUpItemNode(config.ITEMS.GOLD.names),
+  // ]);
 
   const goldCraftingSeq = new Sequence([
     //find placement
@@ -106,7 +106,7 @@ function createNetherProfile(config) {
     // 3. FindBlazeSpawner: looks for blaze spawners (score 100 when in Nether + requested + low blaze rods)
     candidates: [
       { name: "EnterNether", node: enterSeq, scoreFn: enterNetherScore },
-      { name: "CollectNetherGold", node: goldSeq, scoreFn: getGoldNetherScore },
+      //{ name: "CollectNetherGold", node: goldSeq, scoreFn: getGoldNetherScore },
       {
         name: "CraftNetherGold",
         node: goldCraftingSeq,

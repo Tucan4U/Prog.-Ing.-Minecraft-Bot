@@ -1,6 +1,5 @@
 const { Node } = require("../behaviorTree");
 const { equipBestWeapon } = require("../../utils/inventory");
-
 class BreakBlockNode extends Node {
   constructor(stateKey, reachDistance, tools) {
     super("BreakBlock");
@@ -13,14 +12,16 @@ class BreakBlockNode extends Node {
     const lootTarget = state["lootTarget"];
     if (lootTarget) return "SUCCESS";
     const targetBlock = state[this.stateKey];
-    if (!targetBlock) return "FAILURE";
+    if (!targetBlock) {
+      //console.log("There is no target block");
+      return "FAILURE";
+    }
 
     const block = bot.blockAt(targetBlock.position);
 
-    if (!block || (block.name && block.name.includes("air"))) {
+    if (!block || block.name === "air") {
       state["digTask"] = null;
       state[this.stateKey] = null;
-      bot.chat("SUCCESS: Block is already air or missing.");
       return "SUCCESS";
     }
 
@@ -36,18 +37,21 @@ class BreakBlockNode extends Node {
 
       await equipBestWeapon(bot, config[this.tools] || []);
 
-      state["digTask"] = bot.dig(block).catch((err) => {
-        console.error("Dig error:", err);
-        state["digTask"] = null;
-      }).then(() => {
-        state["digTask"] = null;
-      });
+      state["digTask"] = bot
+        .dig(block)
+        .catch((err) => {
+          console.error("Dig error:", err);
+          state["digTask"] = null;
+        })
+        .then(() => {
+          state["digTask"] = null;
+        });
       console.log("Postavili smo digTask", state["digTask"]);
       // re-check in case block disappeared immediately
       const afterBlock = bot.blockAt(targetBlock.position);
       if (!afterBlock || (afterBlock.name && afterBlock.name.includes("air"))) {
         state["digTask"] = null;
-        state[this.stateKey] = null;
+
         bot.chat("SUCCESS: Block became air immediately.");
         return "SUCCESS";
       }
@@ -59,7 +63,7 @@ class BreakBlockNode extends Node {
       const cur = bot.blockAt(targetBlock.position);
       if (!cur || (cur.name && cur.name.includes("air"))) {
         state["digTask"] = null;
-        state[this.stateKey] = null;
+
         bot.chat("SUCCESS: Block became air.");
         return "SUCCESS";
       }

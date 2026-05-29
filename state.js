@@ -7,8 +7,16 @@ module.exports = {
   // Block target specifically for blaze spawner searches.
   blazeSpawnerBlock: null,
   hasEnoughLogs: false,
+  hasEnoughStone: false,
+  hasEnoughDirt: false,
   mission: {
     activeProfile: "OVERWORLD",
+    // This is connected to the craftingTableSequence and it's scoring system
+    hasCraftingTable: false,
+    // This is connected to the scoring system of the craftWoodenPickaxe
+    hasWoodenPickaxe: false,
+
+    hasStonePickaxe: false,
     // Nether portal entry request flag.
     enterNetherRequested: false,
     // Fortress search and travel request flag.

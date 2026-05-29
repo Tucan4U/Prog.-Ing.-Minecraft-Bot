@@ -21,12 +21,19 @@ const ResetFurnaceWorkflowNode = require("../nodes/resetFurnaceWorkflowNode");
 const CraftItemNode = require("../nodes/craftItemNode");
 const FindInteractiveBlockPlacementNode = require("../nodes/findInteractiveBlockPlaceNode");
 const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
-const ResetStateNode = require("../nodes/resetStateNode");
 
 const { pickUpFoodScore } = require("../scores/survivalScores");
 const { huntAnimalsScore } = require("../scores/combatScores");
-const { breakLogsScore } = require("../scores/gatheringScores");
-const { craftWoodenPickaxeScore } = require("../scores/craftingScores");
+const {
+  breakLogsScore,
+  breakStoneScore,
+  breakDirtScore,
+} = require("../scores/gatheringScores");
+const {
+  craftCraftingTableScore,
+  craftWoodenPickaxeScore,
+  craftStonePickaxeScore,
+} = require("../scores/craftingScores");
 
 function createOverworldProfile(config) {
   const pickUpFoodNode = new PickUpItemNode("RAWFOOD");
@@ -56,6 +63,21 @@ function createOverworldProfile(config) {
     new PickUpItemNode(config.BLOCKS.LOGS.names),
   ]);
 
+  const breakDirtSeq = new Sequence([
+    new FindBlockNode(
+      "DIRT",
+      "blockTarget",
+      config.BLOCKS.DIRT.maxBlockDistance,
+    ),
+    new MoveToBlockNode(
+      "blockTarget",
+      config.BT.MOVE_NEAR_DISTANCE,
+      config.BT.BREAK_RANGE,
+    ),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "SHOVELS"),
+    new PickUpItemNode(config.BLOCKS.DIRT.names),
+  ]);
+
   const smeltItemsSeq = new Sequence([
     new PrepareFurnaceMaterialsNode("RAWFOOD", config.FURNACE.FUEL.names),
     new DigPitNode(3), // improvizirana "furnace setup" sekvenca - iskopaj rupu, baci stvari unutra, pokrij zemljom
@@ -67,41 +89,49 @@ function createOverworldProfile(config) {
     new ResetFurnaceWorkflowNode(),
   ]);
 
-  const smeltItemsNode = new Sequence([
-    new PrepareFurnaceMaterialsNode("RAWFOOD", config.FURNACE.FUEL.names),
-    new DigPitNode(3), // improvizirana "furnace setup" sekvenca - iskopaj rupu, baci stvari unutra, pokrij zemljom
-    new PlaceBlockNode("furnace"),
-    new PlaceCoverBlockNode(),
-    new LoadFurnaceNode(),
-    new WaitFurnaceNode(2000),
-    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
-    new ResetFurnaceWorkflowNode(),
-  ]);
-
-  const craftCraftingSeq = new Sequence([
-    //Hard-coded sequence for crafting the crafting table
+  const craftCraftingTableSeq = new Sequence([
     new CraftItemNode(config.BLOCKS.PLANKS.names, 12),
     new CraftItemNode(["crafting_table"], 1),
-    new CraftItemNode(["stick"], 2),
+  ]);
+
+  const craftWoodenPickaxeSeq = new Sequence([
     new FindInteractiveBlockPlacementNode(),
-
     new PlaceBlockNode("crafting_table"),
-
+    new CraftItemNode(["stick"], 2),
     new CraftItemUsingTableNode("wooden_pickaxe"),
-    //find crafting table
-    new FindBlockNode("CRAFTING_TABLE", "blockTarget", 1),
-    //break crafting table
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+    new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
+  ]);
 
-    new PickUpItemNode(["crafting_table"]),
-    new ResetStateNode(),
+  const craftStonePickaxeSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
+    new CraftItemNode(["stick"], 2),
+    new CraftItemUsingTableNode("stone_pickaxe"),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+    new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
+  ]);
+
+  const breakStoneSeq = new Sequence([
+    new FindBlockNode(
+      "STONE",
+      "blockTarget",
+      config.BLOCKS.STONE.maxBlockDistance,
+    ),
+    new MoveToBlockNode(
+      "blockTarget",
+      config.BT.MOVE_NEAR_DISTANCE,
+      config.BT.BREAK_RANGE,
+    ),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new PickUpItemNode(config.BLOCKS.STONE.names),
   ]);
 
   return {
     candidates: [
       {
         name: "SmeltItems",
-        node: smeltItemsNode,
+        node: smeltItemsSeq,
         scoreFn: () => 1000,
       },
       {
@@ -110,9 +140,29 @@ function createOverworldProfile(config) {
         scoreFn: breakLogsScore,
       },
       {
+        name: "BreakDirt",
+        node: breakDirtSeq,
+        scoreFn: breakDirtScore,
+      },
+      {
         name: "CraftCraftingTable",
-        node: craftCraftingSeq,
+        node: craftCraftingTableSeq,
+        scoreFn: craftCraftingTableScore,
+      },
+      {
+        name: "CraftWoodenPickaxe",
+        node: craftWoodenPickaxeSeq,
         scoreFn: craftWoodenPickaxeScore,
+      },
+      {
+        name: "BreakStone",
+        node: breakStoneSeq,
+        scoreFn: breakStoneScore,
+      },
+      {
+        name: "CraftStonePickaxe",
+        node: craftStonePickaxeSeq,
+        scoreFn: craftStonePickaxeScore,
       },
       {
         name: "PickUpFood",

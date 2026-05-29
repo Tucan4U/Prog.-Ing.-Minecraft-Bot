@@ -65,10 +65,6 @@ state.mission.activeProfile = config.PROFILES.OVERWORLD;
 bot.once("spawn", () => {
   const mcData = require("minecraft-data")(bot.version);
   const defaultMove = new Movements(bot, mcData);
-  const logBlockIds = config.BLOCKS.LOGS.names
-    .map((name) => bot.registry.itemsByName[name]?.id)
-    .filter((id) => id !== undefined);
-  logBlockIds.forEach((el) => defaultMove.scafoldingBlocks.push(el));
 
   bot.pathfinder.setMovements(defaultMove);
 

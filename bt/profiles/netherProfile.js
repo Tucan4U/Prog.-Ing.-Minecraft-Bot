@@ -68,7 +68,7 @@ function createNetherProfile(config) {
     //break crafting table
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
     //pick up crafting table
-    new PickUpItemNode(config,ITEMS.CRAFTING_TABLE.names),
+    new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
     ]);
 
     //bot isnt picking up the crafting table after breaking it

@@ -1,4 +1,6 @@
 const { getMissingEquipment } = require('../../utils/netherEquipment');
+const { findMobs } = require('../../behaviors/findEnteties');
+const { findItem } = require('../../behaviors/loot');
 const { needsGold } = require('../../utils/inventory');
 
 
@@ -38,6 +40,8 @@ function findFortressScore(bot, state, config) {
     bot.chat(`Already have ${blazeCountCache} blaze rods, skipping search.`);
     return 0;
   }
+
+  if (state.isEating) return 0; // If bot is currently eating, pause fortress search to avoid pathfinding issues.
 
   // Medium-high priority: run after entering Nether but lower than other potential activities.
   return 150;
@@ -94,7 +98,6 @@ function getGoldNetherScore(bot, state, config) {
   return goldCount < 9 ? 180 : 0;
 }
 
-module.exports = { enterNetherScore, findFortressScore, getGoldNetherScore, craftGoldNetherScore };
 function findBlazeSpawnerScore(bot, state, config) {
   // Only active when blaze spawner search is requested AND bot is already in the Nether.
   if (!state.mission?.findBlazeSpawnerRequested) return 0;
@@ -106,10 +109,48 @@ function findBlazeSpawnerScore(bot, state, config) {
     return 0;
   }
 
+  // Suppress searching while eating
+  if (state.isEating) return 0;
+
   // Lower priority than fortress search because the bot should already be in a fortress.
   // So it does FOR SURE search for blaze spawner and not other spawners (magma cube)
   return 100;
 }
+
+function lootBlazeRodsScore(bot, state, config) {
+  if (!state.mission?.blazeHuntingRequested) return 0;
+
+  if (!checkBlazeNeed(bot, state, config)) {
+    bot.chat(`Already have ${blazeCountCache} blaze rods, skipping looting.`);
+    return 0;
+  }
+
+  // Stop looting while eating so the bot doesn't walk towards death
+  if (state.isEating) return 0;
+
+  // High priority: If there's a dropped rod, grab it immediately before it burns or despawns!
+  const droppedRod = findItem(bot, config.BLAZE_RODS.names);
+  return droppedRod ? 140 : 0; 
+
+}
+
+function huntBlazeScore(bot, state, config) {
+  if (!state.mission?.blazeHuntingRequested) return 0;
+
+  if (!checkBlazeNeed(bot, state, config)) {
+    bot.chat(`Already have ${blazeCountCache} blaze rods, skipping hunting.`);
+    return 0;
+  }
+
+  // Stop fighting while eating so the bot doesn't swing its sword
+  if (state.isEating) return 0;
+  
+  // Medium-high priority: We need rods and we are hunting.
+  const blazes = findMobs(bot, config.BLAZES, state.sensors?.entities);
+  return blazes.length ? 120 : 0;
+}
+
+
 
 // Function check if there is a need for blaze rods:
 // - there isn't: findFortressScore and findBlazeSpawnerScore will return 0 and flags for those will be resetted to false, 
@@ -120,15 +161,17 @@ function checkBlazeNeed(bot, state, config) {
   const blazeRodItem = bot.registry.itemsByName['blaze_rod'];
   blazeCountCache = blazeRodItem ? bot.inventory.count(blazeRodItem.id, null) : 0;
 
-  if (state.mission.netherMode === config.NETHER_MODES.AUTONOMOUS && blazeCountCache >= 8) {
-    // Clear the requests for findBlazeSpawner and findFortress since we don't need to search anymore.
-    state.mission.findFortressRequested = false; 
+  //if (state.mission.netherMode === config.NETHER_MODES.AUTONOMOUS && blazeCountCache >= 8) {
+  if ((state.mission.netherMode === config.NETHER_MODES.AUTONOMOUS || state.mission?.blazeHuntingRequested) && blazeCountCache >= state.mission.targetBlazeRods) {
+    // Clear the requests for findBlazeSpawner and findFortress and blazeHunting since we don't need to search anymore.
+    state.mission.findFortressRequested = false;
     state.mission.fortressTarget = null;
     state.mission.findBlazeSpawnerRequested = false;
+    state.mission.blazeHuntingRequested = false;
     return false; // No need for blaze rods
   }
 
   return true; // Needs blaze rods
 }
 
-module.exports = { enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore };
+module.exports = { enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore, lootBlazeRodsScore, huntBlazeScore };

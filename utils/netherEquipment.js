@@ -4,10 +4,13 @@ const mcData = require('minecraft-data');
 function getOwnedItems(bot) {
   const inventoryItems = bot.inventory.items();
   const armorSlots = [5, 6, 7, 8];
-  const equippedArmor = armorSlots
+  // The off-hand slot is slot 45 in the inventory representation
+  // For shield holding
+  const offhandSlot = 45;
+  const equippedGear = [...armorSlots, offhandSlot]
     .map((slot) => bot.inventory.slots[slot])
     .filter(Boolean);
-  return [...inventoryItems, ...equippedArmor];
+  return [...inventoryItems, ...equippedGear];
 }
 
 function getMissingEquipment(bot) {
@@ -39,6 +42,7 @@ function getMissingEquipment(bot) {
       label: 'sword',
       match: (name) => name.endsWith('_sword') && !name.includes('wooden') && !name.includes('stone') && !name.includes('gold'),
     },
+    { label: 'shield', match: (name) => name === 'shield' },
   ];
 
   return requirements
@@ -59,12 +63,14 @@ async function equipArmor(bot) {
   const chest = findBest('_chestplate');
   const legs = findBest('_leggings');
   const boots = findBest('_boots');
+  const shield = items.find((i) => i.name === 'shield');
 
   const plan = [
     { item: helmet, dest: 'head' },
     { item: chest, dest: 'torso' },
     { item: legs, dest: 'legs' },
     { item: boots, dest: 'feet' },
+    { item: shield, dest: 'off-hand' },
   ];
 
   for (const p of plan) {
@@ -87,7 +93,13 @@ function giveNetherEquipment(bot) {
     bot.chat('/give ' + bot.username + ' iron_boots');
     bot.chat('/give ' + bot.username + ' iron_pickaxe');
     bot.chat('/give ' + bot.username + ' iron_sword');
+    bot.chat('/give ' + bot.username + ' shield'); // Give shield
+    bot.chat('/give ' + bot.username + ' cooked_beef 64'); // Added food for auto-eat plugin
     bot.chat('/give ' + bot.username + ' dirt 64'); // For building temporary structures if needed.
+
+    // Ranged attack
+    bot.chat('/give ' + bot.username + ' bow');
+    bot.chat('/give ' + bot.username + ' arrow 64');
   } catch (err) {
     // ignore
   }

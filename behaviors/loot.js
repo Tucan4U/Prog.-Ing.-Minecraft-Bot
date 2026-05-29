@@ -2,7 +2,6 @@ function findItem(bot, filter, itemsOverride) {
   if (!Array.isArray(filter)) {
     return null;
   }
-  console.log("Filter je array");
   const entities = Array.isArray(itemsOverride)
     ? itemsOverride
     : Object.values(bot.entities);
@@ -10,7 +9,6 @@ function findItem(bot, filter, itemsOverride) {
   return entities.find((e) => {
     if (e.name !== "item") return false;
     const item = e.getDroppedItem?.();
-    console.log(`Ime itema: ${item.name}`);
     return item && filter.includes(item.name);
   });
 }

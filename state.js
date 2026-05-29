@@ -6,6 +6,9 @@ module.exports = {
   digTask: null, //Dali trenutno bot razbija neki blok, korišteno u MoveToBlockNode i BreakLogNode
   // Block target specifically for blaze spawner searches.
   blazeSpawnerBlock: null,
+  // State flag for eating action
+  isEating: false,
+
   mission: {
     activeProfile: "OVERWORLD",
     // Nether portal entry request flag.
@@ -19,6 +22,10 @@ module.exports = {
     fortressTarget: null,
     // Mode - AUTONOMOUS or MANUAL
     netherMode : null,
+    
+    // Blaze hunting state (Blaze rods collection)
+    targetBlazeRods: null,
+    blazeHuntingRequested: false,
   },
   sensors: {
     entities: [],

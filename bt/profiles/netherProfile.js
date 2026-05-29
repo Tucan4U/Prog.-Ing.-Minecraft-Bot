@@ -9,12 +9,25 @@ const LocateFortressNode = require('../nodes/locateFortressNode');
 const MoveToFortressNode = require('../nodes/moveToFortressNode');
 const MoveToBlazeSpawnerNode = require('../nodes/moveToBlazeSpawnerNode');
 const IdleNode = require('../nodes/idleNode');
+
+// Blaze hunting nodes
+const FindMobNode = require('../nodes/findMobNode');
+const MoveToMobNode = require('../nodes/moveToMobNode');
+const AttackNode = require('../nodes/attackNode');
+const RangedAttackNode = require('../nodes/rangedAttackNode');
+const PickUpItemNode = require('../nodes/pickUpItemNode');
+
+// Other Blaze hunting utilities
+const { findMobs } = require('../../behaviors/findEnteties');
+const { getClosestEntity, isTargetFloating } = require('../../utils/target');
+
+const { enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, } = require('../scores/netherScores');
+
+// Gold collection and crafting nodes
 const BreakBlockNode = require("../nodes/breakBlockNode");
-const PickUpItemNode = require("../nodes/pickUpItemNode");
 const FindInteractiveBlockPlacementNode = require('../nodes/findInteractiveBlockPlaceNode');
 const PlaceBlockNode = require("../nodes/placeBlockNode");
 const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
-const { enterNetherScore, findFortressScore, getGoldNetherScore, craftGoldNetherScore, findBlazeSpawnerScore } = require('../scores/netherScores');
 const { ITEMS } = require('../../config');
 
 
@@ -72,6 +85,8 @@ function createNetherProfile(config) {
     ]);
 
     //bot isnt picking up the crafting table after breaking it
+
+
   const blazeSpawnerSeq = new Sequence([
     // Blaze spawner search sequence: equip gear, then find blaze spawner by looking for spawner blocks, 
     // then move to it.
@@ -82,19 +97,88 @@ function createNetherProfile(config) {
     new MoveToBlazeSpawnerNode(),
   ]);
 
+  const lootRodSeq = new Sequence([
+    // Loot dropped blaze rods (if any) before they despawn or burn.
+    new PickUpItemNode(config.BLAZE_RODS.names),
+  ]);
+
+  const rangedBlazeHuntSeq = new Sequence([
+    new FindMobNode('BLAZES'),
+    new RangedAttackNode(),
+  ]);
+
+  const meleeBlazeHuntSeq = new Sequence([
+    // Hunt blazes for rods if we don't have enough and we are in hunting mode.
+    new FindMobNode('BLAZES'),
+    new AttackNode(),
+  ]);
+
   return {
-    // Three main candidates in order of execution priority (decided by scores):
-    // 1. EnterNether: finds and enters a Nether portal (score 200 when requested)
-    // 2. CollectGoldNether: finds and collects gold in the Nether
-    // 3. FindFortress: locates and travels to a fortress (score 150 when in Nether + requested)
-    // Once in Nether, EnterNether score drops to 0, so FindFortress becomes active.
-    // 2. FindFortress: locates and travels to a fortress (score 150 when in Nether + requested)
-    // 3. FindBlazeSpawner: looks for blaze spawners (score 100 when in Nether + requested + low blaze rods)
     candidates: [
       { name: 'EnterNether', node: enterSeq, scoreFn: enterNetherScore },
       { name: 'CollectNetherGold', node: goldSeq, scoreFn: getGoldNetherScore },
       { name: 'CraftNetherGold', node: goldCraftingSeq, scoreFn: craftGoldNetherScore },
       { name: 'FindFortress', node: fortressSeq, scoreFn: findFortressScore },
+      { name: 'LootBlazeRod', node: lootRodSeq, scoreFn: lootBlazeRodsScore },
+
+      {
+        name: 'RangedHuntBlazes',
+        node: rangedBlazeHuntSeq,
+        scoreFn: (bot, state, config) => {
+
+          const score = huntBlazeScore(bot, state, config);
+
+          if (score <= 0) return 0;
+
+          const blazes = findMobs(
+            bot,
+            config.BLAZES,
+            state.sensors?.entities
+          );
+
+          if (!blazes.length) return 0;
+
+          const target = getClosestEntity(bot, blazes);
+
+          if (!target) return 0;
+
+          if (isTargetFloating(bot, target)) {
+            return score + 5;
+          }
+
+          return 0;
+        }
+      },
+
+      {
+        name: 'MeleeHuntBlazes',
+        node: meleeBlazeHuntSeq,
+        scoreFn: (bot, state, config) => {
+
+          const score = huntBlazeScore(bot, state, config);
+
+          if (score <= 0) return 0;
+
+          const blazes = findMobs(
+            bot,
+            config.BLAZES,
+            state.sensors?.entities
+          );
+
+          if (!blazes.length) return 0;
+
+          const target = getClosestEntity(bot, blazes);
+
+          if (!target) return 0;
+
+          if (!isTargetFloating(bot, target)) {
+            return score;
+          }
+
+          return 0;
+        }
+      },
+
       { name: 'FindBlazeSpawner', node: blazeSpawnerSeq, scoreFn: findBlazeSpawnerScore },
       { name: 'Idle', node: new IdleNode(), scoreFn: () => 1 },
     ],

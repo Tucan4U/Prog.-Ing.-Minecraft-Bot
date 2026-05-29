@@ -19,6 +19,15 @@ module.exports = {
     "wooden_pickaxe",
   ],
 
+  RANGED_WEAPONS: [
+    "bow",
+    "crossbow",
+  ],
+  AMMO : [
+    "arrow",
+    "spectral_arrow",
+  ],
+
   AXES: ["wooden_axe", "stone_axe", "iron_axe", "diamond_axe", "golden_axe"],
 
   FOOD: [
@@ -85,6 +94,9 @@ module.exports = {
       ],
     },
   },
+  BLAZE_RODS: {
+    names: ["blaze_rod"],
+  },
   // MOBOVI
   // Tu se nalaze liste mobova koje se koriste kao argumenti u FindMobNode-u
   // Svaki entry ima tip(npr. animal, hostile, mob) i listu imena mobova.
@@ -94,7 +106,6 @@ module.exports = {
     type: "animal",
     names: ["pig", "cow", "sheep", "chicken"],
   },
-
   HOSTILES: {
     type: "hostile",
     names: ["zombie", "skeleton", "spider", "creeper"],
@@ -102,5 +113,9 @@ module.exports = {
   SLIMES: {
     type: "mob",
     names: ["slime"],
+  },
+  BLAZES: {
+    type: "hostile",
+    names: ["blaze"],
   },
 };

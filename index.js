@@ -24,13 +24,25 @@ const { giveNetherEquipment } = require('./utils/netherEquipment');
 const { netherMain,
   enterNetherCommand,
   findFortressCommand,
-  findBlazeSpawnerCommand } = require("./commands/netherCommands");
+  findBlazeSpawnerCommand ,
+  lootBlazeRodsCommand
+} = require("./commands/netherCommands");
+
+// PvP, auto-eat and Hawkeye plugins
+const autoEat = require("mineflayer-auto-eat").loader;
+const pvp = require("mineflayer-pvp").plugin;
+const minecraftHawkEye = require("minecrafthawkeye").default;
 
 const bot = mineflayer.createBot({
   host: "localhost",
   port: 25565,
   username: "IndexBot",
 });
+
+// Loading plugins
+bot.loadPlugin(autoEat);
+bot.loadPlugin(pvp);
+bot.loadPlugin(minecraftHawkEye);
 
 bot.loadPlugin(pathfinder);
 let startFlag = false; // kontrola da li bot treba loviti ili ne
@@ -63,6 +75,8 @@ state.mission.activeProfile = config.PROFILES.OVERWORLD;
 bot.once("spawn", () => {
   const mcData = require("minecraft-data")(bot.version);
   const defaultMove = new Movements(bot, mcData);
+
+  // Set up pathfinding
   const logBlockIds = config.BLOCKS.LOGS.names
     .map((name) => bot.registry.itemsByName[name]?.id)
     .filter((id) => id !== undefined);
@@ -70,11 +84,37 @@ bot.once("spawn", () => {
 
   bot.pathfinder.setMovements(defaultMove);
 
+  // Passing movements to PvP plugin
+  bot.pvp.movements = defaultMove;
+
+  // --- NEW AUTO-EAT V4 CONFIGURATION ---
+  bot.autoEat.setOpts({
+    priority: "foodPoints",
+    minHunger: 19,
+    minHealth: 0,
+    bannedFood: ["rotten_flesh", "pufferfish", "spider_eye"],
+    offhand: false,
+  });
+  // MUST be explicitly enabled in v4!
+  bot.autoEat.enableAuto();
+
+  // Listeners update the centralized state module cleanly
+  bot.autoEat.on("autoeat_started", (item) => {
+    console.log(`[AUTO-EAT] Started eating ${item.name}`);
+    state.isEating = true; // Updates the state module
+    bot.pathfinder.setGoal(null); // Instantly stops pathfinding conflicts
+  });
+
+  bot.autoEat.on("autoeat_stopped", () => {
+    console.log("[AUTO-EAT] Finished eating.");
+    state.isEating = false; // Resets the state module
+  });
+
   worldSensors = startWorldSensors(bot, state, {
     intervalMs: config.SENSORS.WORLD_UPDATE_MS,
   });
 
-  console.log("Bot spawned");
+  console.log("Bot spawned. Survival plugins active.");
 
   startLoop();
 });
@@ -181,7 +221,12 @@ bot.on("chat", (username, message) => {
     findBlazeSpawnerCommand(bot, state, config);
     startFlag = true;
   }
-
+  // Kill Blazes and loot rods command
+  // Message form: "collect rods x" -> where x is the number of rods to collect
+  if (message.startsWith("collect rods")){
+    lootBlazeRodsCommand(bot, state, config, message);
+    startFlag = true;
+  }
 
   if (message === "tp") {
     bot.chat("/tp @s " + username);
@@ -197,5 +242,19 @@ bot.on("end", () => {
   }
   console.log("Bot disconnect!");
 });
+
+
+// DEBUG For health, hunger and saturation monitoring in terminal 
+// bot.on('physicsTick', () => {
+//   // Only log if the bot is actually spawned and has health data available
+//   if (bot.health !== undefined) {
+//     const health = bot.health;
+//     const hunger = bot.food;
+//     const saturation = bot.foodSaturation;
+
+//     // Printing to your terminal console instead of game chat
+//     console.log(`[STATUS] Health: ${health.toFixed(1)} | Hunger: ${hunger} | Saturation: ${saturation.toFixed(1)}`);
+//   }
+// });
 
 console.log("=== BOT 1.21.11 ===");

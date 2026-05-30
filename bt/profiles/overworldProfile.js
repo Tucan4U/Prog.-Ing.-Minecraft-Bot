@@ -132,7 +132,7 @@ function createOverworldProfile(config) {
       {
         name: "SmeltItems",
         node: smeltItemsSeq,
-        scoreFn: () => 1000,
+        scoreFn: () => 1,
       },
       {
         name: "BreakLogs",

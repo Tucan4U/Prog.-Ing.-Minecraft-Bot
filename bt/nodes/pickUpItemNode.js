@@ -18,6 +18,12 @@ class PickUpItemNode extends Node {
 
     const item = findItem(bot, items, itemsCache);
 
+    if (!item && state.lootTarget) {
+      state["lootTarget"] = null;
+      state["blockTarget"] = null;
+      return "SUCCESS";
+    }
+
     if (!item) {
       //Ovo koriste findBlockNode, moveToBlockNode, breakLogNode
       state["lootTarget"] = null;
@@ -29,14 +35,6 @@ class PickUpItemNode extends Node {
     bot.pathfinder.setGoal(
       new goals.GoalBlock(item.position.x, item.position.y, item.position.z),
     );
-
-    const dist = bot.entity.position.distanceTo(item.position);
-
-    if (dist < 1.5) {
-      state["lootTarget"] = null;
-      state["blockTarget"] = null;
-      return "SUCCESS";
-    }
 
     return "RUNNING";
   }

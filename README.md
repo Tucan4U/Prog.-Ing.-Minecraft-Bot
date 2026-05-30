@@ -59,7 +59,7 @@ https://github.com/Tucan4U/Prog.-Ing.-Minecraft-Bot/wiki
 * Automated mining and block gathering
 * Animal hunting and food collection
 * Crafting of simple tools
-* Gold mining in Nether dimesnion
+* Gold mining in the Nether dimension
 * Piglin bartering automation
 * Inventory management
 * Equipment handling

@@ -7,13 +7,15 @@
   "type": "commonjs",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage"
   },
   "dependencies": {
     "minecraft-data": "^3.109.0",
     "mineflayer": "^4.37.0",
     "mineflayer-collectblock": "^1.6.0",
-    "mineflayer-pathfinder": "^2.4.5"
+    "mineflayer-pathfinder": "^2.4.5",
+    "vec3": "^0.1.10"
   },
   "repository": {
     "type": "git",

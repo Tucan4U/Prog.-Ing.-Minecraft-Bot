@@ -260,7 +260,8 @@ node index.js
 │   ├── selectors/
 ├── utils/
 ├── commands/ 
-├── sensors/ 
+├── sensors/
+├── test/
 ├── utils/
 ├── docs/
 ```
@@ -271,13 +272,14 @@ node index.js
 
 Additional and detailed project documentation is available in the GitHub Wiki, including:
 
-* System architecture
-* Behavior Tree design
+* Archtecture Overview
 * Bot Functionalities
-* Code profiling
-* Development workflow
+* Code Profiling Report
+* Development Workflow
 * Installation and Usage
+* System Design
 * WBS and PERT diagrams
+* Software Architectural Patterns
 
 GitHub Wiki:
 

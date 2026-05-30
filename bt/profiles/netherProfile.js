@@ -90,16 +90,15 @@ function createNetherProfile(config) {
 
   const moveToPiglinSeq = new Sequence([ //ako se ne bartera trenutno
     new FindMobNode("PIGLINS","currentTarget",true),
-    new MoveToMobNode(),   
+    // new MoveToMobNode("currentTarget",2,4), 
+    new MoveToMobNode(),  
     new ToggleBarteringNode(), 
+    new DropItemNode("gold_ingot",1),
   ]);
 
-  const barteringSeq = new Sequence([ //ako ima manje od 12 ender pearlsa
-    new DropItemNode("gold_ingot",1),
-    //1. dropaj item
-    // myb cekaj da nestane uz neki timeout
-    //2. cekaj da piglin droppa na pod nesto ca je u listi itema koji se barteraju
-    //3. pokupi ca god baci na pod
+  const barteringSeq = new Sequence([ //ako ima manje od 12 ender pearls
+    new PickUpItemNode(config.PIGLIN_BARTER.names),
+
     new ToggleBarteringNode(),
   ])
 

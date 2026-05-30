@@ -10,14 +10,20 @@ class PickUpItemNode extends Node {
     this.configKeyOrItems = configKeyOrItems;
   }
   async tick(bot, state, config) {
-    await new Promise((r) => setTimeout(r, 500));
+    //await new Promise((r) => setTimeout(r, 500));
     const itemsCache = state.sensors?.items;
     const items = Array.isArray(this.configKeyOrItems)
       ? this.configKeyOrItems
       : config?.[this.configKeyOrItems];
 
     const item = findItem(bot, items, itemsCache);
-    console.log("PickupItemNode looking for items:", items, "Found:", item);
+    //console.log("PickupItemNode looking for items:", items, "Found:", item);
+    if (!item && state.lootTarget) {
+      state["lootTarget"] = null;
+      state["blockTarget"] = null;
+      return "SUCCESS";
+    }
+
     if (!item) {
       state["lootTarget"] = null; //Ovo koriste findBlockNode, moveToBlockNode, breakLogNode
       return "FAILURE";
@@ -29,12 +35,12 @@ class PickUpItemNode extends Node {
       new goals.GoalBlock(item.position.x, item.position.y, item.position.z),
     );
 
-    const dist = bot.entity.position.distanceTo(item.position);
+    // const dist = bot.entity.position.distanceTo(item.position);
 
-    if (dist < 1.5) {
-      state.lootTarget = null;
-      return "SUCCESS";
-    }
+    // if (dist < 1.5) {
+    //   state.lootTarget = null;
+    //   return "SUCCESS";
+    // }
 
     return "RUNNING";
   }

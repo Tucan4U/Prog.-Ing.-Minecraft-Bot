@@ -1,7 +1,7 @@
 const { getMissingEquipment } = require('../../utils/netherEquipment');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { findItem } = require('../../behaviors/loot');
-const { needsGold } = require('../../utils/inventory');
+const { needsGold, numOfBlocks, numOfItems } = require('../../utils/inventory');
 
 
 let blazeCountCache = 0; // Cache for the current blaze rod count to avoid expensive inventory checks every tick.
@@ -83,15 +83,9 @@ function enterNetherScore(bot, state, config) {
 function craftGoldNetherScore(bot, state, config){
   if (!state.needsGold) return 0;
 
-  const goldCountNuggets = bot.inventory
-    .items()
-    .filter((i) => config.ITEMS.GOLD_NUGGETS.names.includes(i.name))
-    .reduce((sum, i) => sum + i.count, 0);
+  const goldCountNuggets = numOfItems(bot, state, config, "GOLD_NUGGETS");
 
-  const goldCountIngots = bot.inventory
-    .items()
-    .filter((i) => config.ITEMS.GOLD_INGOTS.names.includes(i.name))
-    .reduce((sum, i) => sum + i.count, 0);
+  const goldCountIngots = numOfItems(bot, state, config, "GOLD_INGOTS");
 
   if (goldCountNuggets >= 9 && goldCountIngots < state.neededGold){
     return 170;
@@ -107,21 +101,24 @@ function craftGoldNetherScore(bot, state, config){
 function getGoldNetherScore(bot, state, config) {
   if (!state.needsGold) return 0;
   
-  const goldCount = bot.inventory
-    .items()
-    .filter((i) => config.ITEMS.GOLD_NUGGETS.names.includes(i.name))
-    .reduce((sum, i) => sum + i.count, 0);
+  const goldCount = numOfItems(bot, state, config, "GOLD_NUGGETS");
 
   return goldCount < 9 ? 180 : 0;
 }
 
 function moveToPiglinScore(bot, state, config) {
-  if (!state.isBartering && !state.needsGold) return 160;
+  const goldCountIngots = numOfItems(bot, state, config, "GOLD_INGOTS");
+
+  if (!state.isBartering && goldCountIngots > 0) return 160;
+  if (goldCountIngots === 0) state.needsGold = true;
   return 0;
 }
 
 function barteringScore(bot, state, config){
-  return 159;
+  const enderPearlCount = numOfItems(bot, state, config, "ENDER_PEARLS");
+
+  if (state.isBartering && enderPearlCount < 12) return 159;
+  return 0;
 }
 
 function findBlazeSpawnerScore(bot, state, config) {

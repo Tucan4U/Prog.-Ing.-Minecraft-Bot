@@ -119,9 +119,40 @@ module.exports = {
         "crafting_table",
       ]
     },
+    ENDER_PEARLS: {
+      names: [
+        "ender_pearl",
+      ]
+    }
   },
   BLAZE_RODS: {
     names: ["blaze_rod"],
+  },
+  PIGLIN_BARTER: {
+    names: [
+      "blackstone",
+      "gravel",
+      "soul_sand",
+      "nether_brick",
+      "string",
+      "nether_quartz",
+      "fire_charge",
+      "leather",
+      "spectral_arrow",
+      "arrow",
+      "obsidian",
+      "crying_obsidian",
+      "ender_pearl",
+      "magma_cream",
+      "glowstone_dust",
+      "iron_nugget",
+      "potion",
+      "splash_potion",
+      "enchanted_book",
+      "iron_boots",
+      "water_bottle",
+      "dried_ghast",
+    ],
   },
   // MOBOVI
   // Tu se nalaze liste mobova koje se koriste kao argumenti u FindMobNode-u

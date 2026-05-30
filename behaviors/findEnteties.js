@@ -13,4 +13,11 @@ function findMobs(bot, filter, entitiesOverride) {
   );
 } 
 
-module.exports = { findMobs };
+function isBabyMob(entity) {
+  const meta = entity?.metadata;
+  if (!meta) return false;
+
+  return Boolean(meta[17]); // 17 is only for piglins
+}
+
+module.exports = { findMobs, isBabyMob };

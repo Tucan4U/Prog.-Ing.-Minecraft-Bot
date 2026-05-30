@@ -9,6 +9,10 @@ module.exports = {
   // State flag for eating action
   isEating: false,
 
+  isBartering: false,
+  needsGold: true,
+  neededGold: 64,
+
   mission: {
     activeProfile: "OVERWORLD",
     // Nether portal entry request flag.

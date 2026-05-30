@@ -1,12 +1,13 @@
 const { Node } = require('../behaviorTree');
-const { findMobs } = require('../../behaviors/findEnteties');
+const { findMobs, isBabyMob } = require('../../behaviors/findEnteties');
 const { getClosestEntity } = require('../../utils/target');
 
 class FindMobNode extends Node {
-  constructor(configKey, stateKey = 'currentTarget') {
+  constructor(configKey, stateKey = 'currentTarget', adultOnly = false) {
     super('FindMob');
     this.configKey = configKey;
     this.stateKey = stateKey;
+    this.adultOnly = adultOnly;
   }
 
   async tick(bot, state, config) {
@@ -39,7 +40,14 @@ class FindMobNode extends Node {
       return 'FAILURE';
     }
 
+    if (this.adultOnly) {
+      for (let i = mobs.length - 1; i >= 0; i--) {
+        if (isBabyMob(mobs[i])) mobs.splice(i, 1);
+    }
+}
+
     const closestMob = getClosestEntity(bot, mobs);
+
 
     if (!currentTarget) {
       state[this.stateKey] = closestMob;

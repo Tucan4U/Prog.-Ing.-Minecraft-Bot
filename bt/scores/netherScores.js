@@ -81,21 +81,47 @@ function enterNetherScore(bot, state, config) {
 // }
 
 function craftGoldNetherScore(bot, state, config){
-  const goldCount = bot.inventory
+  if (!state.needsGold) return 0;
+
+  const goldCountNuggets = bot.inventory
     .items()
-    .filter((i) => config.ITEMS.GOLD.names.includes(i.name))
+    .filter((i) => config.ITEMS.GOLD_NUGGETS.names.includes(i.name))
     .reduce((sum, i) => sum + i.count, 0);
 
-  return goldCount >= 9 ? 170 : 0;
+  const goldCountIngots = bot.inventory
+    .items()
+    .filter((i) => config.ITEMS.GOLD_INGOTS.names.includes(i.name))
+    .reduce((sum, i) => sum + i.count, 0);
+
+  if (goldCountNuggets >= 9 && goldCountIngots < state.neededGold){
+    return 170;
+  }else if (goldCountIngots >= state.neededGold){
+    state.needsGold = false;
+    state.neededGold = 16;
+    return 0;
+  }else{
+    return 0;
+  }
 }
 
 function getGoldNetherScore(bot, state, config) {
+  if (!state.needsGold) return 0;
+  
   const goldCount = bot.inventory
     .items()
-    .filter((i) => config.ITEMS.GOLD.names.includes(i.name))
+    .filter((i) => config.ITEMS.GOLD_NUGGETS.names.includes(i.name))
     .reduce((sum, i) => sum + i.count, 0);
 
   return goldCount < 9 ? 180 : 0;
+}
+
+function moveToPiglinScore(bot, state, config) {
+  if (!state.isBartering && !state.needsGold) return 160;
+  return 0;
+}
+
+function barteringScore(bot, state, config){
+  return 159;
 }
 
 function findBlazeSpawnerScore(bot, state, config) {
@@ -174,4 +200,4 @@ function checkBlazeNeed(bot, state, config) {
   return true; // Needs blaze rods
 }
 
-module.exports = { enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore, lootBlazeRodsScore, huntBlazeScore };
+module.exports = { barteringScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore, lootBlazeRodsScore, huntBlazeScore };

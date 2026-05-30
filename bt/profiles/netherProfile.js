@@ -21,7 +21,7 @@ const PickUpItemNode = require('../nodes/pickUpItemNode');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { getClosestEntity, isTargetFloating } = require('../../utils/target');
 
-const { enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, } = require('../scores/netherScores');
+const { moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, barteringScore, } = require('../scores/netherScores');
 
 // Gold collection and crafting nodes
 const BreakBlockNode = require("../nodes/breakBlockNode");
@@ -29,6 +29,8 @@ const FindInteractiveBlockPlacementNode = require('../nodes/findInteractiveBlock
 const PlaceBlockNode = require("../nodes/placeBlockNode");
 const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
 const { ITEMS } = require('../../config');
+const DropItemNode = require('../nodes/dropItemNode');
+const ToggleBarteringNode = require('../nodes/startBarteringNode');
 
 
 function createNetherProfile(config) {
@@ -66,7 +68,7 @@ function createNetherProfile(config) {
       config.BT.BREAK_RANGE, 
       "PICKAXES"),
 
-    new PickUpItemNode(config.ITEMS.GOLD.names),
+    new PickUpItemNode(config.ITEMS.GOLD_NUGGETS.names),
   ]);
 
   const goldCraftingSeq = new Sequence([
@@ -86,6 +88,20 @@ function createNetherProfile(config) {
 
     //bot isnt picking up the crafting table after breaking it
 
+  const moveToPiglinSeq = new Sequence([ //ako se ne bartera trenutno
+    new FindMobNode("PIGLINS","currentTarget",true),
+    new MoveToMobNode(),   
+    new ToggleBarteringNode(), 
+  ]);
+
+  const barteringSeq = new Sequence([ //ako ima manje od 12 ender pearlsa
+    new DropItemNode("gold_ingot",1),
+    //1. dropaj item
+    // myb cekaj da nestane uz neki timeout
+    //2. cekaj da piglin droppa na pod nesto ca je u listi itema koji se barteraju
+    //3. pokupi ca god baci na pod
+    new ToggleBarteringNode(),
+  ])
 
   const blazeSpawnerSeq = new Sequence([
     // Blaze spawner search sequence: equip gear, then find blaze spawner by looking for spawner blocks, 
@@ -118,6 +134,8 @@ function createNetherProfile(config) {
       { name: 'EnterNether', node: enterSeq, scoreFn: enterNetherScore },
       { name: 'CollectNetherGold', node: goldSeq, scoreFn: getGoldNetherScore },
       { name: 'CraftNetherGold', node: goldCraftingSeq, scoreFn: craftGoldNetherScore },
+      { name: 'MoveToPiglin', node: moveToPiglinSeq, scoreFn: moveToPiglinScore },
+      { name: 'BarterWithPiglin', node: barteringSeq, scoreFn: barteringScore },
       { name: 'FindFortress', node: fortressSeq, scoreFn: findFortressScore },
       { name: 'LootBlazeRod', node: lootRodSeq, scoreFn: lootBlazeRodsScore },
 

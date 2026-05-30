@@ -104,9 +104,14 @@ module.exports = {
     },
   },
   ITEMS: {
-    GOLD: {
+    GOLD_NUGGETS: {
       names: [
       "gold_nugget",
+      ]
+    },
+    GOLD_INGOTS: {
+      names: [
+      "gold_ingot",
       ]
     },
     CRAFTING_TABLE: {
@@ -138,5 +143,9 @@ module.exports = {
   BLAZES: {
     type: "hostile",
     names: ["blaze"],
+  },
+  PIGLINS: {
+    type: "hostile",
+    names: ["piglin"],
   },
 };

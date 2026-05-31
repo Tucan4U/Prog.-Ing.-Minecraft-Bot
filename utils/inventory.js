@@ -41,6 +41,15 @@ function numOfBlocks(bot, state, config, blocksKey) {
   return blockCount || 0;
 }
 
+function numOfItems(bot, state, config, itemsKey) {
+  const itemCount = bot.inventory
+    .items()
+    .filter((item) => config.ITEMS[itemsKey]?.names.includes(item.name))
+    .reduce((count, item) => count + item.count, 0);
+  return itemCount || 0;
+}
+
+module.exports = { equipBestWeapon, needsFood, numOfBlocks, numOfItems };
 function countItemsByNames(bot, names) {
   const nameSet = new Set(names || []);
 

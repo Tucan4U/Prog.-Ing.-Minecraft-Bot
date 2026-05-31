@@ -6,6 +6,13 @@ module.exports = {
   digTask: null, //Dali trenutno bot razbija neki blok, korišteno u MoveToBlockNode i BreakLogNode
   // Block target specifically for blaze spawner searches.
   blazeSpawnerBlock: null,
+  // State flag for eating action
+  isEating: false,
+
+  isBartering: false,
+  needsGold: true,
+  neededGold: 64,
+
   hasEnoughLogs: false,
   hasEnoughStone: false,
   hasEnoughDirt: false,
@@ -27,7 +34,11 @@ module.exports = {
     // y is the surface level (block.y + 1) so the bot aims for the walkable height.
     fortressTarget: null,
     // Mode - AUTONOMOUS or MANUAL
-    netherMode: null,
+    netherMode : null,
+    
+    // Blaze hunting state (Blaze rods collection)
+    targetBlazeRods: null,
+    blazeHuntingRequested: false,
     // Craft-sequence progress cache used to survive repeated BT ticks.
     craftedItems: null,
     // Placed-block progress cache used by block placement sequences.

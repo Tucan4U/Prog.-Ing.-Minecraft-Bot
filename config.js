@@ -19,6 +19,15 @@ module.exports = {
     "wooden_pickaxe",
   ],
 
+  RANGED_WEAPONS: [
+    "bow",
+    "crossbow",
+  ],
+  AMMO : [
+    "arrow",
+    "spectral_arrow",
+  ],
+
   AXES: ["diamond_axe", "iron_axe", "golden_axe", "stone_axe", "wooden_axe"],
 
   PICKAXES: [
@@ -117,12 +126,53 @@ module.exports = {
     },
   },
   ITEMS: {
-    GOLD: {
-      names: ["gold_nugget"],
+    GOLD_NUGGETS: {
+      names: [
+      "gold_nugget",
+      ]
+    },
+    GOLD_INGOTS: {
+      names: [
+      "gold_ingot",
+      ]
     },
     CRAFTING_TABLE: {
       names: ["crafting_table"],
     },
+    ENDER_PEARLS: {
+      names: [
+        "ender_pearl",
+      ]
+    }
+  },
+  BLAZE_RODS: {
+    names: ["blaze_rod"],
+  },
+  PIGLIN_BARTER: {
+    names: [
+      "blackstone",
+      "gravel",
+      "soul_sand",
+      "nether_brick",
+      "string",
+      "nether_quartz",
+      "fire_charge",
+      "leather",
+      "spectral_arrow",
+      "arrow",
+      "obsidian",
+      "crying_obsidian",
+      "ender_pearl",
+      "magma_cream",
+      "glowstone_dust",
+      "iron_nugget",
+      "potion",
+      "splash_potion",
+      "enchanted_book",
+      "iron_boots",
+      "water_bottle",
+      "dried_ghast",
+    ],
   },
 
   // MOBOVI
@@ -134,7 +184,6 @@ module.exports = {
     type: "animal",
     names: ["pig", "cow", "sheep", "chicken"],
   },
-
   HOSTILES: {
     type: "hostile",
     names: ["zombie", "skeleton", "spider", "creeper"],
@@ -142,5 +191,13 @@ module.exports = {
   SLIMES: {
     type: "mob",
     names: ["slime"],
+  },
+  BLAZES: {
+    type: "hostile",
+    names: ["blaze"],
+  },
+  PIGLINS: {
+    type: "hostile",
+    names: ["piglin"],
   },
 };

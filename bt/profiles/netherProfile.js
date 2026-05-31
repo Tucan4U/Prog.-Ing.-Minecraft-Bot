@@ -34,15 +34,18 @@ const ToggleBarteringNode = require('../nodes/startBarteringNode');
 
 
 function createNetherProfile(config) {
-
   const enterSeq = new Sequence([
-    // Enter Nether sequence: check if already in Nether, 
+    // Enter Nether sequence: check if already in Nether,
     // if not check for required equipment, then find nearest portal and enter it.
     new CheckNetherDimensionNode(),
     new CheckEquipmentNode(),
     new EquipArmorNode(),
-    new FindBlockNode('NETHER_PORTAL', 'blockTarget', config.BLOCKS.NETHER_PORTAL.maxBlockDistance),
-    new MoveToBlockNode('blockTarget', 0, 0),
+    new FindBlockNode(
+      "NETHER_PORTAL",
+      "blockTarget",
+      config.BLOCKS.NETHER_PORTAL.maxBlockDistance,
+    ),
+    new MoveToBlockNode("blockTarget", 0, 0),
     new EnterPortalNode(200),
   ]);
 
@@ -55,18 +58,20 @@ function createNetherProfile(config) {
     new MoveToFortressNode(400, 5),
   ]);
 
-  const goldSeq = new Sequence([
-    new FindBlockNode('GOLD', 
-      'blockTarget', 
-      config.BLOCKS.GOLD.maxBlockDistance),
+  // const goldSeq = new Sequence([
+  //   new FindBlockNode(
+  //     "GOLD",
+  //     "blockTarget",
+  //     config.BLOCKS.GOLD.maxBlockDistance,
+  //   ),
 
-    new MoveToBlockNode('blockTarget', 
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,),
+  //   new MoveToBlockNode(
+  //     "blockTarget",
+  //     config.BT.MOVE_NEAR_DISTANCE,
+  //     config.BT.BREAK_RANGE,
+  //   ),
 
-    new BreakBlockNode("blockTarget", 
-      config.BT.BREAK_RANGE, 
-      "PICKAXES"),
+  //   new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
 
     new PickUpItemNode(config.ITEMS.GOLD_NUGGETS.names),
   ]);
@@ -103,12 +108,16 @@ function createNetherProfile(config) {
   ])
 
   const blazeSpawnerSeq = new Sequence([
-    // Blaze spawner search sequence: equip gear, then find blaze spawner by looking for spawner blocks, 
+    // Blaze spawner search sequence: equip gear, then find blaze spawner by looking for spawner blocks,
     // then move to it.
     // For blaze spawner search we reuse the generic FindBlock and MoveToBlock nodes.
     new CheckEquipmentNode(),
     new EquipArmorNode(),
-    new FindBlockNode('BLAZE_SPAWNER', 'blazeSpawnerBlock', config.BLOCKS.BLAZE_SPAWNER.maxBlockDistance),
+    new FindBlockNode(
+      "BLAZE_SPAWNER",
+      "blazeSpawnerBlock",
+      config.BLOCKS.BLAZE_SPAWNER.maxBlockDistance,
+    ),
     new MoveToBlazeSpawnerNode(),
   ]);
 

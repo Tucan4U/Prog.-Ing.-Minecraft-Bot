@@ -6,7 +6,7 @@ const { chatThrottled } = require("../../utils/throttle");
 class MoveToBlockNode extends Node {
   constructor(
     stateKey = "blockTarget",
-    nearDistance = 1,
+    nearDistance = 3,
     successDistance = 5,
     statusThrottleMs = 3000,
   ) {
@@ -23,7 +23,10 @@ class MoveToBlockNode extends Node {
 
   async tick(bot, state) {
     const item = state["lootTarget"];
-    if (item) return "SUCCESS";
+    if (item) {
+      //console.log("Imamo lootTarget");
+      return "SUCCESS";
+    }
 
     const target = state[this.stateKey];
     if (!target) {
@@ -40,17 +43,18 @@ class MoveToBlockNode extends Node {
       this.resetProgress();
       return "FAILURE";
     }
-
+    //This isn't the best solution and will maybe cause problems
     if (block.name === "air" && !state["digTask"]) {
-      state[this.stateKey] = null;
-      this.resetProgress();
-      return "FAILURE";
+      console.log("Ovo radi probleme");
+      return "SUCCESS";
     }
 
     const dist = bot.entity.position.distanceTo(block.position);
 
     if (dist <= this.successDistance) {
+      bot.pathfinder.setGoal(null);
       this.resetProgress();
+      console.log("I'm near the target");
       return "SUCCESS";
     }
 

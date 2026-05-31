@@ -28,28 +28,32 @@ module.exports = {
     "spectral_arrow",
   ],
 
-  AXES: ["wooden_axe", "stone_axe", "iron_axe", "diamond_axe", "golden_axe"],
+  AXES: ["diamond_axe", "iron_axe", "golden_axe", "stone_axe", "wooden_axe"],
 
-  PICKAXES: ["wooden_pickaxe", "stone_pickaxe", "iron_pickaxe", "diamond_pickaxe", "golden_pickaxe"],
-
-  FOOD: [
-    "beef",
-    "porkchop",
-    "chicken",
-    "mutton",
-    "cooked_beef",
-    "cooked_porkchop",
+  PICKAXES: [
+    "diamond_pickaxe",
+    "iron_pickaxe",
+    "golden_pickaxe",
+    "stone_pickaxe",
+    "wooden_pickaxe",
   ],
+
+  SHOVELS: [
+    "diamond_shovel",
+    "iron_shovel",
+    "golden_shovel",
+    "stone_shovel",
+    "wooden_shovel",
+  ],
+
+  RAWFOOD: ["beef", "porkchop", "chicken", "mutton"],
   //Parametri koji utječu na SUCCESS ili FAILURE unutar BT-a, zbog toga i ime "BT"
   BT: {
-    MOVE_NEAR_DISTANCE: 2,
+    MOVE_NEAR_DISTANCE: 4,
     MOVE_SUCCESS_DISTANCE: 5,
     ATTACK_RANGE: 4,
     MOVE_STATUS_THROTTLE_MS: 3000,
     BREAK_RANGE: 5,
-    BREAK_LOG: {
-      BREAK_RANGE: 5,
-    },
   },
   SENSORS: {
     WORLD_UPDATE_MS: 500,
@@ -75,6 +79,10 @@ module.exports = {
       ],
       maxBlockDistance: 16,
     },
+    STONE: {
+      names: ["cobblestone", "stone"],
+      maxBlockDistance: 16,
+    },
     NETHER_PORTAL: {
       names: ["nether_portal"],
       maxBlockDistance: 64,
@@ -85,6 +93,7 @@ module.exports = {
     },
     PLANKS: {
       names: [
+        "acacia_planks",
         "oak_planks",
         "spruce_planks",
         "birch_planks",
@@ -95,11 +104,24 @@ module.exports = {
         "warped_planks",
       ],
     },
+    FURNACE: {
+      names: ["furnace"],
+    },
+    DIRT: {
+      names: ["dirt"],
+      maxBlockDistance: 16,
+    },
+  },
+  // Furnace / smelting related config
+  FURNACE: {
+    FUEL: {
+      names: ["coal"],
+    },
+    ITEMS_PER_FUEL_UNIT: 8,
+    TIME_PER_ITEM_MS: 10000,
+    BURN_MS_PER_FUEL_UNIT: 1600,
     GOLD: {
-      names: [
-        "nether_gold_ore",
-        "gold_ore",
-      ],
+      names: ["nether_gold_ore", "gold_ore"],
       maxBlockDistance: 64,
     },
   },
@@ -115,9 +137,7 @@ module.exports = {
       ]
     },
     CRAFTING_TABLE: {
-      names: [
-        "crafting_table",
-      ]
+      names: ["crafting_table"],
     },
     ENDER_PEARLS: {
       names: [
@@ -154,6 +174,7 @@ module.exports = {
       "dried_ghast",
     ],
   },
+
   // MOBOVI
   // Tu se nalaze liste mobova koje se koriste kao argumenti u FindMobNode-u
   // Svaki entry ima tip(npr. animal, hostile, mob) i listu imena mobova.

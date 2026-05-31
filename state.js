@@ -13,8 +13,17 @@ module.exports = {
   needsGold: true,
   neededGold: 64,
 
+  hasEnoughLogs: false,
+  hasEnoughStone: false,
+  hasEnoughDirt: false,
   mission: {
     activeProfile: "OVERWORLD",
+    // This is connected to the craftingTableSequence and it's scoring system
+    hasCraftingTable: false,
+    // This is connected to the scoring system of the craftWoodenPickaxe
+    hasWoodenPickaxe: false,
+
+    hasStonePickaxe: false,
     // Nether portal entry request flag.
     enterNetherRequested: false,
     // Fortress search and travel request flag.
@@ -30,7 +39,33 @@ module.exports = {
     // Blaze hunting state (Blaze rods collection)
     targetBlazeRods: null,
     blazeHuntingRequested: false,
+    // Craft-sequence progress cache used to survive repeated BT ticks.
+    craftedItems: null,
+    // Placed-block progress cache used by block placement sequences.
+    placedItems: null,
+
+    craftWoodenPickaxeRequested: false,
   },
+  // Furnace workflow state (reserved by PrepareFurnaceMaterialsNode)
+  furnaceWorkflowStarted: false,
+  furnacePlaced: false,
+  selectedFurnaceItems: null,
+  reservedFuel: null,
+  furnaceExpectedCompleteAt: null,
+  furnaceLoadPhase: null,
+  furnaceLoadDone: false,
+  furnaceLoadedAt: null,
+  furnaceLoadedInputCount: 0,
+  furnaceLoadedFuelCount: 0,
+  furnaceCurrentInputName: null,
+  furnaceCurrentBatchCount: 0,
+  furnaceContainer: null,
+  // Pit digging workflow state
+  pitDigTask: null,
+  pitStartY: null,
+  pitTargetY: null,
+  inPit: false,
+
   sensors: {
     entities: [],
     items: [],

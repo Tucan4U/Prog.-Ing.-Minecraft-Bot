@@ -25,7 +25,8 @@ class PickUpItemNode extends Node {
     }
 
     if (!item) {
-      state["lootTarget"] = null; //Ovo koriste findBlockNode, moveToBlockNode, breakLogNode
+      //Ovo koriste findBlockNode, moveToBlockNode, breakLogNode
+      state["lootTarget"] = null;
       return "FAILURE";
     }
 

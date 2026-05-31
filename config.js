@@ -62,6 +62,7 @@ module.exports = {
     OVERWORLD: "OVERWORLD",
     HOSTILE_COMBAT: "HOSTILE_COMBAT",
     NETHER: "NETHER",
+    END: "END",
   },
   NETHER_MODES: {
     AUTONOMOUS: "AUTONOMOUS",
@@ -107,10 +108,41 @@ module.exports = {
     FURNACE: {
       names: ["furnace"],
     },
-    DIRT: {
-      names: ["dirt"],
-      maxBlockDistance: 16,
+    PUMPKINS: {
+        names: ["pumpkin"],
+        maxBlockDistance: 128,
     },
+    CARVED_PUMPKINS: {
+        names: ["carved_pumpkin"],
+        maxBlockDistance: 128,
+    },
+    DIRT: {
+        names: ["dirt", "grass_block", "coarse_dirt", "podzol", "rooted_dirt"],
+        maxBlockDistance: 16,
+    },
+    COBBLESTONE: {
+        names: ["cobblestone", "stone", "cobbled_deepslate"],
+        maxBlockDistance: 16,
+    },
+    SCAFFOLDING: [
+        "dirt", "grass_block", "coarse_dirt", "podzol", "rooted_dirt",
+        "cobblestone", "stone", "cobbled_deepslate",
+        "oak_log", "birch_log", "spruce_log", "jungle_log", "acacia_log", "dark_oak_log",
+        "oak_planks", "birch_planks", "spruce_planks",
+        "netherrack", "end_stone",
+    ],
+    GATHER_BLOCKS: {
+        names: [
+            "dirt", "grass_block", "cobblestone", "stone", "cobbled_deepslate", "oak_log", "birch_log", 
+            "spruce_log", "jungle_log", "acacia_log", "dark_oak_log", "netherrack"
+        ],
+        maxBlockDistance: 32,
+    },
+    END_PORTAL_FRAMES: {
+        names: ["end_portal_frame"],
+        maxBlockDistance: 96,
+    },
+    
   },
   // Furnace / smelting related config
   FURNACE: {
@@ -200,4 +232,22 @@ module.exports = {
     type: "hostile",
     names: ["piglin"],
   },
+  GATHER_BLOCK_ITEMS: [
+      "dirt", "cobblestone", "cobbled_deepslate", "oak_log", "birch_log", "spruce_log", 
+      "jungle_log", "acacia_log", "dark_oak_log", "oak_planks", "birch_planks", "spruce_planks", "jungle_planks", 
+      "acacia_planks", "dark_oak_planks", "netherrack"
+  ],
+  
+  
+  //RADI lakse implemetacije findAndKillChicken i Spider
+  CHICKENS: {
+      type: "animal",
+      names: ["chicken"],
+  },
+
+  SPIDERS: {
+      type: "mob",
+      names: ["spider", "cave_spider"],
+  },
+    
 };

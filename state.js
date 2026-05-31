@@ -18,6 +18,7 @@ module.exports = {
   hasEnoughDirt: false,
   mission: {
     activeProfile: "OVERWORLD",
+    phase: "END_PREP",
     // This is connected to the craftingTableSequence and it's scoring system
     hasCraftingTable: false,
     // This is connected to the scoring system of the craftWoodenPickaxe

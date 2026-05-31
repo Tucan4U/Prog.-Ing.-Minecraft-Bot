@@ -13,6 +13,7 @@ const {
   createHostileCombatProfile,
 } = require("./bt/profiles/hostileCombatProfile");
 const { createNetherProfile } = require("./bt/profiles/netherProfile");
+const { createEndProfile } = require('./bt/profiles/endProfile')
 const { startWorldSensors } = require("./sensors/worldSensors");
 
 // Decorators
@@ -52,6 +53,7 @@ let worldSensors = null;
 const overworldProfile = createOverworldProfile(config);
 const hostileCombatProfile = createHostileCombatProfile(config);
 const netherProfile = createNetherProfile(config);
+const endProfile = createEndProfile(config)
 
 const utilityTreesByProfile = {
   [config.PROFILES.OVERWORLD]: new UtilitySelectorNode(
@@ -69,6 +71,11 @@ const utilityTreesByProfile = {
     netherProfile.candidates,
     netherProfile.fallbackNode,
   ),
+  [config.PROFILES.END]: new UtilitySelectorNode(
+    'EndUtility',
+    endProfile.candidates,
+    endProfile.fallbackNode,
+  ),
 };
 
 state.mission.activeProfile = config.PROFILES.OVERWORLD;
@@ -83,7 +90,16 @@ bot.once("spawn", () => {
     .filter((id) => id !== undefined);
   logBlockIds.forEach((el) => defaultMove.scafoldingBlocks.push(el));
 
+  // Dozvoli botu da koristi logove kao scaffolding ako mora
+  // Dodaj sve scaffolding blokove (dirt, cobble, logs, end_stone...) u movements
+  const scaffoldingIds = config.BLOCKS.SCAFFOLDING
+    .map(name => bot.registry.itemsByName[name]?.id)
+    .filter(id => id !== undefined)
+  scaffoldingIds.forEach(id => defaultMove.scafoldingBlocks.push(id))
+
   bot.pathfinder.setMovements(defaultMove);
+
+
 
   // Passing movements to PvP plugin
   bot.pvp.movements = defaultMove;
@@ -119,6 +135,25 @@ bot.once("spawn", () => {
 
   startLoop();
 });
+
+bot.on('spawn', () => {
+    console.log('[DIMENSION]', bot.game.dimension)
+
+    if (bot.game.dimension === 'the_end') {
+        state.mission.phase = 'END_FIGHT'
+        state.mission.activeProfile = config.PROFILES.END
+        bot.chat('Entered The End. Switching to End fight phase.')
+    }
+})
+
+//???????? MAKRO
+bot.on('entityHurt', (entity, source) => {
+    if (entity !== bot.entity) return
+    if (!source) return
+
+    state.attackerTarget = source
+    console.log('[DEFENSE] Attacked by:', source.name)
+})
 
 async function startLoop() {
   while (true) {
@@ -237,6 +272,13 @@ bot.on("chat", (username, message) => {
   if (message === "tp") {
     bot.chat("/tp @s " + username);
   }
+  if (message === 'profile end') {
+    state.mission.activeProfile = config.PROFILES.END
+    bot.chat('Profile switched: END')
+  }
+  if (message === 'help') {
+    bot.chat('Commands: start, stop, profile end, inventory, tp')
+  }
 });
 
 //  ERROR
@@ -248,6 +290,21 @@ bot.on("end", () => {
   }
   console.log("Bot disconnect!");
 });
+
+bot.on('kicked', (reason, loggedIn) => {
+    console.log('KICKED:', reason)
+    console.log('loggedIn:', loggedIn)
+})
+
+bot._client.on('end', (reason) => {
+    console.log('CLIENT END:', reason)
+})
+
+bot._client.on('error', (err) => {
+    console.log('CLIENT ERROR:', err)
+})
+
+
 
 
 // DEBUG For health, hunger and saturation monitoring in terminal 

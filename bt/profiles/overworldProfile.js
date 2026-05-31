@@ -22,6 +22,10 @@ const CraftItemNode = require("../nodes/craftItemNode");
 const FindInteractiveBlockPlacementNode = require("../nodes/findInteractiveBlockPlaceNode");
 const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
 
+const ShearPumpkinNode = require('../nodes/shearPumpkinNode')
+const EquipPumpkinNode = require('../nodes/equipPumpkinNode')
+
+const { getPumpkinHelmetScore } = require('../scores/endPrepScores')
 const { pickUpFoodScore } = require("../scores/survivalScores");
 const { huntAnimalsScore } = require("../scores/combatScores");
 const {
@@ -126,6 +130,20 @@ function createOverworldProfile(config) {
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
     new PickUpItemNode(config.BLOCKS.STONE.names),
   ]);
+  // Pumpkin part 3
+  const getPumpkinHelmetNode = new Sequence([
+        new FindBlockNode('PUMPKINS', 'blockTarget', config.BLOCKS.PUMPKINS.maxBlockDistance),
+        new MoveToBlockNode('blockTarget', config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE),
+        new ShearPumpkinNode('blockTarget'),
+        new BreakBlockNode('blockTarget', config.BT.BREAK_RANGE, 'AXES'),
+        new PickUpItemNode(['carved_pumpkin']),
+        new EquipPumpkinNode(),
+    ])
+
+  // const craftCraftingTable = new Sequence([
+  //   new CraftItemNode(config.BLOCKS.PLANKS.names),
+  //   new CraftItemNode(["crafting_table"]),
+  // ]);
 
   return {
     candidates: [
@@ -178,6 +196,9 @@ function createOverworldProfile(config) {
         name: "Idle",
         node: new IdleNode(),
         scoreFn: () => 1,
+      },
+      { // Pumpkin part 4
+        name: 'GetPumpkinHelmet', node: getPumpkinHelmetNode, scoreFn: getPumpkinHelmetScore
       },
     ],
     fallbackNode: new IdleNode(),

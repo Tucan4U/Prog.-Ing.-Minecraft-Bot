@@ -19,6 +19,12 @@ bot.once("spawn", () => {
   mcData = require("minecraft-data")(bot.version);
 });
 
+bot.once("spawn", () => {
+  const mcData = require("minecraft-data")(bot.version);
+  bot.pathfinder.setMovements(new Movements(bot, mcData));
+  console.log("Bot spawned");
+});
+
 function loadLogs() {
   let logs = [];
   mcData.blocksArray.forEach((block) => {

@@ -126,6 +126,8 @@ class LoadFurnaceNode extends Node {
     const furnaceBlock = bot.blockAt(target.position);
     if (!furnaceBlock || !furnaceBlock.name || !furnaceBlock.name.includes("furnace")) {
       bot.chat("Furnace block not found at blockTarget.");
+      // Clear invalid target to trigger re-search in future ticks.
+      state[this.stateBlockKey] = null;
       return null;
     }
 

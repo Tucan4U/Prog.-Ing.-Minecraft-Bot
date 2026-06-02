@@ -19,7 +19,7 @@ class BreakBlockNode extends Node {
 
     const block = bot.blockAt(targetBlock.position);
 
-    if (!block || block.name === "air") {
+    if (!block || block.name.includes("air")) {
       state["digTask"] = null;
       state[this.stateKey] = null;
       return "SUCCESS";
@@ -27,19 +27,21 @@ class BreakBlockNode extends Node {
 
     const dist = bot.entity.position.distanceTo(block.position);
     if (dist > this.reachDistance) {
-      console.log("Log too far away");
+      console.log("Block too far away");
       state["digTask"] = null;
       return "FAILURE";
     }
 
     if (!state["digTask"]) {
-      bot.pathfinder.setGoal(null);
+      if (state["digTask"]) {
+        return "RUNNING"; ////OVO moramo ovako napravi jer bot.dig() vraća promise koji se resolvea kad je kopanje gotovo, a mi ne želimo pokrenuti novi dig dok je stari još u tijeku
+      }
+      else{
+        bot.pathfinder.setGoal(null);
 
       await equipBestWeapon(bot, config[this.tools] || []);
 
-      state["digTask"] = bot
-        .dig(block)
-        .catch((err) => {
+      state["digTask"] = bot.dig(block).catch((err) => {
           console.error("Dig error:", err);
           state["digTask"] = null;
         })
@@ -51,11 +53,12 @@ class BreakBlockNode extends Node {
       const afterBlock = bot.blockAt(targetBlock.position);
       if (!afterBlock || (afterBlock.name && afterBlock.name.includes("air"))) {
         state["digTask"] = null;
-
         bot.chat("SUCCESS: Block became air immediately.");
         return "SUCCESS";
       }
       return "RUNNING";
+      }
+      
     }
 
     // ako je dig još u toku

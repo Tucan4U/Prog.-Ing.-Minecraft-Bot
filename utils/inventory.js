@@ -1,24 +1,32 @@
 async function equipBestWeapon(bot, weapons) {
   // Equipaj sljedeće najbolje oružje
   const currentItem = bot.heldItem?.name;
+  const bestAvailableWeapon = weapons.find((weapon) =>
+    bot.inventory.items().some((item) => item.name === weapon),
+  );
+
+  if (!bestAvailableWeapon) {
+    console.log("No weapons available");
+    return;
+  }
+
+  if (currentItem === bestAvailableWeapon) {
+    return;
+  }
 
   for (const weapon of weapons) {
     const item = bot.inventory.items().find((i) => i.name === weapon);
     if (!item) continue;
     console.log(`Checking for ${weapon} in hand...`);
-    if (currentItem !== weapon) {
-      try {
-        await bot.equip(item, "hand").then(() => {
-          bot.chat(`Equipped ${weapon}`);
-        });
-        console.log(`Equipped ${weapon}`);
-        return;
-      } catch (err) {
-        console.log(`Couldn't equip ${weapon}:`, err.message);
-      }
+    try {
+      await bot.equip(item, "hand").then(() => {
+        bot.chat(`Equipped ${weapon}`);
+      });
+      console.log(`Equipped ${weapon}`);
+      return;
+    } catch (err) {
+      console.log(`Couldn't equip ${weapon}:`, err.message);
     }
-
-    console.log("No weapons available");
   }
 }
 

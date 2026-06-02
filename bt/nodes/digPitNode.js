@@ -141,6 +141,7 @@ class DigPitNode extends Node {
       this.lastCenterGoal = null;
       state.pitTargetCenterX = null;
       state.pitTargetCenterZ = null;
+      state.blockTarget = null;
       state.inPit = true; // opcionalno označi da smo u rupi, može koristiti drugi node za izlazak iz nje kasnije
       console.log("[DigPit] SUCCESS");
       bot.chat("Finished digging pit!");

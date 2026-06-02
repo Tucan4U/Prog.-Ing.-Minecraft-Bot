@@ -43,6 +43,12 @@ class MoveToBlockNode extends Node {
       this.resetProgress();
       return "FAILURE";
     }
+    // If another node (BreakBlock/Dig) already started digging, avoid
+    // re-issuing pathfinder goals which can interrupt mining progress.
+    if (state["digTask"]) {
+      console.log("Dig in progress — skipping movement");
+      return "SUCCESS";
+    }
     //This isn't the best solution and will maybe cause problems
     if (block.name === "air" && !state["digTask"]) {
       console.log("Ovo radi probleme");

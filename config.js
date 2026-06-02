@@ -102,7 +102,32 @@ module.exports = {
       names: ["dirt"],
       maxBlockDistance: 16,
     },
+    GRAVEL: {
+      names: ["gravel"],
+      maxBlockDistance: 64,
+    },
+    COAL: {
+      names: ["coal_ore", "deepslate_coal_ore"],
+      maxBlockDistance: 64,
+    },
+    IRON: {
+      names: ["iron_ore", "deepslate_iron_ore"],
+      maxBlockDistance: 64,
+    },
+    GOLD: {
+      names: ["nether_gold_ore", "gold_ore", "deepslate_gold_ore"],
+      maxBlockDistance: 64,
+    },
+    DIAMOND: {
+      names: ["diamond_ore", "deepslate_diamond_ore"],
+      maxBlockDistance: 64,
+    },
+    OBSIDIAN: {
+      names: ["obsidian"],
+      maxBlockDistance: 16,
+    },
   },
+
   // Furnace / smelting related config
   FURNACE: {
     FUEL: {
@@ -111,17 +136,28 @@ module.exports = {
     ITEMS_PER_FUEL_UNIT: 8,
     TIME_PER_ITEM_MS: 10000,
     BURN_MS_PER_FUEL_UNIT: 1600,
-    GOLD: {
-      names: ["nether_gold_ore", "gold_ore"],
-      maxBlockDistance: 64,
-    },
   },
   ITEMS: {
-    GOLD: {
-      names: ["gold_nugget"],
+    GRAVEL: {
+      names: ["gravel", "flint"],
     },
     CRAFTING_TABLE: {
       names: ["crafting_table"],
+    },
+    COAL: {
+      names: ["coal"],
+    },
+    IRON: {
+      names: ["iron_ingot", "raw_iron"],
+    },
+    GOLD: {
+      names: ["gold_nugget", "gold_ingot", "raw_gold"],
+    },
+    DIAMOND: {
+      names: ["diamond"],
+    },
+    OBSIDIAN: {
+      names: ["obsidian"],
     },
   },
 

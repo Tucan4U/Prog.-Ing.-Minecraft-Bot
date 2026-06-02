@@ -112,6 +112,24 @@ function createOverworldProfile(config) {
     new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
   ]);
 
+  const craftIronPickaxeSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
+    new CraftItemNode(["stick"], 2),
+    new CraftItemUsingTableNode("iron_pickaxe"),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+    new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
+  ]);
+
+  const craftDiamondPickaxeSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
+    new CraftItemNode(["stick"], 2),
+    new CraftItemUsingTableNode("diamond_pickaxe"),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+    new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
+  ]);
+
   const breakStoneSeq = new Sequence([
     new FindBlockNode(
       "STONE",
@@ -127,8 +145,76 @@ function createOverworldProfile(config) {
     new PickUpItemNode(config.BLOCKS.STONE.names),
   ]);
 
+  const gatherGravelSeq = new Sequence([
+    new FindBlockNode("GRAVEL", "blockTarget", config.BLOCKS.GRAVEL.maxBlockDistance,),
+    new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE,),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new PickUpItemNode(config.ITEMS.GRAVEL.names),
+  ]);
+
+  const gatherCoalSeq = new Sequence([
+    new FindBlockNode("COAL", "blockTarget", config.BLOCKS.COAL.maxBlockDistance,),
+    new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE,),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new PickUpItemNode(config.ITEMS.COAL.names),
+  ]);
+
+  const gatherIronSeq = new Sequence([
+    new FindBlockNode("IRON", "blockTarget", config.BLOCKS.IRON.maxBlockDistance,),
+    new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE,),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new PickUpItemNode(config.ITEMS.IRON.names),
+  ]);
+
+  const gatherGoldSeq = new Sequence([
+    new FindBlockNode("GOLD", "blockTarget", config.BLOCKS.GOLD.maxBlockDistance,),
+    new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE,),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new PickUpItemNode(config.ITEMS.GOLD.names),
+  ]);
+
+  const gatherDiamondSeq = new Sequence([
+    new FindBlockNode("DIAMOND", "blockTarget", config.BLOCKS.DIAMOND.maxBlockDistance,),
+    new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE,),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new PickUpItemNode(config.ITEMS.DIAMOND.names),
+  ]);
+
+  const gatherObsidianSeq = new Sequence([
+    new FindBlockNode("OBSIDIAN", "blockTarget", config.BLOCKS.OBSIDIAN.maxBlockDistance,),
+    new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE,),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new PickUpItemNode(config.ITEMS.OBSIDIAN.names),
+  ]);
+
   return {
     candidates: [
+      {
+        name: "GatherCoal",
+        node: gatherCoalSeq,
+        scoreFn: () => 0, 
+      },
+      {
+        name: "GatherIron",
+        node: gatherIronSeq,
+        scoreFn: () => 0,
+      },
+      {
+        name: "GatherGold",
+        node: gatherGoldSeq,
+        scoreFn: () => 0,
+      },
+      {
+        name: "GatherDiamond",
+        node: gatherDiamondSeq,
+        scoreFn: () => 0,
+      },
+      {
+        name: "GatherObsidian",
+        node: gatherObsidianSeq,
+        scoreFn: () => 0,
+      },
+      
       {
         name: "SmeltItems",
         node: smeltItemsSeq,
@@ -163,6 +249,16 @@ function createOverworldProfile(config) {
         name: "CraftStonePickaxe",
         node: craftStonePickaxeSeq,
         scoreFn: craftStonePickaxeScore,
+      },
+      {
+        name: "CraftIronPickaxe",
+        node: craftIronPickaxeSeq,
+        scoreFn: 0,
+      },
+      {
+        name: "CraftDiamondPickaxe",
+        node: craftDiamondPickaxeSeq,
+        scoreFn: 0,
       },
       {
         name: "PickUpFood",

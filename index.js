@@ -86,7 +86,7 @@ async function startLoop() {
       console.log(err);
     }
 
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 2000));
   }
 }
 
@@ -134,27 +134,7 @@ bot.on("chat", (username, message) => {
     state.mission.activeProfile = config.PROFILES.NETHER;
     bot.chat("Profile switched: NETHER");
   }
-  if (message === "entities") {
-    const filter = config.SLIMES;
-    const allowedNames = new Set(filter.names);
-    const entities = state.sensors?.entities || Object.values(bot.entities);
-
-    bot.chat(
-      `Entities: ${entities
-        .filter(
-          (entity) =>
-            entity &&
-            entity.type === filter.type &&
-            allowedNames.has(entity.name),
-        )
-        .map((e) => e.name)
-        .join(", ")}`,
-    );
-
-    const nearest = bot.nearestEntity();
-    bot.chat(`${nearest?.name || "none"}`);
-    bot.chat(`Type: ${nearest?.type || "none"}`);
-  }
+  
   if (message === "inventory") {
     console.log(bot.inventory.items());
   }
@@ -185,9 +165,29 @@ bot.on("chat", (username, message) => {
     findBlazeSpawnerCommand(bot, state, config);
     startFlag = true;
   }
-
+  // Give night vision effect
+  if (message === "nv") {
+    bot.chat("/effect give @a minecraft:night_vision infinite 1 true");
+  }
   if (message === "tp") {
     bot.chat("/tp @s " + username);
+  }
+  if (message === "clear") {
+    bot.chat("/clear @s");
+  }
+  if (message === "dig") {
+    const blockBellow = bot.blockAt(bot.entity.position.offset(0, -1, 0));
+    state.blockTarget = blockBellow; //OVO OSTAJE NAKON I NE ČISTI SE!!
+      
+    if(blockBellow && blockBellow.name !== "air" && blockBellow.name !== "furnace") {
+
+      bot.pathfinder.setGoal(null);
+      //await equipBestWeapon(bot, config.PICKAXES);
+      bot.dig(blockBellow).catch((err) => {
+          console.error("Digggg error:", err);
+      }).then(() => {});
+  
+    }
   }
 });
 

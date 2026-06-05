@@ -37,6 +37,8 @@ module.exports = {
     "wooden_shovel",
   ],
 
+  IRON_ARMOR: ["iron_chestplate", "iron_leggings", "iron_boots"],
+
   //Parametri koji utječu na SUCCESS ili FAILURE unutar BT-a, zbog toga i ime "BT"
   BT: {
     MOVE_NEAR_DISTANCE: 4,
@@ -56,6 +58,14 @@ module.exports = {
   NETHER_MODES: {
     AUTONOMOUS: "AUTONOMOUS",
     MANUAL: "MANUAL",
+  },
+  CRAFTING_STAGES: {
+    STAGES: ["CRAFTING_TABLE", "WOODEN_PICKAXE", "STONE_PICKAXE", "IRON_ARMOR"],
+  },
+  WOOD_REQUIREMENTS: {
+    CRAFTING_TABLE: 1,
+    WOODEN_PICKAXE: 2,
+    STONE_PICKAXE: 1,
   },
   BLOCKS: {
     LOGS: {

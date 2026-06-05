@@ -11,12 +11,17 @@ class PlaceBlockNode extends Node {
   }
 
   async tick(bot, state, config) {
-    if (!state.mission.placedItems) {
-      state.mission.placedItems = {};
-    }
+    let blockAbove = state[this.stateKey];
 
-    if (state.mission.placedItems[this.configKey]) {
-      return "SUCCESS";
+    if (blockAbove) {
+      const currBlock = bot.blockAt(blockAbove.position);
+      if (
+        currBlock &&
+        (currBlock.name === this.configKey ||
+          (currBlock.name.includes("air") && state["digTask"]))
+      ) {
+        return "SUCCESS";
+      }
     }
 
     if (!this.mcData) {
@@ -25,10 +30,8 @@ class PlaceBlockNode extends Node {
 
     let blockToPlaceId = this.mcData.itemsByName[this.configKey]?.id;
 
-    let blockAbove = state[this.stateKey];
-
-    //bot.chat(`${this.configKey}`);
-    //bot.chat(`${blockToPlaceId}`);
+    bot.chat(`${this.configKey}`);
+    bot.chat(`${blockToPlaceId}`);
     let blockBelow = bot.blockAt(blockAbove.position.offset(0, -1, 0));
 
     if (!bot.inventory.items().some((item) => item.name === this.configKey)) {
@@ -42,31 +45,37 @@ class PlaceBlockNode extends Node {
       bot.chat("No block in inventory");
     }
 
-    if (
-      blockAbove &&
-      blockBelow &&
-      blockAbove.name === "air" &&
-      blockBelow.name !== "air"
-    ) {
-      try {
-        await bot.placeBlock(blockBelow, new Vec3(0, 1, 0)).then(() => {
-          const newBlock = bot.blockAt(blockAbove.position);
-          if (newBlock.name === this.configKey) {
-            state.mission.placedItems[this.configKey] = 1; 
-            if (this.configKey === "crafting_table") {
-              state.hasCraftingTable = true;
-              bot.chat("I placed a crafting table!");
-            }
+    const aroundBlockAbove = [
+      blockAbove.position.offset(1, 0, 0),
+      blockAbove.position.offset(-1, 0, 0),
+      blockAbove.position.offset(0, 0, 1),
+      blockAbove.position.offset(0, 0, -1),
+      blockAbove.position.offset(0, 1, 0),
+      blockAbove.position.offset(0, -1, 0),
+    ];
 
-            return "SUCCESS";
-          }
-        });
-      } catch (err) {
-        state["blockTarget"] = null;
-        console.log("Error placing block:", err);
-        bot.chat("Error placing block");
+    for (let pos of aroundBlockAbove) {
+      const neighbor = bot.blockAt(pos);
+      if (neighbor && !neighbor.name.includes("air")) {
+        const face = blockAbove.position.minus(pos); // smjer prema blockAbove
+
+        try {
+          await bot.placeBlock(neighbor, face);
+
+          const newBlock = bot.blockAt(blockAbove.position);
+          if (newBlock?.name === this.configKey) return "SUCCESS";
+          else return "FAILURE";
+        } catch (e) {
+          console.log("Error placing block:", e);
+          bot.chat("Error placing block");
+          state["blockTarget"] = null;
+          return "FAILURE";
+        }
       }
-    } else return "FAILURE";
+
+      //return "FAILURE";
+    }
+
     return "RUNNING";
   }
 }

@@ -17,14 +17,17 @@ class FindBlockNode extends Node {
     // const item = state["lootTarget"];
     // if (item) return "SUCCESS";
 
-    let block = state[this.stateKey];
+    let targetBlock = state[this.stateKey];
+    const block = targetBlock ? bot.blockAt(targetBlock.position) : null;
 
-    if (block && !bot.blockAt(block.position)) {
+    if (targetBlock && (!block || block.name.includes("air"))) {
       console.log("Block invalid");
       state[this.stateKey] = null;
+      return "FAILURE";
     }
 
-    if (block) {
+    if (targetBlock) {
+      console.log("Block already targeted");
       return "SUCCESS";
     }
 

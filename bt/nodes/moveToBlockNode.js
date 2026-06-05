@@ -22,11 +22,11 @@ class MoveToBlockNode extends Node {
   }
 
   async tick(bot, state) {
-    const item = state["lootTarget"];
-    if (item) {
-      //console.log("Imamo lootTarget");
-      return "SUCCESS";
-    }
+    // const item = state["lootTarget"];
+    // if (item) {
+    //   console.log("Imamo lootTarget");
+    //   return "SUCCESS";
+    // }
 
     const target = state[this.stateKey];
     if (!target) {

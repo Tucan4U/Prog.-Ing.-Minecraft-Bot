@@ -8,6 +8,8 @@ module.exports = {
   blazeSpawnerBlock: null,
   
   mission: {
+    craftStage: null,
+
     activeProfile: "OVERWORLD",
     // Nether portal entry request flag.
     enterNetherRequested: false,
@@ -66,6 +68,9 @@ module.exports = {
   hasIronPickaxe: false,
   hasDiamondPickaxe: false,
   hasFurnace: false,
+
+  hasIronArmor: false,
+  hasBucket: false,
 
   foodHuntActive: false,
   sensors: {

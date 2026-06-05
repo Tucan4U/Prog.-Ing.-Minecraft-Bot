@@ -121,8 +121,21 @@ bot.on("chat", (username, message) => {
     bot.chat("/clear");
     bot.chat("/give @s minecraft:diamond_axe");
     bot.chat("/give @s dirt 10");
+    bot.chat("/give @s oak_log 14");
     startFlag = true;
   }
+  if(message === "clear"){
+    bot.chat("/clear");
+  }
+
+  if(message === "iron pickaxe"){
+    bot.chat("/clear");
+    bot.chat("/give @s iron_ingot 3");
+    bot.chat("/give @s dirt 10");
+    bot.chat("/give @s oak_log 16");
+    bot.chat("/give @s crafting_table");
+  }
+
   if (message === "profile overworld") {
     state.mission.activeProfile = config.PROFILES.OVERWORLD;
     bot.chat("Profile switched: OVERWORLD");

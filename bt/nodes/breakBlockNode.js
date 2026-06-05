@@ -25,9 +25,7 @@ class BreakBlockNode extends Node {
     if (!block || block.name.includes("air")) {
       console.log("Block is already air");
       state["digTask"] = null;
-      state[this.stateKey] = null;
-      state.blockTarget = null;
-      state.mission.placedItems = {};
+      //state[this.stateKey] = null;
       return "SUCCESS";
     }
 
@@ -56,7 +54,7 @@ class BreakBlockNode extends Node {
           })
           .then(() => {
             state["digTask"] = null;
-            state["blockTarget"] = null;
+            //state["blockTarget"] = null;
             return "SUCCESS";
           });
         console.log("Postavili smo digTask", state["digTask"]);

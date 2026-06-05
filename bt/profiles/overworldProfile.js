@@ -72,7 +72,10 @@ function createOverworldProfile(bot, config) {
       config.BT.BREAK_RANGE,
     ),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+  ]);
+  const breakLogsSelector = new Selector([
     new PickUpItemNode(config.BLOCKS.LOGS.names),
+    breakLogsSeq,
   ]);
 
   const breakDirtSeq = new Sequence([
@@ -87,7 +90,11 @@ function createOverworldProfile(bot, config) {
       config.BT.BREAK_RANGE,
     ),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "SHOVELS"),
+  ]);
+
+  const breakDirtSelector = new Selector([
     new PickUpItemNode(config.BLOCKS.DIRT.names),
+    breakDirtSeq,
   ]);
 
   const smeltItemsSeq = new Sequence([
@@ -131,6 +138,20 @@ function createOverworldProfile(bot, config) {
     "NeedsWoodenPickaxe",
     () => !hasAnyItem(bot, ["wooden_pickaxe"]),
     commandWoodenPickaxeSeq,
+  );
+  const commandStonePickaxeSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+    new RemoveItemNode("cobblestone", 3),
+    new RemoveItemNode(["stick"], 2),
+    new GiveItemNode(["stone_pickaxe"], 1),
+  ]);
+
+  const commandStonePickaxeCond = new conditionNode(
+    "NeedsStonePickaxe",
+    () => !hasAnyItem(bot, ["stone_pickaxe"]),
+    commandStonePickaxeSeq,
   );
 
   const craftWoodenPickaxeSeq = new Sequence([
@@ -186,7 +207,11 @@ function createOverworldProfile(bot, config) {
       config.BT.BREAK_RANGE,
     ),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+  ]);
+
+  const breakStoneSelector = new Selector([
     new PickUpItemNode(config.BLOCKS.STONE.names),
+    breakStoneSeq,
   ]);
 
   const gatherGravelSeq = new Sequence([
@@ -320,13 +345,19 @@ function createOverworldProfile(bot, config) {
       },
       {
         name: "BreakLogs",
-        node: breakLogsSeq,
+        node: breakLogsSelector,
         scoreFn: breakLogsScore,
       },
       {
         name: "BreakDirt",
-        node: breakDirtSeq,
+        node: breakDirtSelector,
         scoreFn: breakDirtScore,
+      },
+
+      {
+        name: "BreakStone",
+        node: breakStoneSelector,
+        scoreFn: breakStoneScore,
       },
       // {
       //   name: "CraftCraftingTable",
@@ -334,7 +365,7 @@ function createOverworldProfile(bot, config) {
       //   scoreFn: craftCraftingTableScore,
       // },
       {
-        name: "CommandCraftingTable",
+        name: "CraftCraftingTable",
         node: commandCraftingTableCond,
         scoreFn: craftCraftingTableScore,
       },
@@ -343,14 +374,10 @@ function createOverworldProfile(bot, config) {
         node: commandWoodenPickaxeCond,
         scoreFn: craftWoodenPickaxeScore,
       },
-      {
-        name: "BreakStone",
-        node: breakStoneSeq,
-        scoreFn: breakStoneScore,
-      },
+
       {
         name: "CraftStonePickaxe",
-        node: craftStonePickaxeSeq,
+        node: commandStonePickaxeSeq,
         scoreFn: craftStonePickaxeScore,
       },
       {

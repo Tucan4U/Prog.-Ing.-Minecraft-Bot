@@ -58,6 +58,7 @@ class PlaceBlockNode extends Node {
           }
         });
       } catch (err) {
+        state["blockTarget"] = null;
         console.log("Error placing block:", err);
         bot.chat("Error placing block");
       }

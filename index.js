@@ -38,7 +38,7 @@ bot.loadPlugin(pathfinder);
 let startFlag = false; // kontrola da li bot treba loviti ili ne
 let worldSensors = null;
 
-const overworldProfile = createOverworldProfile(config);
+const overworldProfile = createOverworldProfile(bot, config);
 const hostileCombatProfile = createHostileCombatProfile(config);
 const netherProfile = createNetherProfile(config);
 
@@ -86,7 +86,7 @@ async function startLoop() {
       console.log(err);
     }
 
-    await new Promise((r) => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, 500));
   }
 }
 
@@ -120,6 +120,7 @@ bot.on("chat", (username, message) => {
   if (message === "logs") {
     bot.chat("/clear");
     bot.chat("/give @s minecraft:diamond_axe");
+    bot.chat("/give @s dirt 10");
     startFlag = true;
   }
   if (message === "profile overworld") {
@@ -134,7 +135,7 @@ bot.on("chat", (username, message) => {
     state.mission.activeProfile = config.PROFILES.NETHER;
     bot.chat("Profile switched: NETHER");
   }
-  
+
   if (message === "inventory") {
     console.log(bot.inventory.items());
   }
@@ -178,15 +179,20 @@ bot.on("chat", (username, message) => {
   if (message === "dig") {
     const blockBellow = bot.blockAt(bot.entity.position.offset(0, -1, 0));
     state.blockTarget = blockBellow; //OVO OSTAJE NAKON I NE ČISTI SE!!
-      
-    if(blockBellow && blockBellow.name !== "air" && blockBellow.name !== "furnace") {
 
+    if (
+      blockBellow &&
+      blockBellow.name !== "air" &&
+      blockBellow.name !== "furnace"
+    ) {
       bot.pathfinder.setGoal(null);
       //await equipBestWeapon(bot, config.PICKAXES);
-      bot.dig(blockBellow).catch((err) => {
+      bot
+        .dig(blockBellow)
+        .catch((err) => {
           console.error("Digggg error:", err);
-      }).then(() => {});
-  
+        })
+        .then(() => {});
     }
   }
 });

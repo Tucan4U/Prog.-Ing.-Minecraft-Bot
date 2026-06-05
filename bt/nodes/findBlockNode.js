@@ -14,8 +14,8 @@ class FindBlockNode extends Node {
     if (!this.mcData) {
       this.mcData = mcData(bot.version);
     }
-    const item = state["lootTarget"];
-    if (item) return "SUCCESS";
+    // const item = state["lootTarget"];
+    // if (item) return "SUCCESS";
 
     let block = state[this.stateKey];
 

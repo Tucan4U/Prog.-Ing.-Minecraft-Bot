@@ -8,9 +8,10 @@ class PickUpItemNode extends Node {
   constructor(configKeyOrItems) {
     super("PickUpItemNode");
     this.configKeyOrItems = configKeyOrItems;
+    this.lastGoal = null;
   }
   async tick(bot, state, config) {
-    await new Promise((r) => setTimeout(r, 500));
+    //await new Promise((r) => setTimeout(r, 500));
     const itemsCache = state.sensors?.items;
     const items = Array.isArray(this.configKeyOrItems)
       ? this.configKeyOrItems
@@ -32,9 +33,19 @@ class PickUpItemNode extends Node {
 
     state.lootTarget = item;
 
-    bot.pathfinder.setGoal(
-      new goals.GoalBlock(item.position.x, item.position.y, item.position.z),
-    );
+    const goalX = Math.floor(item.position.x);
+    const goalY = Math.floor(item.position.y);
+    const goalZ = Math.floor(item.position.z);
+    const goal = `${goalX}:${goalY}:${goalZ}`;
+
+    if (this.lastGoal !== goal) {
+      // Only update the pathfinder goal when the target block position changes.
+      bot.pathfinder.setGoal(
+        new goals.GoalBlock(item.position.x, item.position.y, item.position.z),
+      );
+
+      this.lastGoal = goal;
+    }
 
     return "RUNNING";
   }

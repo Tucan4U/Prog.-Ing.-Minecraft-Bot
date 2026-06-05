@@ -107,7 +107,7 @@ async function loop() {
 bot.on("chat", (username, message) => {
   if (username === bot.username) return;
   if (message === "stop") {
-    bot.chat("Stopping hunt!");
+    bot.chat("Stopping Bot!");
     bot.pathfinder.setGoal(null);
     startFlag = false;
     // Reset state vars and pathfinder
@@ -175,25 +175,6 @@ bot.on("chat", (username, message) => {
   }
   if (message === "clear") {
     bot.chat("/clear @s");
-  }
-  if (message === "dig") {
-    const blockBellow = bot.blockAt(bot.entity.position.offset(0, -1, 0));
-    state.blockTarget = blockBellow; //OVO OSTAJE NAKON I NE ČISTI SE!!
-
-    if (
-      blockBellow &&
-      blockBellow.name !== "air" &&
-      blockBellow.name !== "furnace"
-    ) {
-      bot.pathfinder.setGoal(null);
-      //await equipBestWeapon(bot, config.PICKAXES);
-      bot
-        .dig(blockBellow)
-        .catch((err) => {
-          console.error("Digggg error:", err);
-        })
-        .then(() => {});
-    }
   }
 });
 

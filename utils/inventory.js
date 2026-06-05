@@ -30,15 +30,34 @@ async function equipBestWeapon(bot, weapons) {
   }
 }
 
-function needsFood(bot, state, config) {
-  const neededFood = config.FOOD || config.RAWFOOD;
+function getFoodHuntStartThreshold(config) {
+  return config?.FURNACE?.FOOD_THRESHOLDS?.HUNT_START_AT ?? 10;
+}
 
-  const foodCount = bot.inventory
-    .items()
-    .filter((i) => neededFood.includes(i.name)) //TODOO
-    .reduce((sum, i) => sum + i.count, 0);
+function getFoodHuntStopThreshold(config) {
+  return config?.FURNACE?.FOOD_THRESHOLDS?.HUNT_STOP_AT ?? 32;
+}
 
-  return foodCount < 32;
+function getTotalFoodCount(bot, config) {
+  const rawFoodNames = config?.ITEMS?.RAWFOOD?.names || [];
+  const cookedFoodNames = config?.ITEMS?.COOKEDFOOD?.names || [];
+  return countItemsByNames(bot, [...rawFoodNames, ...cookedFoodNames]);
+}
+
+function shouldHuntForFood(bot, state, config) {
+  const totalFood = getTotalFoodCount(bot, config);
+  const startThreshold = getFoodHuntStartThreshold(config);
+  const stopThreshold = getFoodHuntStopThreshold(config);
+
+  if (totalFood < startThreshold) {
+    state.foodHuntActive = true;
+  } else if (totalFood >= stopThreshold) {
+    state.foodHuntActive = false;
+  } else if (typeof state.foodHuntActive !== "boolean") {
+    state.foodHuntActive = totalFood < stopThreshold;
+  }
+
+  return state.foodHuntActive;
 }
 
 function numOfBlocks(bot, state, config, blocksKey) {
@@ -91,7 +110,10 @@ function hasAnyItem(bot, names) {
 
 module.exports = {
   equipBestWeapon,
-  needsFood,
+  getFoodHuntStartThreshold,
+  getFoodHuntStopThreshold,
+  getTotalFoodCount,
+  shouldHuntForFood,
   numOfBlocks,
   countItemsByNames,
   findInventoryItemByNames,

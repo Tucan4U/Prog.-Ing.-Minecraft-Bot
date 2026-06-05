@@ -15,7 +15,9 @@ class PlaceBlockNode extends Node {
       state.mission.placedItems = {};
     }
 
-    if (state.mission.placedItems[this.configKey]) return "SUCCESS";
+    if (state.mission.placedItems[this.configKey]) {
+      return "SUCCESS";
+    }
 
     if (!this.mcData) {
       this.mcData = mcData(bot.version);
@@ -25,8 +27,8 @@ class PlaceBlockNode extends Node {
 
     let blockAbove = state[this.stateKey];
 
-    bot.chat(`${this.configKey}`);
-    bot.chat(`${blockToPlaceId}`);
+    //bot.chat(`${this.configKey}`);
+    //bot.chat(`${blockToPlaceId}`);
     let blockBelow = bot.blockAt(blockAbove.position.offset(0, -1, 0));
 
     if (!bot.inventory.items().some((item) => item.name === this.configKey)) {
@@ -50,10 +52,12 @@ class PlaceBlockNode extends Node {
         await bot.placeBlock(blockBelow, new Vec3(0, 1, 0)).then(() => {
           const newBlock = bot.blockAt(blockAbove.position);
           if (newBlock.name === this.configKey) {
-            state.mission.placedItems[this.configKey] = 1;
+            state.mission.placedItems[this.configKey] = 1; 
             if (this.configKey === "crafting_table") {
-              state.mission.hasCraftingTable = true;
+              state.hasCraftingTable = true;
+              bot.chat("I placed a crafting table!");
             }
+
             return "SUCCESS";
           }
         });

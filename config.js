@@ -37,7 +37,6 @@ module.exports = {
     "wooden_shovel",
   ],
 
-  RAWFOOD: ["beef", "porkchop", "chicken", "mutton"],
   //Parametri koji utječu na SUCCESS ili FAILURE unutar BT-a, zbog toga i ime "BT"
   BT: {
     MOVE_NEAR_DISTANCE: 4,
@@ -70,18 +69,6 @@ module.exports = {
       ],
       maxBlockDistance: 16,
     },
-    STONE: {
-      names: ["cobblestone", "stone"],
-      maxBlockDistance: 16,
-    },
-    NETHER_PORTAL: {
-      names: ["nether_portal"],
-      maxBlockDistance: 64,
-    },
-    BLAZE_SPAWNER: {
-      names: ["spawner", "mob_spawner"],
-      maxBlockDistance: 64,
-    },
     PLANKS: {
       names: [
         "acacia_planks",
@@ -94,6 +81,22 @@ module.exports = {
         "mangrove_planks",
         "warped_planks",
       ],
+    },
+    STONE: {
+      names: ["cobblestone", "stone"],
+      maxBlockDistance: 16,
+    },
+    CRAFTING_TABLE: {
+      names: ["crafting_table"],
+      maxBlockDistance: 16,
+    },
+    NETHER_PORTAL: {
+      names: ["nether_portal"],
+      maxBlockDistance: 64,
+    },
+    BLAZE_SPAWNER: {
+      names: ["spawner", "mob_spawner"],
+      maxBlockDistance: 64,
     },
     FURNACE: {
       names: ["furnace"],
@@ -133,16 +136,35 @@ module.exports = {
     FUEL: {
       names: ["coal"],
     },
+    GOLD_IRON: { //used in SmeltItemsSeq
+      names: ["raw_gold", "raw_iron"],
+    },
+    FOOD_THRESHOLDS: {
+      HUNT_START_AT: 10,
+      HUNT_STOP_AT: 32,
+    },
+    SMELTING_THRESHOLDS: {
+      IRON: 30,
+      GOLD: 5,
+    },
     ITEMS_PER_FUEL_UNIT: 8,
     TIME_PER_ITEM_MS: 10000,
     BURN_MS_PER_FUEL_UNIT: 1600,
   },
+
+ 
   ITEMS: {
-    GRAVEL: {
-      names: ["gravel", "flint"],
-    },
     CRAFTING_TABLE: {
       names: ["crafting_table"],
+    },
+    RAWFOOD: { //used in CookFoodSeq
+      names: ["beef", "porkchop", "chicken", "mutton"],
+    },
+    COOKEDFOOD: {
+      names: ["cooked_beef", "cooked_porkchop", "cooked_chicken", "cooked_mutton"],
+    },
+    GRAVEL: {
+      names: ["gravel", "flint"],
     },
     COAL: {
       names: ["coal"],

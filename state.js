@@ -6,17 +6,9 @@ module.exports = {
   digTask: null, //Dali trenutno bot razbija neki blok, korišteno u MoveToBlockNode i BreakLogNode
   // Block target specifically for blaze spawner searches.
   blazeSpawnerBlock: null,
-  hasEnoughLogs: false,
-  hasEnoughStone: false,
-  hasEnoughDirt: false,
+  
   mission: {
     activeProfile: "OVERWORLD",
-    // This is connected to the craftingTableSequence and it's scoring system
-    hasCraftingTable: false,
-    // This is connected to the scoring system of the craftWoodenPickaxe
-    hasWoodenPickaxe: false,
-
-    hasStonePickaxe: false,
     // Nether portal entry request flag.
     enterNetherRequested: false,
     // Fortress search and travel request flag.
@@ -28,13 +20,10 @@ module.exports = {
     fortressTarget: null,
     // Mode - AUTONOMOUS or MANUAL
     netherMode: null,
-    // Craft-sequence progress cache used to survive repeated BT ticks.
-    craftedItems: null,
     // Placed-block progress cache used by block placement sequences.
     placedItems: null,
-
-    craftWoodenPickaxeRequested: false,
   },
+
   // Furnace workflow state (reserved by PrepareFurnaceMaterialsNode)
   furnaceWorkflowStarted: false,
   furnacePlaced: false,
@@ -49,12 +38,36 @@ module.exports = {
   furnaceCurrentInputName: null,
   furnaceCurrentBatchCount: 0,
   furnaceContainer: null,
+
   // Pit digging workflow state
   pitDigTask: null,
   pitStartY: null,
   pitTargetY: null,
   inPit: false,
 
+  //Crafting workflow state
+  craftedItems: null, // Craft-sequence progress cache used to survive repeated BT ticks.
+  isCrafting: false, // Flag to indicate if a crafting operation is currently in progress
+  
+
+  // Inventory memory for tracking what the bot has seen in its inventory, to avoid relying solely on the current state of the inventory which might be mid-operation (e.g. during crafting or furnace loading).
+  hasEnoughLogs: false,
+  hasEnoughStone: false,
+  hasEnoughDirt: false,
+
+  hasEnoughCoal: false,
+  hasEnoughRawIron: false,
+  hasEnoughRawGold: false,
+  hasEnoughDiamonds: false,
+
+  hasCraftingTable: false,
+  hasWoodenPickaxe: false,
+  hasStonePickaxe: false,
+  hasIronPickaxe: false,
+  hasDiamondPickaxe: false,
+  hasFurnace: false,
+
+  foodHuntActive: false,
   sensors: {
     entities: [],
     items: [],

@@ -6,8 +6,8 @@ class MoveToMobNode extends Node {
   constructor(stateKey = 'currentTarget', nearDistance = 2, successDistance = 3, statusThrottleMs = 3000) {
     super('MoveToMob');
     this.stateKey = stateKey;
-    this.nearDistance = nearDistance;
-    this.successDistance = successDistance;
+    this.nearDistance = 1;
+    this.successDistance = 2;
     this.statusThrottleMs = statusThrottleMs;
     this.lastGoal = null;
   }

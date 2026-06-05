@@ -1,13 +1,13 @@
 // Combat score funkcije procjenjuju isplativost lova na različite targete.
-const { needsFood } = require('../../utils/inventory');
+const { shouldHuntForFood } = require('../../utils/inventory');
 const { findMobs } = require('../../behaviors/findEnteties');
 
 function huntAnimalsScore(bot, state, config) {
-  if (!needsFood(bot, state, config)) return 0;
+  if (!shouldHuntForFood(bot, state, config)) return 0;
 
   const entities = state.sensors?.entities;
   const animals = findMobs(bot, config.ANIMALS, entities);
-  return animals.length ? 80 : 0;
+  return animals.length ? 30 : 0;
 }
 
 function huntHostileScore(bot, state, config) {

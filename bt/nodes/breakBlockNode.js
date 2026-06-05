@@ -26,6 +26,8 @@ class BreakBlockNode extends Node {
       console.log("Block is already air");
       state["digTask"] = null;
       state[this.stateKey] = null;
+      state.blockTarget = null;
+      state.mission.placedItems = {};
       return "SUCCESS";
     }
 

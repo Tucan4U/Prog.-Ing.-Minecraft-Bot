@@ -22,83 +22,68 @@ const ResetFurnaceWorkflowNode = require("../nodes/resetFurnaceWorkflowNode");
 const CraftItemNode = require("../nodes/craftItemNode");
 const FindInteractiveBlockPlacementNode = require("../nodes/findInteractiveBlockPlaceNode");
 const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
-const ResetCraftingWorkflowNode = require("../nodes/resetCraftingWorkflowNode");
 const RemoveItemNode = require("../nodes/removeItemNode");
 const GiveItemNode = require("../nodes/giveItemNode");
 
 const {
   pickUpFoodScore,
-  pickUpCraftingTableScore,
+  cookFoodScore,
+  smeltItemsScore,
 } = require("../scores/survivalScores");
 const { huntAnimalsScore } = require("../scores/combatScores");
 const {
-  breakLogsScore,
-  breakStoneScore,
-  breakDirtScore,
+  gatherLogsScore,
+  gatherStoneScore,
+  gatherDirtScore,
+  gatherCoalScore,
+  gatherIronScore,
 } = require("../scores/gatheringScores");
 const {
   craftCraftingTableScore,
+  pickUpCraftingTableScore,
+  craftFurnaceScore,
   craftWoodenPickaxeScore,
   craftStonePickaxeScore,
+  craftIronPickaxeScore,
+  craftDiamondPickaxeScore,
 } = require("../scores/craftingScores");
+
+const { resetScore } = require("../scores/resetScore");
 
 const { hasAnyItem } = require("../../utils/inventory");
 
 function createOverworldProfile(bot, config) {
-  const pickUpFoodNode = new PickUpItemNode("RAWFOOD");
-  const pickUpCraftingTableNode = new PickUpItemNode(
-    config.ITEMS.CRAFTING_TABLE.names,
-  );
+  const pickUpFoodNode = new PickUpItemNode(config.ITEMS.RAWFOOD.names);
+  const pickUpCraftingTableNode = new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names);
+
   const huntAnimalsSeq = new Sequence([
     new FindMobNode("ANIMALS"),
-    new MoveToMobNode(
-      "currentTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.MOVE_SUCCESS_DISTANCE,
-      config.BT.MOVE_STATUS_THROTTLE_MS,
-    ),
+    new MoveToMobNode("currentTarget",config.BT.MOVE_NEAR_DISTANCE,config.BT.MOVE_SUCCESS_DISTANCE,config.BT.MOVE_STATUS_THROTTLE_MS),
     new AttackNode(),
   ]);
 
-  const breakLogsSeq = new Sequence([
-    new FindBlockNode(
-      "LOGS",
-      "blockTarget",
-      config.BLOCKS.LOGS.maxBlockDistance,
-    ),
-    new MoveToBlockNode(
-      "blockTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,
-    ),
+  const gatherLogsSeq = new Sequence([
+    new FindBlockNode("LOGS", "blockTarget", config.BLOCKS.LOGS.maxBlockDistance),
+    new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
   ]);
-  const breakLogsSelector = new Selector([
+  const gatherLogsSelector = new Selector([
     new PickUpItemNode(config.BLOCKS.LOGS.names),
-    breakLogsSeq,
+    gatherLogsSeq,
   ]);
 
-  const breakDirtSeq = new Sequence([
-    new FindBlockNode(
-      "DIRT",
-      "blockTarget",
-      config.BLOCKS.DIRT.maxBlockDistance,
-    ),
-    new MoveToBlockNode(
-      "blockTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,
-    ),
+  const gatherDirtSeq = new Sequence([
+    new FindBlockNode("DIRT", "blockTarget", config.BLOCKS.DIRT.maxBlockDistance),
+    new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE,config.BT.BREAK_RANGE),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "SHOVELS"),
   ]);
-
-  const breakDirtSelector = new Selector([
+  const gatherDirtSelector = new Selector([
     new PickUpItemNode(config.BLOCKS.DIRT.names),
-    breakDirtSeq,
+    gatherDirtSeq,
   ]);
 
-  const smeltItemsSeq = new Sequence([
-    new PrepareFurnaceMaterialsNode("RAWFOOD", config.FURNACE.FUEL.names),
+  const cookFoodSeq = new Sequence([
+    new PrepareFurnaceMaterialsNode(config.ITEMS.RAWFOOD.names, config.FURNACE.FUEL.names),
     new DigPitNode(3), // improvizirana "furnace setup" sekvenca - iskopaj rupu, baci stvari unutra, pokrij zemljom
     new PlaceBlockNode("furnace"),
     new PlaceCoverBlockNode(),
@@ -108,9 +93,15 @@ function createOverworldProfile(bot, config) {
     new ResetFurnaceWorkflowNode(),
   ]);
 
-  const craftCraftingTableSeq = new Sequence([
-    new CraftItemNode(config.BLOCKS.PLANKS.names, 4),
-    new CraftItemNode(["crafting_table"], 1),
+  const smeltItemsSeq = new Sequence([
+    new PrepareFurnaceMaterialsNode(config.FURNACE.GOLD_IRON.names, config.FURNACE.FUEL.names),
+    new DigPitNode(3), // improvizirana "furnace setup" sekvenca - iskopaj rupu, baci stvari unutra, pokrij zemljom
+    new PlaceBlockNode("furnace"),
+    new PlaceCoverBlockNode(),
+    new LoadFurnaceNode(),
+    new WaitFurnaceNode(2000),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new ResetFurnaceWorkflowNode(),
   ]);
 
   const commandCraftingTableSeq = new Sequence([
@@ -125,256 +116,200 @@ function createOverworldProfile(bot, config) {
   );
 
   const commandWoodenPickaxeSeq = new Sequence([
-    new FindInteractiveBlockPlacementNode(),
-    new PlaceBlockNode("crafting_table"),
-    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
     new RemoveItemNode(config.BLOCKS.LOGS.names, 2),
-    new GiveItemNode(["jungle_planks"], 3),
+    new GiveItemNode(["oak_planks"], 3),
     new GiveItemNode(["stick"], 2),
     new GiveItemNode(["wooden_pickaxe"], 1),
   ]);
-
   const commandWoodenPickaxeCond = new conditionNode(
     "NeedsWoodenPickaxe",
     () => !hasAnyItem(bot, ["wooden_pickaxe"]),
     commandWoodenPickaxeSeq,
   );
+
   const commandStonePickaxeSeq = new Sequence([
-    new FindInteractiveBlockPlacementNode(),
-    new PlaceBlockNode("crafting_table"),
-    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
-    new RemoveItemNode("cobblestone", 3),
-    new RemoveItemNode(["stick"], 2),
+    new RemoveItemNode("cobblestone", 3), //INPUT : 1 LOG & 3 COBBLESTONE
+    new RemoveItemNode(config.BLOCKS.LOGS.names, 1),
+    new GiveItemNode(["stick"], 6), //OUTPUT : 6 STICKS(1 LOG -> 8 STICKS - 2 STICKS = 6 STICKS) + 1 STONE PICKAXE
     new GiveItemNode(["stone_pickaxe"], 1),
   ]);
-
   const commandStonePickaxeCond = new conditionNode(
     "NeedsStonePickaxe",
     () => !hasAnyItem(bot, ["stone_pickaxe"]),
     commandStonePickaxeSeq,
   );
 
-  const craftWoodenPickaxeSeq = new Sequence([
-    new FindInteractiveBlockPlacementNode(),
-    new PlaceBlockNode("crafting_table"),
-    //new CraftItemNode(config.BLOCKS.PLANKS.names, 8),
-    new CraftItemNode(["stick"], 4),
-    new CraftItemUsingTableNode("wooden_pickaxe"),
-    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
-    new ResetCraftingWorkflowNode(),
-
-    //new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
+  const commandIronPickaxeSeq = new Sequence([
+    new RemoveItemNode("iron_ingot", 3), //INPUT : 1 LOG & 3 IRON INGOTS
+    new RemoveItemNode(config.BLOCKS.LOGS.names, 1),
+    new GiveItemNode(["stick"], 6), //OUTPUT : 6 STICKS(1 LOG -> 8 STICKS - 2 STICKS = 6 STICKS) + 1 IRON PICKAXE
+    new GiveItemNode(["iron_pickaxe"], 1),
   ]);
+  const commandIronPickaxeCond = new conditionNode(
+    "NeedsIronPickaxe",
+    () => !hasAnyItem(bot, ["iron_pickaxe"]),
+    commandIronPickaxeSeq,
+  );
 
-  const craftStonePickaxeSeq = new Sequence([
-    new FindInteractiveBlockPlacementNode(),
-    new PlaceBlockNode("crafting_table"),
-    new CraftItemNode(config.BLOCKS.PLANKS.names, 8),
-    new CraftItemNode(["stick"], 2),
-    new CraftItemUsingTableNode("stone_pickaxe"),
-    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
-    new ResetCraftingWorkflowNode(),
-    //new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
+  const commandDiamondPickaxeSeq = new Sequence([
+    new RemoveItemNode("diamond", 3), //INPUT : 1 LOG & 3 DIAMOND
+    new RemoveItemNode(config.BLOCKS.LOGS.names, 1),
+    new GiveItemNode(["stick"], 6), //OUTPUT : 6 STICKS(1 LOG -> 8 STICKS - 2 STICKS = 6 STICKS) + 1 DIAMOND PICKAXE
+    new GiveItemNode(["diamond_pickaxe"], 1),
   ]);
+  const commandDiamondPickaxeCond = new conditionNode(
+    "NeedsDiamondPickaxe",
+    () => !hasAnyItem(bot, ["diamond_pickaxe"]),
+    commandDiamondPickaxeSeq,
+  );
 
-  const craftIronPickaxeSeq = new Sequence([
-    new FindInteractiveBlockPlacementNode(),
-    new PlaceBlockNode("crafting_table"),
-    new CraftItemNode(["stick"], 2),
-    new CraftItemUsingTableNode("iron_pickaxe"),
-    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
-    new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
+  const commandFurnaceSeq = new Sequence([
+    new RemoveItemNode("cobblestone", 8),
+    new GiveItemNode(["furnace"], 1),
   ]);
+  const commandFurnaceCond = new conditionNode(
+    "NeedsFurnace",
+    () => !hasAnyItem(bot, ["furnace"]),
+    commandFurnaceSeq,
+  );
 
-  const craftDiamondPickaxeSeq = new Sequence([
-    new FindInteractiveBlockPlacementNode(),
-    new PlaceBlockNode("crafting_table"),
-    new CraftItemNode(["stick"], 2),
-    new CraftItemUsingTableNode("diamond_pickaxe"),
-    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
-    new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
-  ]);
-
-  const breakStoneSeq = new Sequence([
-    new FindBlockNode(
-      "STONE",
-      "blockTarget",
-      config.BLOCKS.STONE.maxBlockDistance,
-    ),
-    new MoveToBlockNode(
-      "blockTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,
-    ),
+  const gatherStoneSeq = new Sequence([
+    new FindBlockNode("STONE","blockTarget",config.BLOCKS.STONE.maxBlockDistance),
+    new MoveToBlockNode("blockTarget",config.BT.MOVE_NEAR_DISTANCE,config.BT.BREAK_RANGE),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
   ]);
-
-  const breakStoneSelector = new Selector([
+  const gatherStoneSelector = new Selector([
     new PickUpItemNode(config.BLOCKS.STONE.names),
-    breakStoneSeq,
+    gatherStoneSeq,
   ]);
 
   const gatherGravelSeq = new Sequence([
-    new FindBlockNode(
-      "GRAVEL",
-      "blockTarget",
-      config.BLOCKS.GRAVEL.maxBlockDistance,
-    ),
-    new MoveToBlockNode(
-      "blockTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,
-    ),
+    new FindBlockNode("GRAVEL","blockTarget",config.BLOCKS.GRAVEL.maxBlockDistance),
+    new MoveToBlockNode("blockTarget",config.BT.MOVE_NEAR_DISTANCE,config.BT.BREAK_RANGE),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+  ]);
+  const gatherGravelSelector = new Selector([
     new PickUpItemNode(config.ITEMS.GRAVEL.names),
+    gatherGravelSeq,
   ]);
 
   const gatherCoalSeq = new Sequence([
-    new FindBlockNode(
-      "COAL",
-      "blockTarget",
-      config.BLOCKS.COAL.maxBlockDistance,
-    ),
-    new MoveToBlockNode(
-      "blockTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,
-    ),
+    new FindBlockNode("COAL","blockTarget",config.BLOCKS.COAL.maxBlockDistance),
+    new MoveToBlockNode("blockTarget",config.BT.MOVE_NEAR_DISTANCE,config.BT.BREAK_RANGE),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+  ]);
+  const gatherCoalSelector = new Selector([
     new PickUpItemNode(config.ITEMS.COAL.names),
+    gatherCoalSeq,
   ]);
 
   const gatherIronSeq = new Sequence([
-    new FindBlockNode(
-      "IRON",
-      "blockTarget",
-      config.BLOCKS.IRON.maxBlockDistance,
-    ),
-    new MoveToBlockNode(
-      "blockTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,
-    ),
+    new FindBlockNode("IRON","blockTarget",config.BLOCKS.IRON.maxBlockDistance),
+    new MoveToBlockNode("blockTarget",config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+  ]);
+  const gatherIronSelector = new Selector([
     new PickUpItemNode(config.ITEMS.IRON.names),
+    gatherIronSeq,
   ]);
 
   const gatherGoldSeq = new Sequence([
-    new FindBlockNode(
-      "GOLD",
-      "blockTarget",
-      config.BLOCKS.GOLD.maxBlockDistance,
-    ),
-    new MoveToBlockNode(
-      "blockTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,
-    ),
+    new FindBlockNode("GOLD","blockTarget",config.BLOCKS.GOLD.maxBlockDistance),
+    new MoveToBlockNode("blockTarget",config.BT.MOVE_NEAR_DISTANCE,config.BT.BREAK_RANGE),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+  ]);
+  const gatherGoldSelector = new Selector([
     new PickUpItemNode(config.ITEMS.GOLD.names),
+    gatherGoldSeq,
   ]);
 
   const gatherDiamondSeq = new Sequence([
-    new FindBlockNode(
-      "DIAMOND",
-      "blockTarget",
-      config.BLOCKS.DIAMOND.maxBlockDistance,
-    ),
-    new MoveToBlockNode(
-      "blockTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,
-    ),
+    new FindBlockNode("DIAMOND","blockTarget",config.BLOCKS.DIAMOND.maxBlockDistance),
+    new MoveToBlockNode("blockTarget",config.BT.MOVE_NEAR_DISTANCE,config.BT.BREAK_RANGE),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+  ]);
+  const gatherDiamondSelector = new Selector([
     new PickUpItemNode(config.ITEMS.DIAMOND.names),
+    gatherDiamondSeq,
   ]);
 
   const gatherObsidianSeq = new Sequence([
-    new FindBlockNode(
-      "OBSIDIAN",
-      "blockTarget",
-      config.BLOCKS.OBSIDIAN.maxBlockDistance,
-    ),
-    new MoveToBlockNode(
-      "blockTarget",
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.BREAK_RANGE,
-    ),
+    new FindBlockNode("OBSIDIAN","blockTarget",config.BLOCKS.OBSIDIAN.maxBlockDistance),
+    new MoveToBlockNode("blockTarget",config.BT.MOVE_NEAR_DISTANCE,config.BT.BREAK_RANGE),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+  ]);
+  const gatherObsidianSelector = new Selector([
     new PickUpItemNode(config.ITEMS.OBSIDIAN.names),
+    gatherObsidianSeq,
   ]);
 
   return {
     candidates: [
-      // {
-      //   name: "CommandWoodenPickaxe",
-      //   node: testWoodenPickaxeCond,
-      //   scoreFn: () => 1000,
-      // },
-
+      {
+        name: "GatherDirt",
+        node: gatherDirtSelector,
+        scoreFn: gatherDirtScore,
+      },
+      {
+        name: "GatherLogs",
+        node: gatherLogsSelector,
+        scoreFn: gatherLogsScore,
+      },
+      {
+        name: "GatherStone",
+        node: gatherStoneSelector,
+        scoreFn: gatherStoneScore,
+      },
       {
         name: "GatherCoal",
-        node: gatherCoalSeq,
-        scoreFn: () => 0,
+        node: gatherCoalSelector,
+        scoreFn: gatherCoalScore,
       },
       {
         name: "GatherIron",
-        node: gatherIronSeq,
-        scoreFn: () => 0,
+        node: gatherIronSelector,
+        scoreFn: gatherIronScore,
       },
       {
         name: "GatherGold",
-        node: gatherGoldSeq,
+        node: gatherGoldSelector,
         scoreFn: () => 0,
       },
       {
         name: "GatherDiamond",
-        node: gatherDiamondSeq,
+        node: gatherDiamondSelector,
         scoreFn: () => 0,
       },
       {
         name: "GatherObsidian",
-        node: gatherObsidianSeq,
+        node: gatherObsidianSelector,
         scoreFn: () => 0,
       },
-
       {
         name: "SmeltItems",
         node: smeltItemsSeq,
-        scoreFn: () => 1,
+        scoreFn: smeltItemsScore,
       },
       {
-        name: "BreakLogs",
-        node: breakLogsSelector,
-        scoreFn: breakLogsScore,
+        name: "CookFood",
+        node: cookFoodSeq,
+        scoreFn: cookFoodScore,
       },
-      {
-        name: "BreakDirt",
-        node: breakDirtSelector,
-        scoreFn: breakDirtScore,
-      },
-
-      {
-        name: "BreakStone",
-        node: breakStoneSelector,
-        scoreFn: breakStoneScore,
-      },
-      // {
-      //   name: "CraftCraftingTable",
-      //   node: craftCraftingTableSeq,
-      //   scoreFn: craftCraftingTableScore,
-      // },
       {
         name: "CraftCraftingTable",
         node: commandCraftingTableCond,
         scoreFn: craftCraftingTableScore,
       },
       {
+        name: "CraftFurnace",
+        node: commandFurnaceCond,
+        scoreFn: craftFurnaceScore,
+      },
+      {
         name: "CraftWoodenPickaxe",
         node: commandWoodenPickaxeCond,
         scoreFn: craftWoodenPickaxeScore,
       },
-
       {
         name: "CraftStonePickaxe",
         node: commandStonePickaxeSeq,
@@ -382,13 +317,13 @@ function createOverworldProfile(bot, config) {
       },
       {
         name: "CraftIronPickaxe",
-        node: craftIronPickaxeSeq,
-        scoreFn: 0,
+        node: commandIronPickaxeSeq,
+        scoreFn: craftIronPickaxeScore,
       },
       {
         name: "CraftDiamondPickaxe",
-        node: craftDiamondPickaxeSeq,
-        scoreFn: 0,
+        node: commandDiamondPickaxeSeq,
+        scoreFn: craftDiamondPickaxeScore,
       },
       {
         name: "PickUpFood",
@@ -408,7 +343,7 @@ function createOverworldProfile(bot, config) {
       {
         name: "Idle",
         node: new IdleNode(),
-        scoreFn: () => 1,
+        scoreFn: resetScore,
       },
     ],
     fallbackNode: new IdleNode(),

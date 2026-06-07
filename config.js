@@ -47,6 +47,7 @@ module.exports = {
     MOVE_NEAR_DISTANCE: 4,
     MOVE_SUCCESS_DISTANCE: 5,
     ATTACK_RANGE: 4,
+    INTERACT_RANGE: 4,
     MOVE_STATUS_THROTTLE_MS: 3000,
     BREAK_RANGE: 5,
   },
@@ -134,6 +135,14 @@ module.exports = {
       names: ["obsidian"],
       maxBlockDistance: 16,
     },
+    WATER: {
+      names: ["water"],
+      maxBlockDistance: 16,
+    },
+    LAVA: {
+      names: ["lava"],
+      maxBlockDistance: 16,
+    },
   },
 
   // Furnace / smelting related config
@@ -186,6 +195,9 @@ module.exports = {
     OBSIDIAN: {
       names: ["obsidian"],
     },
+    BUCKET: {
+      names: ["bucket"],
+    },
   },
   //Dynamic state that can be used across the bot, e.g. for tracking progress on multi-step tasks
   ITEM_THRESHOLDS: { //food and raw iron/gold thresholds are under FURNACE config
@@ -203,6 +215,7 @@ module.exports = {
     RAW_GOLD_MAX: 5,
     DIAMOND_MIN: 0,
     DIAMOND_MAX: 24,
+    OBSIDIAN_MAX: 10,
   },
 
   // MOBOVI

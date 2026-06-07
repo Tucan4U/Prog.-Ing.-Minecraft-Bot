@@ -44,6 +44,20 @@ class FindBlockNode extends Node {
       this.maxBlockDistance *= 2;
       return "FAILURE";
     }
+
+    const checkLiquidBlock = bot.blockAt(blocks[0]);
+
+    if(checkLiquidBlock._properties || checkLiquidBlock._properties !== {}) {
+      for(let block of blocks){
+        let blockInfo = bot.blockAt(block);
+        if(blockInfo._properties?.level === "0"){
+          console.log("Found liquid 'block' at: ", block);
+          blocks[0] = block;
+          break;
+        }
+      }
+    }
+
     state[this.stateKey] = bot.blockAt(blocks[0]);
     console.log(
       `New block found: ${blocks[0].x}, ${blocks[0].y}, ${blocks[0].z}`,

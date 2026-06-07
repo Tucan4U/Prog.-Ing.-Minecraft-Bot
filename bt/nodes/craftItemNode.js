@@ -5,11 +5,16 @@ class CraftItemNode extends Node {
     super("CraftItem");
     this.configKeyOrItems = configKeyOrItems;
     this.numberOfItemsToCraft = numberOfItemsToCraft;
+    this.Recipe = null;
+    this.mcData = null;
   }
 
   async tick(bot, state, config) {
-    if (!state.craftedItems) {
-      state.craftedItems = {};
+    if (!this.Recipe)
+      this.Recipe = require("prismarine-recipe")(bot.version).Recipe;
+    if (!this.mcData) this.mcData = require("minecraft-data")(bot.version);
+    if (!state.mission.craftedItems) {
+      state.mission.craftedItems = {};
     }
 
     const desiredNames = Array.isArray(this.configKeyOrItems)
@@ -18,7 +23,9 @@ class CraftItemNode extends Node {
     const targetCount = this.numberOfItemsToCraft ?? 1;
     for (const key in state.craftedItems) {
       if (desiredNames.includes(key)) {
-        if (state.craftedItems[key] >= targetCount) return "SUCCESS";
+        if (state.mission.craftedItems[key] >= targetCount) {
+          return "SUCCESS";
+        }
       }
     }
     console.log(
@@ -60,6 +67,18 @@ class CraftItemNode extends Node {
           });
 
         return "RUNNING";
+      } else {
+        console.log(this.Recipe.find(id)[0]);
+        if (this.Recipe.find(id)[0].ingredients) {
+          const missingItemId = this.Recipe.find(id)[0].ingredients[0].id;
+          //console.log("Ingredients: ", missingItemId);
+          console.log("Missing items: ", this.mcData[missingItemId]);
+        }
+        if (this.Recipe.find(id)[0].inShape) {
+          const missingItemId = this.Recipe.find(id)[0].inShape[0][0].id;
+          //console.log("In shape: ", missingItemId);
+          console.log("Missing items: ", this.mcData.items[missingItemId].name);
+        }
       }
     }
 

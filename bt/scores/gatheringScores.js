@@ -5,6 +5,7 @@ const {
   shouldHuntForFood,
 } = require("../../utils/inventory");
 
+
 function gatherDirtScore(bot, state, cfg) {
   const dirtCount = countItemsByNames(bot, cfg.BLOCKS.DIRT.names || []);
 

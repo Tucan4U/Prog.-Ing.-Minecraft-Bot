@@ -2,6 +2,7 @@ const {
   findInventoryItemByNames,
   countItemsByNames,
   hasAllItems,
+  hasAnyItem,
 } = require("../../utils/inventory");
 
 function hasNearbyCraftingTableItem(state, config) {
@@ -144,7 +145,7 @@ function craftBucketScore(bot, state, config) {
   // INPUT : 3 IRON INGOTS + 1 LOG
   const ironCount = countItemsByNames(bot, ["iron_ingot"]);
   if (ironCount < 3) return 0;
-  return 39;
+  return 42;
 }
 
 function craftFlintAndSteelScore(bot, state, config) {
@@ -172,6 +173,17 @@ function craftIronArmorScore(bot, state, config) {
 
   const ironCount = countItemsByNames(bot, ["iron_ingot"]);
   if (ironCount < 19) return 0;
+
+  return 38;
+}
+function craftGoldenHelmetScore(bot, state, config) {
+  if(hasAnyItem(bot, ["golden_helmet"]) && findInventoryItemByNames(bot, ["crafting_table"]) !== null) {
+    state.hasGoldenHelmet = true;
+  }
+  if(state.hasGoldenHelmet) return 0;
+
+  const goldCount = countItemsByNames(bot, ["gold_ingot"]);
+  if (goldCount < 5) return 0;
 
   return 38;
 }
@@ -238,6 +250,7 @@ module.exports = {
   craftIronPickaxeScore,
   craftDiamondPickaxeScore,
   craftIronArmorScore,
+  craftGoldenHelmetScore,
   craftBucketScore,
   craftFlintAndSteelScore,
   craftDiamondSwordScore,

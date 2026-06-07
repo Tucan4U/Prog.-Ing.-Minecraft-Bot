@@ -1,6 +1,7 @@
 const { Node } = require("../behaviorTree");
 const mcData = require("minecraft-data");
 const Vec3 = require("vec3");
+const { findInventoryItemByNames } = require("../../utils/inventory");
 
 class PlaceBlockNode extends Node {
   constructor(configKey, stateKey = "blockTarget") {
@@ -17,6 +18,10 @@ class PlaceBlockNode extends Node {
 
     let blockAbove = state[this.stateKey];
 
+    if (!blockAbove || !blockAbove.position) {
+      return "FAILURE";
+    }
+
     if (blockAbove) {
       const currBlock = bot.blockAt(blockAbove.position);
       if (
@@ -32,21 +37,18 @@ class PlaceBlockNode extends Node {
       this.mcData = mcData(bot.version);
     }
 
-    let blockToPlaceId = this.mcData.itemsByName[this.configKey]?.id;
+    const blockToPlace = findInventoryItemByNames(bot, [this.configKey]);
 
-    bot.chat(`${this.configKey}`);
-    bot.chat(`${blockToPlaceId}`);
-    let blockBelow = bot.blockAt(blockAbove.position.offset(0, -1, 0));
-
-    if (!bot.inventory.items().some((item) => item.name === this.configKey)) {
+    if (!blockToPlace) {
       console.log(`No ${this.configKey} in inventory!`);
       return "FAILURE";
     }
+
     try {
-      await bot.equip(blockToPlaceId, "hand");
+      await bot.equip(blockToPlace, "hand");
     } catch (err) {
       console.log("No block in inventory:", err);
-      bot.chat("No block in inventory");
+      return "FAILURE";
     }
 
     const aroundBlockAbove = [

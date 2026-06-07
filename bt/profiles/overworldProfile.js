@@ -24,11 +24,16 @@ const FindInteractiveBlockPlacementNode = require("../nodes/findInteractiveBlock
 const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
 const RemoveItemNode = require("../nodes/removeItemNode");
 const GiveItemNode = require("../nodes/giveItemNode");
+const EquipGearNode = require("../nodes/equipGearNode");
+const EquipItemNode = require("../nodes/equipItemNode");
+const InteractWithBlockNode = require("../nodes/interactWithBlockNode");
 
 const {
   pickUpFoodScore,
   cookFoodScore,
   smeltItemsScore,
+  equipGearScore,
+  collectWaterScore,
 } = require("../scores/survivalScores");
 const { huntAnimalsScore } = require("../scores/combatScores");
 const {
@@ -54,6 +59,7 @@ const {
   craftDiamondSwordScore,
   craftDiamondArmorScore,
   craftIronArmorScore,
+  craftGoldenHelmetScore,
   craftBucketScore,
   craftFlintAndSteelScore,
 } = require("../scores/craftingScores");
@@ -211,7 +217,6 @@ function createOverworldProfile(bot, config) {
     () => !hasAnyItem(bot, ["diamond_pickaxe"]),
     commandDiamondPickaxeSeq,
   );
-
   const commandDiamondSwordSeq = new Sequence([
     new FindInteractiveBlockPlacementNode(),
     new PlaceBlockNode("crafting_table"),
@@ -255,6 +260,21 @@ function createOverworldProfile(bot, config) {
     "NeedsDiamondArmor",
     () => !hasAllItems(bot, config.ARMOR.DIAMOND_ARMOR),
     commandDiamondArmorSeq,
+  );
+
+
+  const commandGoldHelmetSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
+    new RemoveItemNode("gold_ingot", 5),
+    new GiveItemNode(["golden_helmet"], 1),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+  ]);
+
+  const commandGoldHelmetCond = new conditionNode(
+    "NeedsGoldHelmet",
+    () => !hasAnyItem(bot, ["golden_helmet"]),
+    commandGoldHelmetSeq,
   );
 
   const commandBucketSeq = new Sequence([
@@ -350,6 +370,23 @@ function createOverworldProfile(bot, config) {
     new PickUpItemNode(config.ITEMS.OBSIDIAN.names),
     gatherObsidianSeq,
   ]);
+
+  const equipGearNode = new EquipGearNode();
+
+  const collectWaterSeq = new Sequence([
+    new FindBlockNode("WATER", "blockTarget", config.BLOCKS.WATER.maxBlockDistance),
+    new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.INTERACT_RANGE),
+    new EquipItemNode("bucket"),
+    new RemoveItemNode("bucket", 1),
+    new GiveItemNode(["water_bucket"], 1),
+    new EquipItemNode("water_bucket"),
+  ]);
+
+  // const lavaPoolSeq = new Sequence([
+  //   new FindBlockNode("LAVA", "blockTarget", config.BLOCKS.LAVA.maxBlockDistance),
+  //   new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.INTERACT_RANGE), 
+  // ]);
+
 
   return {
     candidates: [
@@ -462,6 +499,15 @@ function createOverworldProfile(bot, config) {
         name: "CraftFlintAndSteel",
         node: commandFlintAndSteelCond,
         scoreFn: craftFlintAndSteelScore,
+      },      {
+        name: "CraftGoldenHelmet",
+        node: commandGoldHelmetCond,
+        scoreFn: craftGoldenHelmetScore,
+      },
+      {
+        name: "EquipGear",
+        node: equipGearNode,
+        scoreFn: equipGearScore,
       },
       {
         name: "PickUpFood",
@@ -478,6 +524,16 @@ function createOverworldProfile(bot, config) {
         node: pickUpCraftingTableNode,
         scoreFn: pickUpCraftingTableScore,
       },
+      {
+        name: "CollectWater",
+        node: collectWaterSeq,
+        scoreFn: collectWaterScore,
+      },
+      // {
+      //   name: "LavaPool",
+      //   node: lavaPoolSeq,
+      //   scoreFn: () => 1000,
+      // },
       {
         name: "Idle",
         node: new IdleNode(),

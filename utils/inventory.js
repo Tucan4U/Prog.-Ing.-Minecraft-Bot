@@ -116,6 +116,21 @@ function hasAllItems(bot, names) {
   return true;
 }
 
+function hasAllItems(bot, names) {
+  if (!names || names.length === 0) return true;
+
+  const required = new Set(names);
+  const found = new Set(
+    bot.inventory.items().map(item => item.name)
+  );
+
+  // Provjeravamo da li su svi required itemi prisutni u found setu
+  for (const name of required) {
+    if (!found.has(name)) return false;
+  }
+  return true;
+}
+
 module.exports = {
   equipBestWeapon,
   getFoodHuntStartThreshold,

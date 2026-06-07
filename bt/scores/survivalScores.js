@@ -5,9 +5,11 @@ const {
   getFoodHuntStopThreshold,
   findInventoryItemByNames,
   shouldHuntForFood,
-} = require('../../utils/inventory');
+  hasAllItems,
+  hasAnyItem,
+} = require("../../utils/inventory");
 
-function hasNearbyFoodItem(state, config) {
+function hasNearbyFoodItem(state, config, item) {
   const items = state.sensors?.items || [];
   if (!Array.isArray(items) || !items.length) return false;
 
@@ -46,7 +48,9 @@ function cookFoodScore(bot, state, config) {
   }
 
   const totalFood = getTotalFoodCount(bot, config);
-  const foodNeedsFuel = !shouldHuntForFood(bot, state, config) && totalFood >= (config?.FURNACE?.FOOD_THRESHOLDS?.HUNT_STOP_AT ?? 32);
+  const foodNeedsFuel =
+    !shouldHuntForFood(bot, state, config) &&
+    totalFood >= (config?.FURNACE?.FOOD_THRESHOLDS?.HUNT_STOP_AT ?? 32);
 
   if (!foodNeedsFuel) {
     //bot.chat("Food does not need fuel to cook.");
@@ -57,8 +61,11 @@ function cookFoodScore(bot, state, config) {
   const foodFuelNeed = foodNeedsFuel
     ? Math.max(2, Math.ceil(rawFoodCount / itemsPerFuelUnit) + 1)
     : 0;
-  const requiredFuel =foodFuelNeed;
-  const currentCoal = countItemsByNames(bot, config.FURNACE?.FUEL?.names || ["coal"]);
+  const requiredFuel = foodFuelNeed;
+  const currentCoal = countItemsByNames(
+    bot,
+    config.FURNACE?.FUEL?.names || ["coal"],
+  );
 
   if (currentCoal < requiredFuel) {
     //bot.chat(`Current coal: ${currentCoal}, required fuel: ${requiredFuel}`);
@@ -73,7 +80,8 @@ function smeltItemsScore(bot, state, config) {
   const ironTarget = config?.FURNACE?.SMELTING_THRESHOLDS?.IRON || 30;
   const goldTarget = config?.FURNACE?.SMELTING_THRESHOLDS?.GOLD || 5;
 
-  const furnacePresent = findInventoryItemByNames(bot, ["furnace"]) !== null || state.hasFurnace;
+  const furnacePresent =
+    findInventoryItemByNames(bot, ["furnace"]) !== null || state.hasFurnace;
   if (!furnacePresent) return 0;
 
   const ironCount = countItemsByNames(bot, ["iron_ingot"]);
@@ -94,11 +102,26 @@ function smeltItemsScore(bot, state, config) {
     ? Math.max(2, Math.ceil(oreCount / itemsPerFuelUnit) + 1)
     : 0;
   const requiredFuel = oreFuelNeed;
-  const currentCoal = countItemsByNames(bot, config.FURNACE?.FUEL?.names || ["coal"]);
+  const currentCoal = countItemsByNames(
+    bot,
+    config.FURNACE?.FUEL?.names || ["coal"],
+  );
 
   if (currentCoal < requiredFuel) return 0;
 
   return 40;
+}
+
+function collectWaterScore(bot, state, config) {
+  if(findInventoryItemByNames(bot, ["water_bucket"]) !== null) {
+    state.hasWaterBucket = true;
+  }
+  return (state.hasBucket && !state.hasWaterBucket) ? 40 : 0;
+}
+
+function equipGearScore(bot, state, config) {
+  const armor = [...config.ARMOR.DIAMOND_ARMOR, "golden_helmet"];
+  return hasAnyItem(bot, armor) ? 31 : 0;
 }
 
 module.exports = {
@@ -106,4 +129,6 @@ module.exports = {
   smeltItemsScore,
   pickUpFoodScore,
   hasNearbyFoodItem,
+  equipGearScore,
+  collectWaterScore,
 };

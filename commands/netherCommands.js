@@ -1,4 +1,5 @@
 const resetState = require("../utils/resetState");
+const checkEnderEyesPosession = require("../utils/netherUtils").checkEnderEyesPosession;
 
 function netherMain(bot, state, config) {
     // Combined unified command: switch to Nether profile, request both enter and fortress search.
@@ -7,18 +8,34 @@ function netherMain(bot, state, config) {
     // then automatically switch to FindBlazeSpawner (score 100) once fortress is reached.
 
     state.mission.netherMode = config.NETHER_MODES.AUTONOMOUS; // Set mode to autonomous for the main nether run.
+    state.mission.activeProfile = config.PROFILES.NETHER;  // Swith to Nether profile
 
-    state.mission.activeProfile = config.PROFILES.NETHER;
-    state.mission.enterNetherRequested = true;
-    state.mission.findFortressRequested = true;
-    state.mission.fortressTarget = null;
-    state.mission.findBlazeSpawnerRequested = true;
-    state.blazeSpawnerBlock = null;
+    // If already have ender eyes, no need to enter the Nether. Notify and reset state.
+    if (checkEnderEyesPosession(bot, state, config)) {
+        if (bot.game && bot.game.dimension === 'the_nether') {
+            state.mission.netherMode = config.NETHER_MODES.AUTONOMOUS; // Set mode to autonomous for the main nether run.
+            bot.chat('I already have enough ender eyes, exiting the Nether to continue main run.');
+            state.mission.exitNetherRequested = true;
+        } else {
+            bot.chat("I have enough ender eyes, no need to go in the Nether.");
+            resetState(bot);
+        }
 
-    // Blaze killing and blaze rod collection
-    state.mission.blazeHuntingRequested = true;
-    state.mission.targetBlazeRods = 10; // Set desired blaze rod count for hunting mode.
-
+    } else {
+        
+        state.mission.enterNetherRequested = true;
+        state.mission.findFortressRequested = true;
+        state.mission.fortressTarget = null;
+        state.mission.findBlazeSpawnerRequested = true;
+        state.blazeSpawnerBlock = null;
+        
+        // Blaze killing and blaze rod collection
+        state.mission.blazeHuntingRequested = true;
+        state.mission.targetBlazeRods = 10; // Set desired blaze rod count for hunting mode.
+        
+        state.mission.exitNetherRequested = true;
+    }
+        
     if (bot.game && bot.game.dimension === 'the_nether') {
     bot.chat('Nether mode: already in Nether!');
     } else {
@@ -39,6 +56,22 @@ function enterNetherCommand(bot, state, config) {
         state.mission.activeProfile = config.PROFILES.NETHER;
         state.mission.enterNetherRequested = true;
         bot.chat('Switching to Nether profile and entering nether.');
+    }
+}
+
+function exitNetherCommand(bot, state, config) {
+    // If we're already outside the Nether, notify and clear the request
+
+    state.mission.netherMode = config.NETHER_MODES.MANUAL; // Set mode to manual for single commands.
+
+    if (bot.game && bot.game.dimension !== 'the_nether') {
+        state.mission.activeProfile = config.PROFILES.NETHER;
+        state.mission.exitNetherRequested = false;
+        bot.chat('I am already outside the Nether.');
+    } else {
+        state.mission.activeProfile = config.PROFILES.NETHER;
+        state.mission.exitNetherRequested = true;
+        bot.chat('Switching to Nether profile and exiting nether.');
     }
 }
 
@@ -112,4 +145,4 @@ function lootBlazeRodsCommand(bot, state, config, message) {
     }
 }
 
-module.exports = { netherMain, enterNetherCommand, findFortressCommand, findBlazeSpawnerCommand, lootBlazeRodsCommand };
+module.exports = { netherMain, enterNetherCommand, findFortressCommand, findBlazeSpawnerCommand, lootBlazeRodsCommand, exitNetherCommand };

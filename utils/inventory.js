@@ -49,7 +49,6 @@ function numOfItems(bot, state, config, itemsKey) {
   return itemCount || 0;
 }
 
-module.exports = { equipBestWeapon, needsFood, numOfBlocks, numOfItems };
 function countItemsByNames(bot, names) {
   const nameSet = new Set(names || []);
 
@@ -94,6 +93,7 @@ module.exports = {
   equipBestWeapon,
   needsFood,
   numOfBlocks,
+  numOfItems,
   countItemsByNames,
   findInventoryItemByNames,
   findBestInventoryItemByNames,

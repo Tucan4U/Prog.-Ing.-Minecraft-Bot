@@ -3,9 +3,10 @@ const { Node } = require('../behaviorTree');
 // Waits inside a Nether portal and detects when the bot changes dimension.
 // This node handles portal timing, success detection, and failure fallback.
 class EnterPortalNode extends Node {
-  constructor(timeoutTicks = 200) {
+  constructor(timeoutTicks = 200, targetDimension = 'the_nether') {
     super('EnterPortal');
     this.timeoutTicks = timeoutTicks; //how long to wait for the portal to work (4 seconds)
+    this.targetDimension = targetDimension;
     this.task = null;
     this.startTick = null;
     this.feedbackSent = false;
@@ -19,10 +20,22 @@ class EnterPortalNode extends Node {
       this.startTick = null;
       this.lastBlockTarget = state.blockTarget;
     }
-    // If already in Nether, success
-    if (bot.game && bot.game.dimension === 'the_nether') {
-      bot.chat('I have entered the Nether successfully!');
-      state.mission.enterNetherRequested = false;
+    // If already in target dimension, success
+    const currentDim = bot.game ? bot.game.dimension : null;
+    const targetDim = this.targetDimension;
+
+    const isSuccess = (targetDim === 'the_nether')
+      ? (currentDim === 'the_nether')
+      : (targetDim === 'overworld' ? (currentDim !== 'the_nether') : (currentDim === targetDim));
+
+    if (bot.game && isSuccess) {
+      if (targetDim === 'the_nether') {
+        bot.chat('I have entered the Nether successfully!');
+        state.mission.enterNetherRequested = false;
+      } else {
+        bot.chat('I have exited the Nether successfully!');
+        state.mission.exitNetherRequested = false;
+      }
       state.blockTarget = null;
       this.task = null;
       this.startTick = null;
@@ -53,18 +66,22 @@ class EnterPortalNode extends Node {
 
     if (hasTimedOut) {
       // Timeout reached: confirm whether the portal transition succeeded.
-      if (bot.game && bot.game.dimension === 'the_nether') {
-        bot.chat('I have entered the Nether successfully!');
+      if (bot.game && isSuccess) {
         if (!this.feedbackSent) {
-          bot.chat('I have entered the Nether successfully!');
+          if (targetDim === 'the_nether') {
+            bot.chat('I have entered the ' + targetDim + ' successfully!');
+            state.mission.enterNetherRequested = false;
+          } else {
+            bot.chat('I have exited the Nether successfully!');
+            state.mission.exitNetherRequested = false;
+          }
           this.feedbackSent = true;
           state.blockTarget = null;
-          state.mission.enterNetherRequested = false;
         }
         return 'SUCCESS';
       } else {
         if (!this.feedbackSent) {
-          bot.chat('Error: Portal entry failed. I am still in the Overworld.');
+          bot.chat('Error: Portal transition failed. Dimension unchanged.');
           this.feedbackSent = true;
           state.blockTarget = null;
         }

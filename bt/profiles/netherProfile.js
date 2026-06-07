@@ -21,7 +21,7 @@ const PickUpItemNode = require('../nodes/pickUpItemNode');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { getClosestEntity, isTargetFloating } = require('../../utils/target');
 
-const { moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, barteringScore, } = require('../scores/netherScores');
+const { exitNetherScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, barteringScore, } = require('../scores/netherScores');
 
 // Gold collection and crafting nodes
 const BreakBlockNode = require("../nodes/breakBlockNode");
@@ -46,7 +46,18 @@ function createNetherProfile(config) {
       config.BLOCKS.NETHER_PORTAL.maxBlockDistance,
     ),
     new MoveToBlockNode("blockTarget", 0, 0),
-    new EnterPortalNode(200),
+    new EnterPortalNode(200, "the_nether"),
+  ]);
+
+  const exitSeq = new Sequence([
+    // Exit Nether sequence: find nearest portal and enter it.
+    new FindBlockNode(
+      "NETHER_PORTAL",
+      "blockTarget",
+      config.BLOCKS.NETHER_PORTAL.maxBlockDistance,
+    ),
+    new MoveToBlockNode("blockTarget", 0, 0),
+    new EnterPortalNode(200, "overworld"),
   ]);
 
   const fortressSeq = new Sequence([
@@ -58,20 +69,20 @@ function createNetherProfile(config) {
     new MoveToFortressNode(400, 5),
   ]);
 
-  // const goldSeq = new Sequence([
-  //   new FindBlockNode(
-  //     "GOLD",
-  //     "blockTarget",
-  //     config.BLOCKS.GOLD.maxBlockDistance,
-  //   ),
+  const goldSeq = new Sequence([
+    new FindBlockNode(
+      "GOLD",
+      "blockTarget",
+      config.BLOCKS.maxBlockDistance,
+    ),
 
-  //   new MoveToBlockNode(
-  //     "blockTarget",
-  //     config.BT.MOVE_NEAR_DISTANCE,
-  //     config.BT.BREAK_RANGE,
-  //   ),
+    new MoveToBlockNode(
+      "blockTarget",
+      config.BT.MOVE_NEAR_DISTANCE,
+      config.BT.BREAK_RANGE,
+    ),
 
-  //   new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
 
     new PickUpItemNode(config.ITEMS.GOLD_NUGGETS.names),
   ]);
@@ -140,6 +151,7 @@ function createNetherProfile(config) {
   return {
     candidates: [
       { name: 'EnterNether', node: enterSeq, scoreFn: enterNetherScore },
+      { name: 'ExitNether', node: exitSeq, scoreFn: exitNetherScore }, 
       { name: 'CollectNetherGold', node: goldSeq, scoreFn: getGoldNetherScore },
       { name: 'CraftNetherGold', node: goldCraftingSeq, scoreFn: craftGoldNetherScore },
       { name: 'MoveToPiglin', node: moveToPiglinSeq, scoreFn: moveToPiglinScore },

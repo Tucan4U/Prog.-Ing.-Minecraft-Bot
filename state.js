@@ -36,6 +36,8 @@ module.exports = {
     fortressTarget: null,
     // Mode - AUTONOMOUS or MANUAL
     netherMode : null,
+    // Exit Nether portal request flag.
+    exitNetherRequested: false,
     
     // Blaze hunting state (Blaze rods collection)
     targetBlazeRods: null,

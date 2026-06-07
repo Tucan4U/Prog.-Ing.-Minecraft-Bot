@@ -27,7 +27,8 @@ const {
   enterNetherCommand,
   findFortressCommand,
   findBlazeSpawnerCommand ,
-  lootBlazeRodsCommand
+  lootBlazeRodsCommand,
+  exitNetherCommand,
 } = require("./commands/netherCommands");
 
 // PvP, auto-eat and Hawkeye plugins
@@ -268,6 +269,12 @@ bot.on("chat", (username, message) => {
     lootBlazeRodsCommand(bot, state, config, message);
     startFlag = true;
   }
+  // Exit nether command
+  if (message === "exit nether") {
+    exitNetherCommand(bot, state, config);
+    startFlag = true;
+  }
+  
 
   if (message === "tp") {
     bot.chat("/tp @s " + username);

@@ -2,12 +2,12 @@ const { getMissingEquipment } = require('../../utils/netherEquipment');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { findItem } = require('../../behaviors/loot');
 const { needsGold, numOfBlocks, numOfItems } = require('../../utils/inventory');
+const { checkEnderEyesPosession } = require('../../utils/netherUtils');
 
 
 let blazeCountCache = 0; // Cache for the current blaze rod count to avoid expensive inventory checks every tick.
 // Score function for Nether behavior. Returns high priority only when a Nether request is active and gear is ready.
 function enterNetherScore(bot, state, config) {
-
   if (bot.game && bot.game.dimension === 'the_nether') {
     if (state.mission?.enterNetherRequested) {
       // Clear stale requests when already in the Nether.
@@ -27,6 +27,29 @@ function enterNetherScore(bot, state, config) {
 
   // High priority when requested and gear is ready
   return 200;
+}
+
+function exitNetherScore(bot, state, config) {
+  if (bot.game && bot.game.dimension !== 'the_nether' && 
+    (checkEnderEyesPosession(bot, state, config) || state.mission?.netherMode === config.NETHER_MODES.MANUAL)) {
+    if (state.mission?.exitNetherRequested) {
+      // Clear stale requests when already in the Nether.
+      state.mission.exitNetherRequested = false;
+      bot.chat("Exited Nether, clearing exit request.");
+    }
+    return 0;
+  }
+
+  // Triggered via state flag
+  if (!state.mission?.exitNetherRequested) return 0;
+
+  if (!checkEnderEyesPosession(bot, state, config)) {
+    bot.chat(`Cannot exit Nether, missing ender eyes.`);
+    return 0;
+  }
+
+  // High priority when requested and enough ender eyes
+  return 250;
 }
 
 function findFortressScore(bot, state, config) {
@@ -45,28 +68,6 @@ function findFortressScore(bot, state, config) {
 
   // Medium-high priority: run after entering Nether but lower than other potential activities.
   return 150;
-}
-
-function enterNetherScore(bot, state, config) {
-  if (bot.game && bot.game.dimension === 'the_nether') {
-    if (state.mission?.enterNetherRequested) {
-      // Clear stale requests when already in the Nether.
-      state.mission.enterNetherRequested = false;
-    }
-    return 0;
-  }
-
-  // Triggered via state flag
-  if (!state.mission?.enterNetherRequested) return 0;
-
-  const missing = getMissingEquipment(bot);
-  if (missing.length > 0) {
-    bot.chat(`Cannot enter Nether, missing: ${missing.join(', ')}`);
-    return 0;
-  }
-
-  // High priority when requested and gear is ready
-  return 200;
 }
 
 // function hasNearbyGoldItem(state, config) { //ignore for now
@@ -197,4 +198,4 @@ function checkBlazeNeed(bot, state, config) {
   return true; // Needs blaze rods
 }
 
-module.exports = { barteringScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore, lootBlazeRodsScore, huntBlazeScore };
+module.exports = { exitNetherScore, barteringScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore, lootBlazeRodsScore, huntBlazeScore };

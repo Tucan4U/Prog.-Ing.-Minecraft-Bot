@@ -17,7 +17,7 @@ class FindInteractiveBlockPlacementNode extends Node {
 
     // 1) Pit check: if block 3 below is air and has at least one solid neighbor,
     // treat that spot as interactive placement target.
-    const pitCheckPos = botPos.offset(0, 2, 0);
+    const pitCheckPos = botPos.offset(0, 3, 0);
     const pitBlock = bot.blockAt(pitCheckPos);
     if (isAir(pitBlock)) {
       const horizontal = [

@@ -37,6 +37,10 @@ const {
   gatherDirtScore,
   gatherCoalScore,
   gatherIronScore,
+  gatherGoldScore,
+  gatherDiamondScore,
+  gatherObsidianScore,
+  gatherGravelScore,
 } = require("../scores/gatheringScores");
 const {
   craftCraftingTableScore,
@@ -44,10 +48,14 @@ const {
   craftFurnaceScore,
   craftWoodenPickaxeScore,
   craftStonePickaxeScore,
+  craftStoneAxeScore,
   craftIronPickaxeScore,
   craftDiamondPickaxeScore,
+  craftDiamondSwordScore,
+  craftDiamondArmorScore,
   craftIronArmorScore,
   craftBucketScore,
+  craftFlintAndSteelScore,
 } = require("../scores/craftingScores");
 
 const { resetScore } = require("../scores/resetScore");
@@ -83,7 +91,7 @@ function createOverworldProfile(bot, config) {
     new PickUpItemNode(config.BLOCKS.DIRT.names),
     gatherDirtSeq,
   ]);
-
+  
   const cookFoodSeq = new Sequence([
     new PrepareFurnaceMaterialsNode(config.ITEMS.RAWFOOD.names, config.FURNACE.FUEL.names),
     new DigPitNode(3), // improvizirana "furnace setup" sekvenca - iskopaj rupu, baci stvari unutra, pokrij zemljom
@@ -94,7 +102,7 @@ function createOverworldProfile(bot, config) {
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
     new ResetFurnaceWorkflowNode(),
   ]);
-
+  
   const smeltItemsSeq = new Sequence([
     new PrepareFurnaceMaterialsNode(config.FURNACE.GOLD_IRON.names, config.FURNACE.FUEL.names),
     new DigPitNode(3), // improvizirana "furnace setup" sekvenca - iskopaj rupu, baci stvari unutra, pokrij zemljom
@@ -107,14 +115,26 @@ function createOverworldProfile(bot, config) {
   ]);
 
   const commandCraftingTableSeq = new Sequence([
-    new RemoveItemNode(config.BLOCKS.LOGS.names, 1),
-    new GiveItemNode(["crafting_table"], 1),
+    new RemoveItemNode(config.BLOCKS.LOGS.names, 2),
+    new GiveItemNode(["crafting_table"], 2),
   ]);
-
   const commandCraftingTableCond = new conditionNode(
     "NeedsCraftingTable",
     () => !hasAnyItem(bot, ["crafting_table"]),
     commandCraftingTableSeq,
+  );
+
+  const commandFurnaceSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
+    new RemoveItemNode("cobblestone", 8),
+    new GiveItemNode(["furnace"], 1),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+  ]);
+  const commandFurnaceCond = new conditionNode(
+    "NeedsFurnace",
+    () => !hasAnyItem(bot, ["furnace"]),
+    commandFurnaceSeq,
   );
 
   const commandWoodenPickaxeSeq = new Sequence([
@@ -147,6 +167,21 @@ function createOverworldProfile(bot, config) {
     commandStonePickaxeSeq,
   );
 
+  const commandStoneAxeSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
+    new RemoveItemNode("cobblestone", 3),
+    new RemoveItemNode(config.BLOCKS.LOGS.names, 1),
+    new GiveItemNode(["stick"], 6),
+    new GiveItemNode(["stone_axe"], 1),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+  ]);
+  const commandStoneAxeCond = new conditionNode(
+    "NeedsStoneAxe",
+    () => !hasAnyItem(bot, ["stone_axe"]),
+    commandStoneAxeSeq,
+  );
+
   const commandIronPickaxeSeq = new Sequence([
     new FindInteractiveBlockPlacementNode(),
     new PlaceBlockNode("crafting_table"),
@@ -163,10 +198,13 @@ function createOverworldProfile(bot, config) {
   );
 
   const commandDiamondPickaxeSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
     new RemoveItemNode("diamond", 3), //INPUT : 1 LOG & 3 DIAMOND
     new RemoveItemNode(config.BLOCKS.LOGS.names, 1),
     new GiveItemNode(["stick"], 6), //OUTPUT : 6 STICKS(1 LOG -> 8 STICKS - 2 STICKS = 6 STICKS) + 1 DIAMOND PICKAXE
     new GiveItemNode(["diamond_pickaxe"], 1),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
   ]);
   const commandDiamondPickaxeCond = new conditionNode(
     "NeedsDiamondPickaxe",
@@ -174,14 +212,19 @@ function createOverworldProfile(bot, config) {
     commandDiamondPickaxeSeq,
   );
 
-  const commandFurnaceSeq = new Sequence([
-    new RemoveItemNode("cobblestone", 8),
-    new GiveItemNode(["furnace"], 1),
+  const commandDiamondSwordSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
+    new RemoveItemNode("diamond", 2), //INPUT : 1 LOG & 2 DIAMOND
+    new RemoveItemNode(config.BLOCKS.LOGS.names, 1),
+    new GiveItemNode(["stick"], 7), //OUTPUT : 6 STICKS(1 LOG -> 8 STICKS - 1 STICKS = 7 STICKS) + 1 DIAMOND SWORD
+    new GiveItemNode(["diamond_sword"], 1),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
   ]);
-  const commandFurnaceCond = new conditionNode(
-    "NeedsFurnace",
-    () => !hasAnyItem(bot, ["furnace"]),
-    commandFurnaceSeq,
+  const commandDiamondSwordCond = new conditionNode(
+    "NeedsDiamondSword",
+    () => !hasAnyItem(bot, ["diamond_sword"]),
+    commandDiamondSwordSeq,
   );
 
   const commandIronArmorSeq = new Sequence([
@@ -195,9 +238,25 @@ function createOverworldProfile(bot, config) {
   ]);
   const commandIronArmorCond = new conditionNode(
     "NeedsIronArmor",
-    () => !hasAllItems(bot, ["iron_chestplate", "iron_leggings", "iron_boots"]),
+    () => !hasAllItems(bot, config.ARMOR.IRON_ARMOR),
     commandIronArmorSeq,
   );
+
+  const commandDiamondArmorSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
+    new RemoveItemNode("diamond", 19),
+    new GiveItemNode(["diamond_chestplate"], 1),
+    new GiveItemNode(["diamond_leggings"], 1),
+    new GiveItemNode(["diamond_boots"], 1),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+  ]);
+  const commandDiamondArmorCond = new conditionNode(
+    "NeedsDiamondArmor",
+    () => !hasAllItems(bot, config.ARMOR.DIAMOND_ARMOR),
+    commandDiamondArmorSeq,
+  );
+
   const commandBucketSeq = new Sequence([
     new FindInteractiveBlockPlacementNode(),
     new PlaceBlockNode("crafting_table"),
@@ -210,7 +269,17 @@ function createOverworldProfile(bot, config) {
     () => !hasAnyItem(bot, ["bucket"]),
     commandBucketSeq,
   );
-  
+
+  const commandFlintAndSteelSeq = new Sequence([
+    new RemoveItemNode("iron_ingot", 1),
+    new RemoveItemNode("flint", 1),
+    new GiveItemNode(["flint_and_steel"], 1),
+  ]);
+  const commandFlintAndSteelCond = new conditionNode(
+    "NeedsFlintAndSteel",
+    () => !hasAnyItem(bot, ["flint_and_steel"]),
+    commandFlintAndSteelSeq,
+  );
 
   const gatherStoneSeq = new Sequence([
     new FindBlockNode("STONE","blockTarget",config.BLOCKS.STONE.maxBlockDistance),
@@ -295,6 +364,11 @@ function createOverworldProfile(bot, config) {
         scoreFn: gatherLogsScore,
       },
       {
+        name: "GatherGravel",
+        node: gatherGravelSelector,
+        scoreFn: gatherGravelScore,
+      },
+      {
         name: "GatherStone",
         node: gatherStoneSelector,
         scoreFn: gatherStoneScore,
@@ -312,17 +386,17 @@ function createOverworldProfile(bot, config) {
       {
         name: "GatherGold",
         node: gatherGoldSelector,
-        scoreFn: () => 0,
+        scoreFn: gatherGoldScore,
       },
       {
         name: "GatherDiamond",
         node: gatherDiamondSelector,
-        scoreFn: () => 0,
+        scoreFn: gatherDiamondScore,
       },
       {
         name: "GatherObsidian",
         node: gatherObsidianSelector,
-        scoreFn: () => 0,
+        scoreFn: gatherObsidianScore,
       },
       {
         name: "SmeltItems",
@@ -355,26 +429,40 @@ function createOverworldProfile(bot, config) {
         scoreFn: craftStonePickaxeScore,
       },
       {
+        name: "CraftStoneAxe",
+        node: commandStoneAxeCond,
+        scoreFn: craftStoneAxeScore,
+      },
+      {
         name: "CraftIronPickaxe",
         node: commandIronPickaxeCond,
         scoreFn: craftIronPickaxeScore,
       },
       {
         name: "CraftDiamondPickaxe",
-        node: commandDiamondPickaxeSeq,
+        node: commandDiamondPickaxeCond,
         scoreFn: craftDiamondPickaxeScore,
       },
       {
-        name: "CraftIronArmor",
-        node: commandIronArmorCond,
-        scoreFn: craftIronArmorScore,
+        name: "CraftDiamondSword",
+        node: commandDiamondSwordCond,
+        scoreFn: craftDiamondSwordScore,
+      },
+      {
+        name: "CraftDiamondArmor",
+        node: commandDiamondArmorCond,
+        scoreFn: craftDiamondArmorScore,
       },
       {
         name: "CraftBucket",
         node: commandBucketCond,
         scoreFn: craftBucketScore,
       },
-
+      {
+        name: "CraftFlintAndSteel",
+        node: commandFlintAndSteelCond,
+        scoreFn: craftFlintAndSteelScore,
+      },
       {
         name: "PickUpFood",
         node: pickUpFoodNode,

@@ -9,12 +9,8 @@ class BreakBlockNode extends Node {
   }
 
   async tick(bot, state, config) {
-    // const lootTarget = state["lootTarget"];
-    // if (lootTarget) {
-    //   console.log("We have a loot target, picking it up first");
-    //   return "SUCCESS";
-    // }
     const targetBlock = state[this.stateKey];
+    
     if (!targetBlock) {
       console.log("There is no target block");
       return "FAILURE";
@@ -39,39 +35,36 @@ class BreakBlockNode extends Node {
     }
     console.log("Ovo je trenutno stanje dig taska: ", state["digTask"]);
     if (!state["digTask"]) {
-      if (state["digTask"]) {
-        return "RUNNING"; ////OVO moramo ovako napravi jer bot.dig() vraća promise koji se resolvea kad je kopanje gotovo, a mi ne želimo pokrenuti novi dig dok je stari još u tijeku
-      } else {
-        bot.pathfinder.setGoal(null);
+      bot.pathfinder.setGoal(null);
 
-        await equipBestWeapon(bot, config[this.tools] || []);
+      await equipBestWeapon(bot, config[this.tools] || []);
 
-        state["digTask"] = bot
-          .dig(block)
-          .catch((err) => {
-            console.error("Dig error:", err);
-            state["digTask"] = null;
-          })
-          .then(() => {
-            state["digTask"] = null;
-            //state["blockTarget"] = null;
-            return "SUCCESS";
-          });
-        console.log("Postavili smo digTask", state["digTask"]);
-        // re-check in case block disappeared immediately
-        const afterBlock = bot.blockAt(targetBlock.position);
-        if (
-          !afterBlock ||
-          (afterBlock.name && afterBlock.name.includes("air"))
-        ) {
+      state["digTask"] = bot
+        .dig(block)
+        .catch((err) => {
+          console.error("Dig error:", err);
           state["digTask"] = null;
-          bot.chat("SUCCESS: Block became air immediately.");
+        })
+        .then(() => {
+          state["digTask"] = null;
+          //state["blockTarget"] = null;
           return "SUCCESS";
-        }
-        return "RUNNING";
+        });
+      console.log("Postavili smo digTask", state["digTask"]);
+      // re-check in case block disappeared immediately
+      const afterBlock = bot.blockAt(targetBlock.position);
+      if (
+        !afterBlock ||
+        (afterBlock.name && afterBlock.name.includes("air"))
+      ) {
+        state["digTask"] = null;
+        bot.chat("SUCCESS: Block became air immediately.");
+        return "SUCCESS";
       }
+      console.log("Started digging block", block.name);
+      return "RUNNING";
     }
-
+    console.log("Already digging, waiting for completion");
     return "RUNNING";
   }
 }

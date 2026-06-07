@@ -36,8 +36,11 @@ module.exports = {
     "stone_shovel",
     "wooden_shovel",
   ],
-
-  IRON_ARMOR: ["iron_chestplate", "iron_leggings", "iron_boots"],
+  ARMOR: {
+    IRON_ARMOR: ["iron_chestplate", "iron_leggings", "iron_boots"],
+    GOLD_ARMOR: ["golden_helmet"],
+    DIAMOND_ARMOR: ["diamond_chestplate", "diamond_leggings", "diamond_boots"],
+  },
 
   //Parametri koji utječu na SUCCESS ili FAILURE unutar BT-a, zbog toga i ime "BT"
   BT: {
@@ -58,14 +61,6 @@ module.exports = {
   NETHER_MODES: {
     AUTONOMOUS: "AUTONOMOUS",
     MANUAL: "MANUAL",
-  },
-  CRAFTING_STAGES: {
-    STAGES: ["CRAFTING_TABLE", "WOODEN_PICKAXE", "STONE_PICKAXE", "IRON_ARMOR"],
-  },
-  WOOD_REQUIREMENTS: {
-    CRAFTING_TABLE: 1,
-    WOODEN_PICKAXE: 2,
-    STONE_PICKAXE: 1,
   },
   BLOCKS: {
     LOGS: {
@@ -150,11 +145,11 @@ module.exports = {
       names: ["raw_gold", "raw_iron"],
     },
     FOOD_THRESHOLDS: {
-      HUNT_START_AT: 10,
-      HUNT_STOP_AT: 32,
+      HUNT_START_AT: 1,
+      HUNT_STOP_AT: 2,
     },
     SMELTING_THRESHOLDS: {
-      IRON: 30,
+      IRON: 7,
       GOLD: 5,
     },
     ITEMS_PER_FUEL_UNIT: 8,
@@ -191,6 +186,23 @@ module.exports = {
     OBSIDIAN: {
       names: ["obsidian"],
     },
+  },
+  //Dynamic state that can be used across the bot, e.g. for tracking progress on multi-step tasks
+  ITEM_THRESHOLDS: { //food and raw iron/gold thresholds are under FURNACE config
+    DIRT_MIN: 2,
+    DIRT_MAX: 16,
+    LOGS_MIN: 2,
+    LOGS_MAX: 16,
+    STONE_MIN: 3,
+    STONE_MAX: 8,
+    COAL_MIN: 5,
+    COAL_MAX: 9,
+    RAW_IRON_MIN: 0,
+    RAW_IRON_MAX: 7,
+    RAW_GOLD_MIN: 0,
+    RAW_GOLD_MAX: 5,
+    DIAMOND_MIN: 0,
+    DIAMOND_MAX: 24,
   },
 
   // MOBOVI

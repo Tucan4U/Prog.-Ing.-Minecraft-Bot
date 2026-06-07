@@ -128,12 +128,15 @@ bot.on("chat", (username, message) => {
     bot.chat("/clear");
   }
 
-  if(message === "iron pickaxe"){
+  if(message === "prp"){
     bot.chat("/clear");
-    bot.chat("/give @s iron_ingot 3");
-    bot.chat("/give @s dirt 10");
-    bot.chat("/give @s oak_log 16");
-    bot.chat("/give @s crafting_table");
+    bot.chat("/give @s raw_iron 7");
+    bot.chat("/give @s raw_gold 4");
+    bot.chat("/give @s coal 8");
+    bot.chat("/give @s dirt 15");
+    bot.chat("/give @s oak_log 15");
+    bot.chat("/give @s cobblestone 7");
+    bot.chat("/give @s beef 1");
   }
 
   if (message === "profile overworld") {

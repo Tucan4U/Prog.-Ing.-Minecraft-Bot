@@ -24,7 +24,7 @@ function pickUpFoodScore(bot, state, config) {
 }
 
 function cookFoodScore(bot, state, config) {
-  if (state.furnaceWorkflowStarted || state.furnaceLoadPhase) return 400;
+  if (state.furnaceWorkflowStarted) return 400;
   const furnacePresent = findInventoryItemByNames(bot, ["furnace"]) !== null || state.hasFurnace;
   if (!furnacePresent) return 0;
 
@@ -33,7 +33,7 @@ function cookFoodScore(bot, state, config) {
     //bot.chat("No raw food available to cook.");
     return 0;
   }
-
+  
   if (shouldHuntForFood(bot, state, config)) {
     //bot.chat("Food levels are low, prioritizing hunting for food over cooking.");
     return 0;
@@ -65,7 +65,7 @@ function cookFoodScore(bot, state, config) {
     return 0;
   }
 
-  return 28;
+  return 49;
 }
 
 function smeltItemsScore(bot, state, config) {
@@ -98,7 +98,7 @@ function smeltItemsScore(bot, state, config) {
 
   if (currentCoal < requiredFuel) return 0;
 
-  return 24;
+  return 40;
 }
 
 module.exports = {

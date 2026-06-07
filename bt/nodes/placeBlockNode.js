@@ -11,6 +11,10 @@ class PlaceBlockNode extends Node {
   }
 
   async tick(bot, state, config) {
+    if (state.furnaceProtection) {
+      return "SUCCESS";
+    }
+
     let blockAbove = state[this.stateKey];
 
     if (blockAbove) {
@@ -58,15 +62,12 @@ class PlaceBlockNode extends Node {
       const neighbor = bot.blockAt(pos);
       if (neighbor && !neighbor.name.includes("air")) {
         const face = blockAbove.position.minus(pos); // smjer prema blockAbove
-
         try {
           await bot.placeBlock(neighbor, face);
-
+        } catch (e) {
           const newBlock = bot.blockAt(blockAbove.position);
           if (newBlock?.name === this.configKey) return "SUCCESS";
-          else return "FAILURE";
-        } catch (e) {
-          console.log("Error placing block:", e);
+          console.log("Errrror placing block:", e);
           bot.chat("Error placing block");
           state["blockTarget"] = null;
           return "FAILURE";

@@ -18,7 +18,7 @@ class RemoveItemNode extends Node {
     for (const key of keys) {
       if (hasAnyItem(bot, [key])) {
         bot.chat(`/clear @s ${key} ${this.count}`);
-        bot.chat(`Removed ${this.count} of ${key} from inventory.`);
+        // bot.chat(`Removed ${this.count} of ${key} from inventory.`);
         this.removed = true;
         return "SUCCESS";
       }

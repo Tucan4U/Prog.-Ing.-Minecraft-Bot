@@ -139,16 +139,24 @@ class LoadFurnaceNode extends Node {
 
   async tick(bot, state, config) {
     const phase = state.furnaceLoadPhase || "OPEN";
-
+    state.furnaceProtection = true; // Postavi zaštitu da spriječi PlaceBlockNode da postavlja blokove dok se furnace učitava/istovara.
     try {
       if (phase === "OPEN") {
         const furnace = await this.openFurnaceIfNeeded(bot, state);
-        return furnace ? "RUNNING" : "FAILURE";
+        if (furnace) {
+          return "RUNNING";
+        } else {
+          bot.chat("LOAD FURNACE -> Failed to open furnace container.");
+          return "FAILURE";
+        }
       }
 
       if (phase === "PUT_FUEL") {
         const furnace = state.furnaceContainer;
-        if (!furnace) return "FAILURE";
+        if (!furnace) {
+          bot.chat("LOAD FURNACE -> No furnace container available in PUT_FUEL phase.");
+          return "FAILURE";
+        }
 
         const fuelNames = [state.reservedFuel?.name].filter(Boolean);
         const effectiveFuelNames = fuelNames.length ? fuelNames : ["coal"];
@@ -205,7 +213,10 @@ class LoadFurnaceNode extends Node {
 
       if (phase === "PUT_INPUT") {
         const furnace = state.furnaceContainer;
-        if (!furnace) return "FAILURE";
+        if (!furnace) {
+          bot.chat("LOAD FURNACE -> No furnace container available in PUT_INPUT phase.");
+          return "FAILURE";
+        }
 
         const nextAvailable = this.getNextAvailableSelectedItem(bot, state);
         if (!nextAvailable) {
@@ -233,6 +244,7 @@ class LoadFurnaceNode extends Node {
 
       if (phase === "WAIT_SMELT") {
         const readyAt = state.furnaceExpectedCompleteAt || 0;
+        console.log(`[WaitFurnace] RUNNING remaining=${Math.ceil((readyAt - Date.now()) / 1000)}s`);
         if (Date.now() < readyAt) {
           return "RUNNING";
         }

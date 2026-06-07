@@ -18,7 +18,6 @@ const {
   findBestInventoryItemByNames,
   getTotalFoodCount,
   hasAnyItem,
-  numOfBlocks,
   shouldHuntForFood,
 } = require("../utils/inventory");
 const config = require("../config");
@@ -145,7 +144,6 @@ test("inventory helpers count, find, score and classify items", () => {
   assert.equal(findBestInventoryItemByNames(bot, ["oak_log"]).count, 12);
   assert.equal(hasAnyItem(bot, ["bread"]), true);
   assert.equal(hasAnyItem(bot, ["diamond"]), false);
-  assert.equal(numOfBlocks(bot, {}, config, "LOGS"), 18);
 });
 
 test("total food count includes raw and cooked food", () => {

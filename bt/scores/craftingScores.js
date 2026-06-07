@@ -1,6 +1,4 @@
-const { WOOD_REQUIREMENTS } = require("../../config");
 const {
-  numOfBlocks,
   findInventoryItemByNames,
   countItemsByNames,
   hasAllItems,
@@ -22,7 +20,7 @@ function pickUpCraftingTableScore(bot, state, config) {
 }
 
 function craftCraftingTableScore(bot, state, config) {
-  if (findInventoryItemByNames(bot, ["crafting_table"]) !== null || findInventoryItemByNames(bot, config.PICKAXES) !== null) {
+  if (findInventoryItemByNames(bot, ["crafting_table"]) !== null) {
     state.hasCraftingTable = true;
   } else {
     state.hasCraftingTable = false;
@@ -30,10 +28,10 @@ function craftCraftingTableScore(bot, state, config) {
 
   if (state.hasCraftingTable) return 0;
 
-  const numberOfBlocks = numOfBlocks(bot, state, config, "LOGS");
-  if (numberOfBlocks < 1) return 0;
+  const logCount = countItemsByNames(bot, config.BLOCKS.LOGS.names || []);
+  if (logCount < 2) return 0;
 
-  return 39;
+  return 69;
 }
 
 function craftFurnaceScore(bot, state, config) {
@@ -52,11 +50,11 @@ function craftFurnaceScore(bot, state, config) {
 
   if (state.furnaceWorkflowStarted) return 0;
 
-  return 33;
+  return 62;
 }
 
 function craftWoodenPickaxeScore(bot, state, config) {
-  if (findInventoryItemByNames(bot, ["wooden_pickaxe"]) !== null && findInventoryItemByNames(bot, ["crafting_table"]) !== null) {
+  if (findInventoryItemByNames(bot, ["wooden_pickaxe"]) !== null) {
     state.hasWoodenPickaxe = true;
   } else {
     state.hasWoodenPickaxe = false;
@@ -74,18 +72,18 @@ function craftWoodenPickaxeScore(bot, state, config) {
   const logCount = countItemsByNames(bot, config.BLOCKS.LOGS.names || []);
   if (logCount < 2) return 0;
 
-  return 35;
+  return 65;
 }
 
 function craftStonePickaxeScore(bot, state, config) {
-  if (findInventoryItemByNames(bot, ["stone_pickaxe"]) !== null && findInventoryItemByNames(bot, ["crafting_table"]) !== null) {
+  if (findInventoryItemByNames(bot, ["stone_pickaxe"]) !== null) {
     state.hasStonePickaxe = true;
   } else {
     state.hasStonePickaxe = false;
   }
   
 
-  if (state.hasStonePickaxe || state.hasIronPickaxe || state.hasDiamondPickaxe)
+  if (state.hasStonePickaxe || state.hasIronPickaxe || state.hasDiamondPickaxe || !state.hasCraftingTable)
     return 0;
 
   // INPUT : 3 COBBLESTONE + 1 LOG
@@ -95,19 +93,37 @@ function craftStonePickaxeScore(bot, state, config) {
   const logCount = countItemsByNames(bot, config.BLOCKS.LOGS.names || []);
   if (logCount < 1) return 0;
   //console.log("CRAFTING stone pickaxe");
-  return 36;
+  return 66;
+}
+
+function craftStoneAxeScore(bot, state, config) {
+  if (findInventoryItemByNames(bot, ["stone_axe"]) !== null) {
+    state.hasStoneAxe = true;
+  } else {
+    state.hasStoneAxe = false;
+  }
+  
+
+  if (state.hasStoneAxe || !state.hasCraftingTable)
+    return 0;
+
+  // INPUT : 3 COBBLESTONE + 1 LOG
+  const stoneCount = countItemsByNames(bot, config.BLOCKS.STONE.names || []);
+  if (stoneCount < 3) return 0;
+
+  const logCount = countItemsByNames(bot, config.BLOCKS.LOGS.names || []);
+  if (logCount < 1) return 0;  
+  return 61; 
 }
 
 function craftIronPickaxeScore(bot, state, config) {
-  if (findInventoryItemByNames(bot, ["iron_pickaxe"]) !== null && findInventoryItemByNames(bot, ["crafting_table"]) !== null) {
+  if (findInventoryItemByNames(bot, ["iron_pickaxe"]) !== null) {
     state.hasIronPickaxe = true;
   } else {
     state.hasIronPickaxe = false;
   }
 
-  if (state.hasIronPickaxe || state.hasDiamondPickaxe) return 0;
-
-  
+  if (state.hasIronPickaxe || state.hasDiamondPickaxe || !state.hasCraftingTable) return 0;
 
   // INPUT : 3 IRON INGOTS + 1 LOG
   const ironCount = countItemsByNames(bot, ["iron_ingot"]);
@@ -116,44 +132,58 @@ function craftIronPickaxeScore(bot, state, config) {
   const logCount = countItemsByNames(bot, config.BLOCKS.LOGS.names || []);
   if (logCount < 1) return 0;
 
-  return 37;
+  return 67;
 }
 function craftBucketScore(bot, state, config) {
-  if (findInventoryItemByNames(bot, ["bucket"]) !== null && findInventoryItemByNames(bot, ["crafting_table"]) !== null) {
+  if (findInventoryItemByNames(bot, ["bucket"]) !== null) {
     state.hasBucket = true;
   } else {
     state.hasBucket = false;
   }
-  if (state.hasBucket) return 0;
+  if (state.hasBucket || !state.hasCraftingTable) return 0;
   // INPUT : 3 IRON INGOTS + 1 LOG
   const ironCount = countItemsByNames(bot, ["iron_ingot"]);
   if (ironCount < 3) return 0;
-  return 36;
+  return 39;
+}
+
+function craftFlintAndSteelScore(bot, state, config) {
+  if (findInventoryItemByNames(bot, ["flint_and_steel"]) !== null) {
+    state.hasFlintAndSteel = true;
+  } else {
+    state.hasFlintAndSteel = false;
+  }
+  if (state.hasFlintAndSteel || !state.hasCraftingTable) return 0;
+  // INPUT : 1 FLINT + 1 IRON INGOT
+  const flintCount = countItemsByNames(bot, ["flint"]);
+  if (flintCount < 1) return 0;
+  const ironCount = countItemsByNames(bot, ["iron_ingot"]);
+  if (ironCount < 1) return 0;
+  return 37;
 }
 
 function craftIronArmorScore(bot, state, config) {
-  if(hasAllItems(bot, config.IRON_ARMOR) && findInventoryItemByNames(bot, ["crafting_table"]) !== null) {
+  if(hasAllItems(bot, config.ARMOR.IRON_ARMOR)) {
     state.hasIronArmor = true;
+  } else {
+    state.hasIronArmor = false;
   }
-  if(state.hasIronArmor) return 0;
-
-  if(!state.hasCraftingTable) return 0;
+  if(state.hasIronArmor || !state.hasCraftingTable) return 0;
 
   const ironCount = countItemsByNames(bot, ["iron_ingot"]);
   if (ironCount < 19) return 0;
 
-  return 36;
+  return 38;
 }
 
 function craftDiamondPickaxeScore(bot, state, config) {
-  if (findInventoryItemByNames(bot, ["diamond_pickaxe"]) !== null && findInventoryItemByNames(bot, ["crafting_table"]) !== null) {
+  if (findInventoryItemByNames(bot, ["diamond_pickaxe"]) !== null) {
     state.hasDiamondPickaxe = true;
   } else {
     state.hasDiamondPickaxe = false;
   }
 
-  if (state.hasDiamondPickaxe) return 0;
-
+  if (state.hasDiamondPickaxe || !state.hasCraftingTable) return 0;
   
   // INPUT : 3 DIAMONDS + 1 LOG
   const diamondCount = countItemsByNames(bot, ["diamond"]);
@@ -162,7 +192,40 @@ function craftDiamondPickaxeScore(bot, state, config) {
   const logCount = countItemsByNames(bot, config.BLOCKS.LOGS.names || []);
   if (logCount < 1) return 0;
 
-  return 38;
+  return 68;
+}
+
+function craftDiamondSwordScore(bot, state, config) {
+  if (findInventoryItemByNames(bot, ["diamond_sword"]) !== null) {
+    state.hasDiamondSword = true;
+  } else {
+    state.hasDiamondSword = false;
+  }
+
+  if (state.hasDiamondSword || !state.hasCraftingTable) return 0;
+  
+  // INPUT : 2 DIAMONDS + 1 LOG
+  const diamondCount = countItemsByNames(bot, ["diamond"]);
+  if (diamondCount < 2) return 0;
+
+  const logCount = countItemsByNames(bot, config.BLOCKS.LOGS.names || []);
+  if (logCount < 1) return 0;
+
+  return 35;
+}
+
+function craftDiamondArmorScore(bot, state, config) {
+  if(hasAllItems(bot, config.ARMOR.DIAMOND_ARMOR)) {
+    state.hasDiamondArmor = true;
+  } else {
+    state.hasDiamondArmor = false;
+  }
+  if(state.hasDiamondArmor || !state.hasCraftingTable) return 0;
+
+  const diamondCount = countItemsByNames(bot, ["diamond"]);
+  if (diamondCount < 19) return 0;
+
+  return 34;
 }
 
 module.exports = {
@@ -171,8 +234,12 @@ module.exports = {
   pickUpCraftingTableScore,
   craftWoodenPickaxeScore,
   craftStonePickaxeScore,
+  craftStoneAxeScore,
   craftIronPickaxeScore,
   craftDiamondPickaxeScore,
   craftIronArmorScore,
   craftBucketScore,
+  craftFlintAndSteelScore,
+  craftDiamondSwordScore,
+  craftDiamondArmorScore,
 };

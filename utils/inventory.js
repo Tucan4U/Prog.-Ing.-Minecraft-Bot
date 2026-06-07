@@ -60,13 +60,7 @@ function shouldHuntForFood(bot, state, config) {
   return state.foodHuntActive;
 }
 
-function numOfBlocks(bot, state, config, blocksKey) {
-  const blockCount = bot.inventory
-    .items()
-    .filter((item) => config.BLOCKS[blocksKey]?.names?.includes(item.name))
-    .reduce((count, item) => count + item.count, 0);
-  return blockCount || 0;
-}
+
 
 function countItemsByNames(bot, names) {
   const nameSet = new Set(names || []);
@@ -81,7 +75,7 @@ function findInventoryItemByNames(bot, names) {
   const nameSet = new Set(names || []);
   return bot.inventory.items().find((item) => nameSet.has(item.name)) || null;
 }
-
+// Finds the best item by names using a scoring function (default is count)
 function findBestInventoryItemByNames(
   bot,
   names,
@@ -107,6 +101,20 @@ function findBestInventoryItemByNames(
 function hasAnyItem(bot, names) {
   return Boolean(findInventoryItemByNames(bot, names));
 }
+// Helper to check if all specified items are present in the inventory
+function hasAllItems(bot, names) {
+  if (!names || names.length === 0) return true;
+
+  const required = new Set(names);
+  const found = new Set(
+    bot.inventory.items().map(item => item.name)
+  );
+
+  for (const name of required) {
+    if (!found.has(name)) return false;
+  }
+  return true;
+}
 
 module.exports = {
   equipBestWeapon,
@@ -114,9 +122,9 @@ module.exports = {
   getFoodHuntStopThreshold,
   getTotalFoodCount,
   shouldHuntForFood,
-  numOfBlocks,
   countItemsByNames,
   findInventoryItemByNames,
   findBestInventoryItemByNames,
   hasAnyItem,
+  hasAllItems
 };

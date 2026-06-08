@@ -119,10 +119,8 @@ function collectWaterScore(bot, state, config) {
     state.hasWaterBucket = false;
   }
 
-  return (state.hasBucket && !state.hasWaterBucket) ? 31 : 0;
+  return (state.hasBucket && !state.hasWaterBucket && !state.hasEnoughObsidian) ? 29 : 0;
 }
-
-
 
 function hasGearToEquip(bot, state, config) {
     const armorSlots = [

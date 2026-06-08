@@ -139,6 +139,28 @@ bot.on("chat", (username, message) => {
     bot.chat("/give @s beef 1");
   }
 
+  if(message === "obsidian"){
+    bot.chat("/clear");
+    bot.chat("/give @s iron_ingot 8");
+    bot.chat("/give @s gold_ingot 5");
+    bot.chat("/give @s coal 9");
+    bot.chat("/give @s dirt 16");
+    bot.chat("/give @s oak_log 16");
+    bot.chat("/give @s cobblestone 8");
+    bot.chat("/give @s furnace");
+    bot.chat("/give @s cooked_beef 4");
+    bot.chat("/give @s golden_helmet");
+    bot.chat("/give @s diamond_chestplate");
+    bot.chat("/give @s diamond_leggings");
+    bot.chat("/give @s diamond_boots");
+    bot.chat("/give @s diamond_pickaxe");
+    bot.chat("/give @s diamond_sword");
+    bot.chat("/give @s stone_axe");
+    bot.chat("/give @s bucket");
+    bot.chat("/give @s shield");
+    bot.chat("/give @s flint_and_steel");
+  }
+
   if (message === "profile overworld") {
     state.mission.activeProfile = config.PROFILES.OVERWORLD;
     bot.chat("Profile switched: OVERWORLD");

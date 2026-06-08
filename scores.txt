@@ -1,36 +1,36 @@
-400 -> cookFoodScore
-390 -> smeltItemsScore
-300 -> pickUpFoodScore
-300 -> pickUpCraftingTableScore
-200 -> enterNetherScore
-180 -> getGoldNetherScore
-170 -> craftGoldNetherScore
-150 -> findFortressScore
-100 -> huntHostileScore
-100 -> findBlazeSpawnerScore
-80 -> gatherDirtScore
-79 -> gatherLogsScore
-69 -> craftCraftingTableScore
-68 -> craftDiamondPickaxeScore
-67 -> craftIronPickaxeScore
-66 -> craftStonePickaxeScore
-65 -> craftWoodenPickaxeScore
-64 -> gatherGravelScore
-63 -> gatherStoneScore
-62 -> craftFurnaceScore
-61 -> craftStoneAxeScore
-55 -> huntAnimalsScore
-50 -> gatherCoalScore
-45 -> gatherIronScore
-44 -> gatherGoldScore
-42 -> craftBucketScore
-40 -> collectWaterScore
-38 -> craftIronArmorScore
-38 -> craftGoldenHelmetScore
-37 -> craftFlintAndSteelScore
-35 -> craftDiamondSwordScore
-34 -> craftDiamondArmorScore
-33 -> gatherDiamondScore
-31 -> equipGearScore
-29 -> gatherObsidianScore
-1 -> resetScore
+400 -> cookFoodScore | uvjeti: furnaceWorkflowStarted je već uključen; imaš furnace; imaš raw food; ne vrijedi lov na hranu; ukupna hrana je barem na prag-u za kuhanje; imaš dovoljno fuela.
+390 -> smeltItemsScore | uvjeti: furnaceWorkflowStarted ili furnaceLoadPhase je aktivan; inače treba furnace; barem jedan raw_iron ili raw_gold; nisi već na cilju za iron/gold; imaš dovoljno fuela.
+300 -> pickUpFoodScore | uvjeti: bot treba hranu (shouldHuntForFood); u blizini je bačen raw food.
+300 -> pickUpCraftingTableScore | uvjeti: u blizini je bačen crafting table.
+200 -> enterNetherScore | uvjeti: mission.enterNetherRequested je true; bot nije već u Netheru; nema missing opreme za ulazak.
+180 -> getGoldNetherScore | uvjeti: imaš manje od 9 gold itema.
+170 -> craftGoldNetherScore | uvjeti: imaš 9 ili više gold itema.
+150 -> findFortressScore | uvjeti: mission.findFor  tressRequested je true; bot je u Netheru; još treba blaze rods.
+100 -> huntHostileScore | uvjeti: hostile mobovi su u blizini.
+100 -> findBlazeSpawnerScore | uvjeti: mission.findBlazeSpawnerRequested je true; bot je u Netheru; još treba blaze rods.
+80 -> gatherDirtScore | uvjeti: dirt je ispod minimalnog praga i state.hasEnoughDirt je false.
+79 -> gatherLogsScore | uvjeti: logs su ispod minimalnog praga i state.hasEnoughLogs je false.
+69 -> craftCraftingTableScore | uvjeti: nemaš crafting table; imaš barem 2 loga.
+68 -> craftDiamondPickaxeScore | uvjeti: nemaš diamond pickaxe; imaš crafting table; imaš barem 3 diamonda; imaš barem 1 log.
+67 -> craftIronPickaxeScore | uvjeti: nemaš iron ili diamond pickaxe; imaš crafting table; imaš barem 3 iron ingota; imaš barem 1 log.
+66 -> craftStonePickaxeScore | uvjeti: nemaš stone, iron ili diamond pickaxe; imaš crafting table; imaš barem 3 stone itema; imaš barem 1 log.
+65 -> craftWoodenPickaxeScore | uvjeti: nemaš wood/stone/iron/diamond pickaxe; imaš barem 2 loga.
+64 -> gatherGravelScore | uvjeti: nemaš flint_and_steel i treba ti flint.
+63 -> gatherStoneScore | uvjeti: imaš pickaxe; stone je ispod praga i state.hasEnoughStone je false.
+62 -> craftFurnaceScore | uvjeti: nemaš furnace; imaš barem 8 stone itema; furnace workflow nije već pokrenut.
+61 -> craftStoneAxeScore | uvjeti: nemaš stone axe; imaš crafting table; imaš barem 3 stone itema; imaš barem 1 log.
+55 -> huntAnimalsScore | uvjeti: trebaš hranu; imaš crafting table; u blizini su životinje.
+50 -> gatherCoalScore | uvjeti: imaš furnace; coal je ispod praga; imaš stone, iron ili diamond pickaxe.
+45 -> gatherIronScore | uvjeti: imaš furnace; nemaš dovoljno raw/processed irona; imaš stone, iron ili diamond pickaxe; nisi već u kombinaciji iron/diamond pickaxe + bucket + flint_and_steel.
+44 -> gatherGoldScore | uvjeti: imaš furnace; nemaš golden helmet; imaš iron ili diamond pickaxe; gold nije na dovoljnoj količini.
+42 -> craftBucketScore | uvjeti: nemaš bucket; imaš crafting table; imaš barem 3 iron ingota.
+40 -> collectWaterScore | uvjeti: imaš bucket; nemaš water bucket.
+38 -> craftIronArmorScore | uvjeti: nemaš full iron armor set; imaš crafting table; imaš barem 19 iron ingota.
+38 -> craftGoldenHelmetScore | uvjeti: nemaš golden helmet; imaš barem 5 gold ingota.
+37 -> craftFlintAndSteelScore | uvjeti: nemaš flint_and_steel; imaš crafting table; imaš barem 1 flint; imaš barem 1 iron ingot.
+35 -> craftDiamondSwordScore | uvjeti: nemaš diamond sword; imaš crafting table; imaš barem 2 diamonda; imaš barem 1 log.
+34 -> craftDiamondArmorScore | uvjeti: nemaš full diamond armor set; imaš crafting table; imaš barem 19 diamonda.
+33 -> gatherDiamondScore | uvjeti: nemaš dovoljno diamonda; imaš iron ili diamond pickaxe; dijamanti su ispod praga.
+31 -> equipGearScore | uvjeti: imaš barem jedan komad diamond armor-a ili golden helmet.
+29 -> gatherObsidianScore | uvjeti: ne gradiš i nije dovršen portal; obsidian je ispod praga; imaš diamond pickaxe.
+1 -> resetScore | uvjeti: uvijek aktivan; samo osvježava state flagove iz inventara.

@@ -26,8 +26,9 @@ class FindBlockNode extends Node {
       return "FAILURE";
     }
 
-    if (targetBlock) {
+    if (targetBlock && block && config.BLOCKS[this.configKey].names.includes(block.name)) {
       console.log("Block already targeted");
+      console.log("Target block: ", targetBlock.name);
       return "SUCCESS";
     }
 
@@ -36,7 +37,7 @@ class FindBlockNode extends Node {
       matching: config.BLOCKS[this.configKey].names
         .map((name) => this.mcData.blocksByName[name]?.id)
         .filter(Boolean),
-      count: 1,
+      count: 10,
     });
 
     if (!blocks.length) {

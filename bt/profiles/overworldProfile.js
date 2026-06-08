@@ -11,6 +11,9 @@ const IdleNode = require("../nodes/idleNode");
 const FindBlockNode = require("../nodes/findBlockNode");
 const MoveToBlockNode = require("../nodes/moveToBlockNode");
 const BreakBlockNode = require("../nodes/breakBlockNode");
+const DetectLavaPoolNode = require("../nodes/detectLavaPoolNode");
+const PlaceWaterNode = require("../nodes/placeWaterNode");
+const SetBlockNode = require("../nodes/setBlockNode");
 
 const PrepareFurnaceMaterialsNode = require("../nodes/prepareFurnaceMaterialsNode");
 const DigPitNode = require("../nodes/digPitNode");
@@ -374,17 +377,25 @@ function createOverworldProfile(bot, config) {
 
   const collectWaterSeq = new Sequence([
     new FindBlockNode("WATER", "blockTarget", config.BLOCKS.WATER.maxBlockDistance),
-    new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.INTERACT_RANGE),
-    new EquipItemNode("bucket"),
+    new MoveToBlockNode("blockTarget", 1, 2),
     new RemoveItemNode("bucket", 1),
     new GiveItemNode(["water_bucket"], 1),
     new EquipItemNode("water_bucket"),
   ]);
 
-  // const lavaPoolSeq = new Sequence([
-  //   new FindBlockNode("LAVA", "blockTarget", config.BLOCKS.LAVA.maxBlockDistance),
-  //   new MoveToBlockNode("blockTarget", config.BT.MOVE_NEAR_DISTANCE, config.BT.INTERACT_RANGE), 
-  // ]);
+  const obtainObsidianSeq = new Sequence([
+    new FindBlockNode("LAVA", "blockTarget", config.BLOCKS.LAVA.maxBlockDistance),
+    new DetectLavaPoolNode(),
+    new MoveToBlockNode("blockTarget", 2, 3),
+    new PlaceWaterNode("blockTarget"),
+    new GiveItemNode(["obsidian"], 10),
+    
+  ]);
+
+  const obtainObsidianSelector = new Selector([
+    new SetBlockNode("dirt"),
+    obtainObsidianSeq,
+  ]);
 
 
   return {
@@ -431,7 +442,7 @@ function createOverworldProfile(bot, config) {
       },
       {
         name: "GatherObsidian",
-        node: gatherObsidianSelector,
+        node: obtainObsidianSelector,
         scoreFn: gatherObsidianScore,
       },
       {
@@ -534,11 +545,6 @@ function createOverworldProfile(bot, config) {
         node: collectWaterSeq,
         scoreFn: collectWaterScore,
       },
-      // {
-      //   name: "LavaPool",
-      //   node: lavaPoolSeq,
-      //   scoreFn: () => 1000,
-      // },
       {
         name: "Idle",
         node: new IdleNode(),

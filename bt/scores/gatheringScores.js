@@ -135,7 +135,7 @@ function gatherObsidianScore(bot, state, config) {
   if (obsidianCount >= config.ITEM_THRESHOLDS.OBSIDIAN_MAX) state.hasEnoughObsidian = true;
   else state.hasEnoughObsidian = false;
 
-  if(!state.hasEnoughObsidian && state.hasDiamondPickaxe) return 29;
+  if(!state.hasEnoughObsidian && state.hasWaterBucket) return 31;
 
   return 0;
 }

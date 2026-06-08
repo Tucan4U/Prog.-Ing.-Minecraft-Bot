@@ -52,12 +52,12 @@ class PlaceBlockNode extends Node {
     }
 
     const aroundBlockAbove = [
+      blockAbove.position.offset(0, 1, 0),
+      blockAbove.position.offset(0, -1, 0),
       blockAbove.position.offset(1, 0, 0),
       blockAbove.position.offset(-1, 0, 0),
       blockAbove.position.offset(0, 0, 1),
       blockAbove.position.offset(0, 0, -1),
-      blockAbove.position.offset(0, 1, 0),
-      blockAbove.position.offset(0, -1, 0),
     ];
 
     for (let pos of aroundBlockAbove) {
@@ -77,7 +77,7 @@ class PlaceBlockNode extends Node {
           console.log("Pokušavam potvrditi postavljanje nakon greške...");
           
           // Čekamo kratko da se sinkronizira stanje sa serverom (npr. 200-500ms je sasvim dovoljno)
-          await new Promise((resolve) => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 500));
           
           // Provjeravamo je li blok ipak postavljen unatoč greški na klijentu
           const placedBlock = bot.blockAt(blockAbove.position);

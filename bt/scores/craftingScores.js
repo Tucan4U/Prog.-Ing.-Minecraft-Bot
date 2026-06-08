@@ -142,7 +142,7 @@ function craftBucketScore(bot, state, config) {
   } else {
     state.hasBucket = false;
   }
-  if (state.hasBucket || !state.hasCraftingTable) return 0;
+  if (state.hasBucket || !state.hasCraftingTable || state.hasWaterBucket) return 0;
   // INPUT : 3 IRON INGOTS + 1 LOG
   const ironCount = countItemsByNames(bot, ["iron_ingot"]);
   if (ironCount < 3) return 0;
@@ -180,7 +180,7 @@ function craftShieldScore(bot, state, config) {
 }
 
 function craftGoldenHelmetScore(bot, state, config) {
-  if(hasAnyItem(bot, ["golden_helmet"])) {
+  if(hasAnyItem(bot, ["golden_helmet"]) || bot.entity.equipment[5]?.name === "golden_helmet") {
     state.hasGoldenHelmet = true;
   }
   if(state.hasGoldenHelmet || !state.hasCraftingTable) return 0;

@@ -79,12 +79,15 @@ module.exports = {
   hasDiamondArmor: false,
   hasGoldenHelmet: false,
   hasBucket: false,
+  hasWaterBucket: false,
   hasFlint: false,
   hasFlintAndSteel: false,
   hasShield: false,
   hasGoldenHelmet: false,
 
   foodHuntActive: false,
+
+  lavaSearchDistance: 16, // Configurable max distance for lava pool detection, used in DetectLavaPoolNode
   sensors: {
     entities: [],
     items: [],

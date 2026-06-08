@@ -91,6 +91,37 @@ function createNetherProfile(config) {
     new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
   ]);
 
+  const tablePickUpSeq = new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names);
+
+  const tablePlacingSeq = new Sequence([
+    //find placement
+    new FindInteractiveBlockPlacementNode(),
+    //place block
+    new PlaceBlockNode("crafting_table"),
+  ]);
+
+  const craftingSeq = new Sequence([
+    //find crafting table
+    new FindBlockNode("crafting_table"),
+    //craft item
+    new CraftItemUsingTableNode("gold_ingot"),
+  ]);
+
+  const tableBreakingSeq = new Sequence([
+    //find crafting table
+    new FindBlockNode("crafting_table"),
+    //move to crafting table
+    new MoveToBlockNode(
+      "blockTarget",
+      config.BT.MOVE_NEAR_DISTANCE,
+      config.BT.BREAK_RANGE,
+    ),
+    //break crafting table
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+    //pick up crafting table
+    new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
+  ])
+
     //bot isnt picking up the crafting table after breaking it
 
   const moveToPiglinSeq = new Sequence([ //ako se ne bartera trenutno
@@ -140,8 +171,11 @@ function createNetherProfile(config) {
   return {
     candidates: [
       { name: 'EnterNether', node: enterSeq, scoreFn: enterNetherScore },
+      { name: 'PickUpTable', node: tablePickUpSeq, scoreFn: tablePickUpScore },
+      { name: 'PlaceTable', node: tablePlacingSeq, scoreFn: placeTableScore },
+      { name: 'UseTable', node: craftingSeq, scoreFn: useTableScore },
+      { name: 'BreakTable', node: tableBreakingSeq, scoreFn: breakTableScore },
       { name: 'CollectNetherGold', node: goldSeq, scoreFn: getGoldNetherScore },
-      { name: 'CraftNetherGold', node: goldCraftingSeq, scoreFn: craftGoldNetherScore },
       { name: 'MoveToPiglin', node: moveToPiglinSeq, scoreFn: moveToPiglinScore },
       { name: 'BarterWithPiglin', node: barteringSeq, scoreFn: barteringScore },
       { name: 'FindFortress', node: fortressSeq, scoreFn: findFortressScore },

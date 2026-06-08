@@ -2,7 +2,7 @@ const { getMissingEquipment } = require('../../utils/netherEquipment');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { findItem } = require('../../behaviors/loot');
 const { needsGold, numOfBlocks, numOfItems } = require('../../utils/inventory');
-const { checkEnderEyesPosession } = require('../../utils/netherUtils');
+const { checkEnderEyesPosession, hasBlazeRods } = require('../../utils/netherUtils');
 
 
 let blazeCountCache = 0; // Cache for the current blaze rod count to avoid expensive inventory checks every tick.
@@ -174,6 +174,28 @@ function huntBlazeScore(bot, state, config) {
   return blazes.length ? 120 : 0;
 }
 
+function craftBlazePowderScore(bot, state, config) {
+  // Active when craft blaze powder was requested.
+  if (!state.mission?.craftBlazePowderRequested) return 0;
+
+  const craftedPowderCount = state.mission?.craftedItems?.['blaze_powder'] || 0;
+  if (craftedPowderCount >= state.mission.targetBlazePowder) {
+    state.mission.craftBlazePowderRequested = false;
+    return 0;
+  }
+
+  // Count blaze rods in inventory
+  const blazeRodCount = hasBlazeRods(bot, state, config);
+
+  // In AUTNOMOUS mode only craft if we have at least 10 blaze rods
+  if (state.mission?.netherMode === config.NETHER_MODES.AUTONOMOUS && blazeRodCount < 10) return 0;
+
+  if (state.mission?.netherMode === config.NETHER_MODES.MANUAL && blazeRodCount < 1) return 0;
+
+  bot.chat(`Have ${blazeRodCount} blaze rods, ready to craft blaze powder.`);
+  return 130;
+}
+
 
 
 // Function check if there is a need for blaze rods:
@@ -198,4 +220,4 @@ function checkBlazeNeed(bot, state, config) {
   return true; // Needs blaze rods
 }
 
-module.exports = { exitNetherScore, barteringScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore, lootBlazeRodsScore, huntBlazeScore };
+module.exports = { exitNetherScore, barteringScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore, lootBlazeRodsScore, huntBlazeScore, craftBlazePowderScore };

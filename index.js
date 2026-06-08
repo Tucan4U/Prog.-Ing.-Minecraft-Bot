@@ -28,6 +28,7 @@ const {
   findFortressCommand,
   findBlazeSpawnerCommand ,
   lootBlazeRodsCommand,
+  craftBlazePowderCommand,
   exitNetherCommand,
 } = require("./commands/netherCommands");
 
@@ -53,7 +54,7 @@ let worldSensors = null;
 
 const overworldProfile = createOverworldProfile(config);
 const hostileCombatProfile = createHostileCombatProfile(config);
-const netherProfile = createNetherProfile(config);
+const netherProfile = createNetherProfile(config, state);
 const endProfile = createEndProfile(config)
 
 const utilityTreesByProfile = {
@@ -267,6 +268,11 @@ bot.on("chat", (username, message) => {
   // Message form: "collect rods x" -> where x is the number of rods to collect
   if (message.startsWith("collect rods")){
     lootBlazeRodsCommand(bot, state, config, message);
+    startFlag = true;
+  }
+  // Craft blaze powder command
+  if (message === "craft blaze powder") {
+    craftBlazePowderCommand(bot, state, config);
     startFlag = true;
   }
   // Exit nether command

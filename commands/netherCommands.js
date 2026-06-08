@@ -1,5 +1,5 @@
 const resetState = require("../utils/resetState");
-const checkEnderEyesPosession = require("../utils/netherUtils").checkEnderEyesPosession;
+const { checkEnderEyesPosession, hasBlazeRods }= require("../utils/netherUtils");
 
 function netherMain(bot, state, config) {
     // Combined unified command: switch to Nether profile, request both enter and fortress search.
@@ -34,6 +34,9 @@ function netherMain(bot, state, config) {
         state.mission.targetBlazeRods = 10; // Set desired blaze rod count for hunting mode.
         
         state.mission.exitNetherRequested = true;
+
+        state.mission.craftBlazePowderRequested = true; // Request crafting blaze powder after collecting rods.
+        state.mission.targetBlazePowder = 20; // Set desired blaze powder count (from 10 rods) for crafting mode.
     }
         
     if (bot.game && bot.game.dimension === 'the_nether') {
@@ -145,4 +148,21 @@ function lootBlazeRodsCommand(bot, state, config, message) {
     }
 }
 
-module.exports = { netherMain, enterNetherCommand, findFortressCommand, findBlazeSpawnerCommand, lootBlazeRodsCommand, exitNetherCommand };
+function craftBlazePowderCommand(bot, state, config) {
+    // No need to be in the Nether for this one so no dimension check
+
+    state.mission.netherMode = config.NETHER_MODES.MANUAL;
+    state.mission.activeProfile = config.PROFILES.NETHER;
+
+    const blazeRodCount = hasBlazeRods(bot, state, config);
+    if (bot.game && blazeRodCount > 0) {
+        bot.chat('Crafting blaze powder from blaze rods.');
+        state.mission.craftBlazePowderRequested = true;
+        state.mission.targetBlazePowder = blazeRodCount * 2; // Convert all available rods to blaze powder.
+    } else {
+        bot.chat('Not enough blaze rods to craft blaze powder.');
+        state.mission.craftBlazePowderRequested = false;
+    }
+}
+
+module.exports = { netherMain, enterNetherCommand, findFortressCommand, findBlazeSpawnerCommand, lootBlazeRodsCommand, craftBlazePowderCommand, exitNetherCommand };

@@ -38,10 +38,13 @@ module.exports = {
     netherMode : null,
     // Exit Nether portal request flag.
     exitNetherRequested: false,
-    
     // Blaze hunting state (Blaze rods collection)
     targetBlazeRods: null,
     blazeHuntingRequested: false,
+    // Blaze powder crafting state
+    craftBlazePowderRequested: false,
+    blazePowderTargetNumber: 20, // Desired blaze powder count
+
     // Craft-sequence progress cache used to survive repeated BT ticks.
     craftedItems: null,
     // Placed-block progress cache used by block placement sequences.

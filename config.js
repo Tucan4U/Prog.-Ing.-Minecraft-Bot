@@ -175,6 +175,11 @@ module.exports = {
       names: [
         "ender_pearl",
       ]
+    },
+    BLAZE_POWDER: {
+      names: [
+        "blaze_powder",
+      ]
     }
   },
   BLAZE_RODS: {

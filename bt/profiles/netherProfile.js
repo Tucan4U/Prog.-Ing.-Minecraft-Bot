@@ -21,7 +21,7 @@ const PickUpItemNode = require('../nodes/pickUpItemNode');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { getClosestEntity, isTargetFloating } = require('../../utils/target');
 
-const { exitNetherScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, barteringScore, } = require('../scores/netherScores');
+const { exitNetherScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, barteringScore, craftBlazePowderScore, } = require('../scores/netherScores');
 
 // Gold collection and crafting nodes
 const BreakBlockNode = require("../nodes/breakBlockNode");
@@ -31,9 +31,11 @@ const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
 const { ITEMS } = require('../../config');
 const DropItemNode = require('../nodes/dropItemNode');
 const ToggleBarteringNode = require('../nodes/startBarteringNode');
+const CraftItemNode = require('../nodes/craftItemNode');
 
 
-function createNetherProfile(config) {
+
+function createNetherProfile(config, state) {
   const enterSeq = new Sequence([
     // Enter Nether sequence: check if already in Nether,
     // if not check for required equipment, then find nearest portal and enter it.
@@ -118,6 +120,11 @@ function createNetherProfile(config) {
     new ToggleBarteringNode(),
   ])
 
+  const blazePowderSeq = new Sequence([
+    // Craft blaze powder from collected blaze rods (10 rods -> 20 powder)
+    new CraftItemNode('blaze_powder', (bot, state) => state.mission.targetBlazePowder),
+  ]);
+
   const blazeSpawnerSeq = new Sequence([
     // Blaze spawner search sequence: equip gear, then find blaze spawner by looking for spawner blocks,
     // then move to it.
@@ -156,6 +163,7 @@ function createNetherProfile(config) {
       { name: 'CraftNetherGold', node: goldCraftingSeq, scoreFn: craftGoldNetherScore },
       { name: 'MoveToPiglin', node: moveToPiglinSeq, scoreFn: moveToPiglinScore },
       { name: 'BarterWithPiglin', node: barteringSeq, scoreFn: barteringScore },
+      { name: 'CraftBlazePowder', node: blazePowderSeq, scoreFn: craftBlazePowderScore },
       { name: 'FindFortress', node: fortressSeq, scoreFn: findFortressScore },
       { name: 'LootBlazeRod', node: lootRodSeq, scoreFn: lootBlazeRodsScore },
 

@@ -16,7 +16,16 @@ class CraftItemNode extends Node {
     const desiredNames = Array.isArray(this.configKeyOrItems)
       ? this.configKeyOrItems
       : [this.configKeyOrItems];
-    const targetCount = this.numberOfItemsToCraft ?? 1;
+
+    let targetCount = 1;
+    if (typeof this.numberOfItemsToCraft === "function") {
+      targetCount = this.numberOfItemsToCraft(bot, state, config) ?? 1;
+    } else if (typeof this.numberOfItemsToCraft === "string") {
+      targetCount = state.mission?.[this.numberOfItemsToCraft] ?? 1;
+    } else {
+      targetCount = this.numberOfItemsToCraft ?? 1;
+    }
+
     for (const key in state.mission.craftedItems) {
       if (desiredNames.includes(key)) {
         if (state.mission.craftedItems[key] >= targetCount) return "SUCCESS";

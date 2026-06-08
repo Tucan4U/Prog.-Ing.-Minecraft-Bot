@@ -26,6 +26,7 @@ const RemoveItemNode = require("../nodes/removeItemNode");
 const GiveItemNode = require("../nodes/giveItemNode");
 const EquipGearNode = require("../nodes/equipGearNode");
 const EquipItemNode = require("../nodes/equipItemNode");
+const BuildNetherPortalNode = require("../nodes/buildNetherPortalNode");
 
 const {
   pickUpFoodScore,
@@ -539,6 +540,11 @@ function createOverworldProfile(bot, config) {
       //   node: lavaPoolSeq,
       //   scoreFn: () => 1000,
       // },
+      {
+        name: "buildNetherPortal",
+        node: new BuildNetherPortalNode(),
+        scoreFn: () => 1000,
+      },
       {
         name: "Idle",
         node: new IdleNode(),

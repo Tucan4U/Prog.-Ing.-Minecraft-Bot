@@ -1,6 +1,7 @@
 // Glavni entrypoint: inicijalizira bota, senzore i pokreće top-level BT odluke.
 const mineflayer = require("mineflayer");
 const { pathfinder, Movements } = require("mineflayer-pathfinder");
+const NetherPortalBuilder = require("./bt/nodes/buildNetherPortalNode");
 
 const config = require("./config");
 // State
@@ -86,7 +87,7 @@ async function startLoop() {
       console.log(err);
     }
 
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, state.tickSpeed));
   }
 }
 
@@ -104,7 +105,7 @@ async function loop() {
 }
 
 // CHAT
-bot.on("chat", (username, message) => {
+bot.on("chat", async (username, message) => {
   if (username === bot.username) return;
   if (message === "stop") {
     bot.chat("Stopping Bot!");
@@ -213,6 +214,11 @@ bot.on("chat", (username, message) => {
   }
   if (message === "clear") {
     bot.chat("/clear @s");
+  }
+  if (message === "np") {
+    const builder = new NetherPortalBuilder(bot);
+
+    await builder.build();
   }
 });
 

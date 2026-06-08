@@ -98,4 +98,5 @@ module.exports = {
   findInventoryItemByNames,
   findBestInventoryItemByNames,
   hasAnyItem,
+  numOfItems,
 };

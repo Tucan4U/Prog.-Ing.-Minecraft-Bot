@@ -11,7 +11,7 @@ class CraftItemUsingTableNode extends Node {
   }
 
   async tick(bot, state, config) {
-    if (state.mission.craftedItems[this.configKey]) return "SUCCESS";
+    //if (state.mission.craftedItems[this.configKey]) return "SUCCESS";
     if (!this.mcData) {
       this.mcData = mcData(bot.version);
     }
@@ -43,7 +43,7 @@ class CraftItemUsingTableNode extends Node {
     try {
       await bot.craft(recipe, 1, table);
       bot.chat("Crafted: ", this.configKey);
-      state.mission.craftedItems[this.configKey] = 1;
+      //state.mission.craftedItems[this.configKey] = 1;
       return "SUCCESS";
     } catch (err) {
       bot.chat("Crafting failed: " + err.message);

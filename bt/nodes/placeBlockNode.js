@@ -15,7 +15,10 @@ class PlaceBlockNode extends Node {
       state.mission.placedItems = {};
     }
 
-    if (state.mission.placedItems[this.configKey]) return "SUCCESS";
+    if (state.mission.placedItems[this.configKey]) {
+      console.log("zajeb sa placed items")
+      return "SUCCESS";
+    }
 
     if (!this.mcData) {
       this.mcData = mcData(bot.version);

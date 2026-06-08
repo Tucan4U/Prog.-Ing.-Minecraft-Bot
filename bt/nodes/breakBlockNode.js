@@ -53,6 +53,9 @@ class BreakBlockNode extends Node {
         state["digTask"] = null;
 
         bot.chat("SUCCESS: Block became air immediately.");
+        if (targetBlock.name === "crafting_table") {
+              state.mission.placedItems["crafting_table"] = null;
+            }
         return "SUCCESS";
       }
       return "RUNNING";

@@ -27,7 +27,7 @@ class FindInteractiveBlockPlacementNode extends Node {
           dz <= this.placementDistance;
           dz++
         ) {
-          if (dx === 0 && dz === 0) continue;
+          if (dx === 0 && dz === 0 && dy === 0) continue;
 
           const standPos = botPos.offset(dx, dy, dz);
           let blockAbove = bot.blockAt(standPos);

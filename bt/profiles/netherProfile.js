@@ -89,7 +89,7 @@ function createNetherProfile(config) {
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
     //pick up crafting table
     new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
-    ]);
+  ]);
 
     //bot isnt picking up the crafting table after breaking it
 
@@ -105,7 +105,7 @@ function createNetherProfile(config) {
     new PickUpItemNode(config.PIGLIN_BARTER.names),
 
     new ToggleBarteringNode(),
-  ])
+  ]);
 
   const blazeSpawnerSeq = new Sequence([
     // Blaze spawner search sequence: equip gear, then find blaze spawner by looking for spawner blocks,

@@ -115,9 +115,12 @@ function moveToPiglinScore(bot, state, config) {
 }
 
 function barteringScore(bot, state, config){
-  const enderPearlCount = numOfItems(bot, state, config, "ENDER_PEARLS");
+  const enderPearlCount = numOfItems(bot, state, config, "ENDER_PEARLS");  
 
-  if (state.isBartering && enderPearlCount < 12) return 159;
+  if (state.isBartering && enderPearlCount < 12){
+    bot.chat(enderPearlCount);
+    return 159;
+  } 
   return 0;
 }
 

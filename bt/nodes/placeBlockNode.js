@@ -65,10 +65,26 @@ class PlaceBlockNode extends Node {
       if (neighbor && !neighbor.name.includes("air")) {
         const face = blockAbove.position.minus(pos); // smjer prema blockAbove
         try {
+          // Pokušavamo postaviti blok
           await bot.placeBlock(neighbor, face);
+          
+          // Ako je prošlo bez greške, provjeravamo je li blok stvarno tamo
+          const placedBlock = bot.blockAt(blockAbove.position);
+          if (placedBlock?.name === this.configKey) {
+            return "SUCCESS";
+          }
         } catch (e) {
-          const newBlock = bot.blockAt(blockAbove.position);
-          if (newBlock?.name === this.configKey) return "SUCCESS";
+          console.log("Pokušavam potvrditi postavljanje nakon greške...");
+          
+          // Čekamo kratko da se sinkronizira stanje sa serverom (npr. 200-500ms je sasvim dovoljno)
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          
+          // Provjeravamo je li blok ipak postavljen unatoč greški na klijentu
+          const placedBlock = bot.blockAt(blockAbove.position);
+          if (placedBlock?.name === this.configKey) {
+            console.log("Blok je uspješno postavljen unatoč greški u placeBlock!");
+            return "SUCCESS";
+          }
           console.log("Errrror placing block:", e);
           bot.chat("Error placing block");
           state["blockTarget"] = null;

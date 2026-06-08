@@ -81,6 +81,7 @@ module.exports = {
   hasBucket: false,
   hasFlint: false,
   hasFlintAndSteel: false,
+  hasShield: false,
   hasGoldenHelmet: false,
 
   foodHuntActive: false,

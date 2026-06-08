@@ -26,7 +26,6 @@ const RemoveItemNode = require("../nodes/removeItemNode");
 const GiveItemNode = require("../nodes/giveItemNode");
 const EquipGearNode = require("../nodes/equipGearNode");
 const EquipItemNode = require("../nodes/equipItemNode");
-const InteractWithBlockNode = require("../nodes/interactWithBlockNode");
 
 const {
   pickUpFoodScore,
@@ -58,10 +57,10 @@ const {
   craftDiamondPickaxeScore,
   craftDiamondSwordScore,
   craftDiamondArmorScore,
-  craftIronArmorScore,
   craftGoldenHelmetScore,
   craftBucketScore,
   craftFlintAndSteelScore,
+  craftShieldScore,
 } = require("../scores/craftingScores");
 
 const { resetScore } = require("../scores/resetScore");
@@ -232,21 +231,6 @@ function createOverworldProfile(bot, config) {
     commandDiamondSwordSeq,
   );
 
-  const commandIronArmorSeq = new Sequence([
-    new FindInteractiveBlockPlacementNode(),
-    new PlaceBlockNode("crafting_table"),
-    new RemoveItemNode("iron_ingot", 19),
-    new GiveItemNode(["iron_chestplate"], 1),
-    new GiveItemNode(["iron_leggings"], 1),
-    new GiveItemNode(["iron_boots"], 1),
-    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
-  ]);
-  const commandIronArmorCond = new conditionNode(
-    "NeedsIronArmor",
-    () => !hasAllItems(bot, config.ARMOR.IRON_ARMOR),
-    commandIronArmorSeq,
-  );
-
   const commandDiamondArmorSeq = new Sequence([
     new FindInteractiveBlockPlacementNode(),
     new PlaceBlockNode("crafting_table"),
@@ -299,6 +283,21 @@ function createOverworldProfile(bot, config) {
     "NeedsFlintAndSteel",
     () => !hasAnyItem(bot, ["flint_and_steel"]),
     commandFlintAndSteelSeq,
+  );
+
+  const commandShieldSeq = new Sequence([
+    new FindInteractiveBlockPlacementNode(),
+    new PlaceBlockNode("crafting_table"),
+    new RemoveItemNode("iron_ingot", 1), //INPUT : 2 LOGs & 1 iron ingot
+    new RemoveItemNode(config.BLOCKS.LOGS.names, 2),
+    new GiveItemNode(["oak_planks"], 2), //OUTPUT : 2 OAK PLANKS(2 LOGs -> 8 PLANKS - 6 PLANKS = 2 PLANKS) + 1 SHIELD
+    new GiveItemNode(["shield"], 1),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+  ]);
+  const commandShieldCond = new conditionNode(
+    "NeedsShield",
+    () => !hasAnyItem(bot, ["shield"]),
+    commandShieldSeq,
   );
 
   const gatherStoneSeq = new Sequence([
@@ -499,7 +498,13 @@ function createOverworldProfile(bot, config) {
         name: "CraftFlintAndSteel",
         node: commandFlintAndSteelCond,
         scoreFn: craftFlintAndSteelScore,
-      },      {
+      },
+      {
+        name: "CraftShield",
+        node: commandShieldCond,
+        scoreFn: craftShieldScore,
+      },
+      {
         name: "CraftGoldenHelmet",
         node: commandGoldHelmetCond,
         scoreFn: craftGoldenHelmetScore,

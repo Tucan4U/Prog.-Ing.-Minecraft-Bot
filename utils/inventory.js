@@ -98,37 +98,58 @@ function findBestInventoryItemByNames(
   return bestItem;
 }
 
+function getOffhandItem(bot) {
+  // Broj slota za off-hand u kodu Mineflayera je obično 45 za novije verzije,
+  // ali najsigurniji način je tražiti opremljeni predmet na "off-hand" lokaciji.
+  return bot.inventory.equipped(10, null); 
+}
+
+function checkOffhand(bot, names) {
+  const nameSet = new Set(names || []);
+  const offhandItem = bot.inventory.equipped(10, null); // 10 označava off-hand opremu
+
+  // Ako u ruci ima predmet i njegovo ime je u traženom setu, vraća taj predmet
+  if (offhandItem && nameSet.has(offhandItem.name)) {
+    return offhandItem;
+  }
+  
+  return null; // Off-hand je prazan ili drži krivi predmet
+}
+
 function hasAnyItem(bot, names) {
   return Boolean(findInventoryItemByNames(bot, names));
 }
-// Helper to check if all specified items are present in the inventory
-function hasAllItems(bot, names) {
-  if (!names || names.length === 0) return true;
-
-  const required = new Set(names);
-  const found = new Set(
-    bot.inventory.items().map(item => item.name)
-  );
-
-  for (const name of required) {
-    if (!found.has(name)) return false;
-  }
-  return true;
-}
 
 function hasAllItems(bot, names) {
   if (!names || names.length === 0) return true;
 
-  const required = new Set(names);
-  const found = new Set(
-    bot.inventory.items().map(item => item.name)
-  );
-
-  // Provjeravamo da li su svi required itemi prisutni u found setu
-  for (const name of required) {
-    if (!found.has(name)) return false;
+  // 1. Izbroji koliko kojih predmeta bot mora imati
+  const requiredCounts = {};
+  for (const name of names) {
+    requiredCounts[name] = (requiredCounts[name] || 0) + 1;
   }
-  return true;
+
+  // 2. Izbroji sve predmete koje bot trenutno posjeduje
+  const botCounts = {};
+  
+  // bot.inventory.slots sadrži apsolutno sve slotove (uključujući oklop)
+  for (const item of bot.inventory.slots) {
+    if (item) {
+      botCounts[item.name] = (botCounts[item.name] || 0) + item.count;
+    }
+  }
+
+  // 3. Provjeri ima li bot dovoljnu količinu za svaki traženi predmet
+  for (const name in requiredCounts) {
+    const requiredAmount = requiredCounts[name];
+    const botAmount = botCounts[name] || 0;
+
+    if (botAmount < requiredAmount) {
+      return false; // Bot nema dovoljno ovih predmeta
+    }
+  }
+
+  return true; // Bot ima sve tražene predmete u pravoj količini
 }
 
 module.exports = {
@@ -141,5 +162,7 @@ module.exports = {
   findInventoryItemByNames,
   findBestInventoryItemByNames,
   hasAnyItem,
-  hasAllItems
+  hasAllItems,
+  getOffhandItem,
+  checkOffhand,
 };

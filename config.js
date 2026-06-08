@@ -158,7 +158,7 @@ module.exports = {
       HUNT_STOP_AT: 2,
     },
     SMELTING_THRESHOLDS: {
-      IRON: 7,
+      IRON: 8,
       GOLD: 5,
     },
     ITEMS_PER_FUEL_UNIT: 8,
@@ -210,7 +210,7 @@ module.exports = {
     COAL_MIN: 5,
     COAL_MAX: 9,
     RAW_IRON_MIN: 0,
-    RAW_IRON_MAX: 7,
+    RAW_IRON_MAX: 8,
     RAW_GOLD_MIN: 0,
     RAW_GOLD_MAX: 5,
     DIAMOND_MIN: 0,

@@ -35,10 +35,10 @@ function gatherGravelScore(bot, state, cfg) {
   
   if (state.hasFlintAndSteel) return 0;
 
-  if (flintCount >= 1) state.hasEnoughFlint = true;
+  if (flintCount >= 1) state.hasFlint = true;
   else state.hasFlint = false;
 
-  if (!state.hasFlint) return 64;
+  if (!state.hasFlint && flintCount === 0) return 64;
 
   return 0;
 }
@@ -80,7 +80,7 @@ function gatherIronScore(bot, state, config) {
   const furnacePresent = findInventoryItemByNames(bot, ["furnace"]) !== null || state.hasFurnace;
   if (!furnacePresent) return 0;
   
-  if ((state.hasIronPickaxe || state.hasDiamondPickaxe) && state.hasBucket && state.hasFlintAndSteel) return 0;
+  if ((state.hasIronPickaxe || state.hasDiamondPickaxe) && state.hasBucket && state.hasWaterBucket && state.hasFlintAndSteel && state.hasShield) return 0;
 
   const rawIronCount = countItemsByNames(bot, ["raw_iron"]);
   const ironIngotCount = countItemsByNames(bot, ["iron_ingot"]);
@@ -116,12 +116,13 @@ function gatherGoldScore(bot, state, config) {
 }
 
 function gatherDiamondScore(bot, state, config) {
+  //bot.chat(` has enough diamond: ${state.hasEnoughDiamond}, has diamond pickaxe: ${state.hasDiamondPickaxe}, has diamond sword: ${state.hasDiamondSword}, has diamond armor: ${state.hasDiamondArmor}`);
   if (state.hasDiamondPickaxe && state.hasDiamondSword && state.hasDiamondArmor) return 0;
   const diamondCount = countItemsByNames(bot, ["diamond"]);
   if (diamondCount <= config.ITEM_THRESHOLDS.DIAMOND_MIN) state.hasEnoughDiamond = false;
 
   if (diamondCount >= config.ITEM_THRESHOLDS.DIAMOND_MAX) state.hasEnoughDiamond = true;
-
+  //bot.chat(`Diamond count: ${diamondCount}, has enough diamond: ${state.hasEnoughDiamond}, has diamond pickaxe: ${state.hasDiamondPickaxe}, has diamond sword: ${state.hasDiamondSword}, has diamond armor: ${state.hasDiamondArmor}`);
   if(!state.hasEnoughDiamond && (state.hasIronPickaxe || state.hasDiamondPickaxe)) return 33;
 
   return 0;

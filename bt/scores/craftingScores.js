@@ -3,6 +3,7 @@ const {
   countItemsByNames,
   hasAllItems,
   hasAnyItem,
+  checkOffhand,
 } = require("../../utils/inventory");
 
 function hasNearbyCraftingTableItem(state, config) {
@@ -145,7 +146,7 @@ function craftBucketScore(bot, state, config) {
   // INPUT : 3 IRON INGOTS + 1 LOG
   const ironCount = countItemsByNames(bot, ["iron_ingot"]);
   if (ironCount < 3) return 0;
-  return 42;
+  return 39;
 }
 
 function craftFlintAndSteelScore(bot, state, config) {
@@ -163,29 +164,31 @@ function craftFlintAndSteelScore(bot, state, config) {
   return 37;
 }
 
-function craftIronArmorScore(bot, state, config) {
-  if(hasAllItems(bot, config.ARMOR.IRON_ARMOR)) {
-    state.hasIronArmor = true;
+function craftShieldScore(bot, state, config) {
+  if (findInventoryItemByNames(bot, ["shield"]) !== null || hasAllItems(bot, ["shield"])) {
+    state.hasShield = true;
   } else {
-    state.hasIronArmor = false;
+    state.hasShield = false;
   }
-  if(state.hasIronArmor || !state.hasCraftingTable) return 0;
-
+  if (state.hasShield || !state.hasCraftingTable) return 0;
+  // INPUT : 1 IRON INGOT + 6 WOOD PLANKS
   const ironCount = countItemsByNames(bot, ["iron_ingot"]);
-  if (ironCount < 19) return 0;
-
+  if (ironCount < 1) return 0;
+  const logCount = countItemsByNames(bot, config.BLOCKS.LOGS.names || []);
+  if (logCount < 1) return 0;
   return 38;
 }
+
 function craftGoldenHelmetScore(bot, state, config) {
-  if(hasAnyItem(bot, ["golden_helmet"]) && findInventoryItemByNames(bot, ["crafting_table"]) !== null) {
+  if(hasAnyItem(bot, ["golden_helmet"])) {
     state.hasGoldenHelmet = true;
   }
-  if(state.hasGoldenHelmet) return 0;
+  if(state.hasGoldenHelmet || !state.hasCraftingTable) return 0;
 
   const goldCount = countItemsByNames(bot, ["gold_ingot"]);
   if (goldCount < 5) return 0;
 
-  return 38;
+  return 36;
 }
 
 function craftDiamondPickaxeScore(bot, state, config) {
@@ -232,6 +235,7 @@ function craftDiamondArmorScore(bot, state, config) {
   } else {
     state.hasDiamondArmor = false;
   }
+  //bot.chat(`has diamond armor: ${state.hasDiamondArmor}`);
   if(state.hasDiamondArmor || !state.hasCraftingTable) return 0;
 
   const diamondCount = countItemsByNames(bot, ["diamond"]);
@@ -249,7 +253,7 @@ module.exports = {
   craftStoneAxeScore,
   craftIronPickaxeScore,
   craftDiamondPickaxeScore,
-  craftIronArmorScore,
+  craftShieldScore,
   craftGoldenHelmetScore,
   craftBucketScore,
   craftFlintAndSteelScore,

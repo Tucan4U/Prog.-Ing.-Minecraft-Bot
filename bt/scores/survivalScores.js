@@ -115,13 +115,42 @@ function smeltItemsScore(bot, state, config) {
 function collectWaterScore(bot, state, config) {
   if(findInventoryItemByNames(bot, ["water_bucket"]) !== null) {
     state.hasWaterBucket = true;
+  }else {    
+    state.hasWaterBucket = false;
   }
-  return (state.hasBucket && !state.hasWaterBucket) ? 40 : 0;
+
+  return (state.hasBucket && !state.hasWaterBucket) ? 31 : 0;
+}
+
+
+
+function hasGearToEquip(bot, state, config) {
+    const armorSlots = [
+        { suffix: '_helmet', slot: 5 },
+        { suffix: '_chestplate', slot: 6 },
+        { suffix: '_leggings', slot: 7 },
+        { suffix: '_boots', slot: 8 },
+    ]
+
+    for (const armorSlot of armorSlots) {
+        const equipped = bot.inventory.slots[armorSlot.slot]
+
+        const hasArmor = bot.inventory.items().some(item =>
+            item.name.endsWith(armorSlot.suffix)
+        )
+
+        if (hasArmor && !equipped) {
+            return true
+        }
+    }
+    const offhand = bot.inventory.slots[45]
+    const hasShield = bot.inventory.items().some(item => item.name === 'shield')
+
+    return hasShield && offhand?.name !== 'shield'
 }
 
 function equipGearScore(bot, state, config) {
-  const armor = [...config.ARMOR.DIAMOND_ARMOR, "golden_helmet"];
-  return hasAnyItem(bot, armor) ? 31 : 0;
+    return hasGearToEquip(bot, state, config) ? 78 : 0
 }
 
 module.exports = {

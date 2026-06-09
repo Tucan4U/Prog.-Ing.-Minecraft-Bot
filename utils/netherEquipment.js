@@ -100,6 +100,10 @@ function giveNetherEquipment(bot) {
     // Ranged attack
     bot.chat('/give ' + bot.username + ' bow');
     bot.chat('/give ' + bot.username + ' arrow 64');
+
+    // Testing
+    bot.chat('/give ' + bot.username + ' blaze_rod 5'); // For testing blaze rod collection and fortress searching without needing to hunt blazes.
+    bot.chat('/give ' + bot.username + ' ender_pearl 12'); // For testing ender pearl usage and ender eye crafting without needing to hunt endermen.
   } catch (err) {
     // ignore
   }

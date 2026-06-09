@@ -2,12 +2,13 @@ const { Node } = require("../behaviorTree");
 const mcData = require("minecraft-data");
 
 class FindBlockNode extends Node {
-  constructor(configKey, stateKey = "blockTarget", maxBlockDistance) {
+  constructor(configKey, stateKey = "blockTarget", maxBlockDistance, selectLowestBlock = false) {
     super("FindBlock");
     this.mcData = null;
     this.configKey = configKey;
     this.stateKey = stateKey;
     this.maxBlockDistance = maxBlockDistance;
+    this.selectLowestBlock = selectLowestBlock;
   }
 
   async tick(bot, state, config) {
@@ -33,7 +34,7 @@ class FindBlockNode extends Node {
       matching: config.BLOCKS[this.configKey].names
         .map((name) => this.mcData.blocksByName[name]?.id)
         .filter(Boolean),
-      count: 1,
+      count: this.selectLowestBlock ? 64 : 1,
     });
 
     if (!blocks.length) {
@@ -41,9 +42,28 @@ class FindBlockNode extends Node {
       this.maxBlockDistance *= 2;
       return "FAILURE";
     }
-    state[this.stateKey] = bot.blockAt(blocks[0]);
+
+    let target = blocks[0];
+    if (this.selectLowestBlock) {
+      const botPos = bot.entity?.position;
+      const distanceSq = (pos) => {
+        if (!botPos) return 0;
+        const dx = pos.x - botPos.x;
+        const dy = pos.y - botPos.y;
+        const dz = pos.z - botPos.z;
+        return dx * dx + dy * dy + dz * dz;
+      };
+
+      blocks.sort((a, b) => {
+        if (a.y !== b.y) return a.y - b.y;
+        return distanceSq(a) - distanceSq(b);
+      });
+      target = blocks[0];
+    }
+
+    state[this.stateKey] = bot.blockAt(target);
     console.log(
-      `New block found: ${blocks[0].x}, ${blocks[0].y}, ${blocks[0].z}`,
+      `New block found: ${target.x}, ${target.y}, ${target.z}`,
     );
 
     this.maxBlockDistance = 16;

@@ -10,11 +10,9 @@ function checkEnderEyesPosession(bot, state, config) {
   return enderEyesCount >= 12;
 }
 
-function hasBlazeRods(bot, state, config) {
-  const blazeRodItem = bot.registry.itemsByName['blaze_rod'];
-  const blazeRodCount = blazeRodItem ? bot.inventory.count(blazeRodItem.id, null) : 0;
-
-  return blazeRodCount;
+function hasRequiredNetherItem(bot, state, config, itemName) {
+  const item = bot.registry.itemsByName[itemName];
+  return item ? bot.inventory.count(item.id, null) : 0;
 }
 
-module.exports = { checkEnderEyesPosession, hasBlazeRods };
+module.exports = { checkEnderEyesPosession, hasRequiredNetherItem };

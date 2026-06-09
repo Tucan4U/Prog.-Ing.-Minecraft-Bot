@@ -13,7 +13,7 @@ class AttackNode extends Node {
       if (bot.pvp?.target) {
         bot.pvp.stop(); // Stop PvP if we are eating
       }
-      console.log("[COMBAT] Trenutno jedem, pauziram borbu.");
+      console.log("[COMBAT] Currently eating, pausing combat.");
       return "FAILURE"; // We go into idleNode
     }
 

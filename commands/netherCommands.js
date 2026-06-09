@@ -1,5 +1,5 @@
 const resetState = require("../utils/resetState");
-const { checkEnderEyesPosession, hasBlazeRods }= require("../utils/netherUtils");
+const { checkEnderEyesPosession, hasRequiredNetherItem } = require("../utils/netherUtils");
 
 function netherMain(bot, state, config) {
     // Combined unified command: switch to Nether profile, request both enter and fortress search.
@@ -37,6 +37,9 @@ function netherMain(bot, state, config) {
 
         state.mission.craftBlazePowderRequested = true; // Request crafting blaze powder after collecting rods.
         state.mission.targetBlazePowder = 20; // Set desired blaze powder count (from 10 rods) for crafting mode.
+
+        state.mission.craftEnderEyesRequested = true; // Request crafting ender eyes after crafting blaze powder.
+        state.mission.enderEyesTargetNumber = 12; // Set desired ender eye count for crafting mode.
     }
         
     if (bot.game && bot.game.dimension === 'the_nether') {
@@ -154,7 +157,7 @@ function craftBlazePowderCommand(bot, state, config) {
     state.mission.netherMode = config.NETHER_MODES.MANUAL;
     state.mission.activeProfile = config.PROFILES.NETHER;
 
-    const blazeRodCount = hasBlazeRods(bot, state, config);
+    const blazeRodCount = hasRequiredNetherItem(bot, state, config, 'blaze_rod');
     if (bot.game && blazeRodCount > 0) {
         bot.chat('Crafting blaze powder from blaze rods.');
         state.mission.craftBlazePowderRequested = true;
@@ -165,4 +168,22 @@ function craftBlazePowderCommand(bot, state, config) {
     }
 }
 
-module.exports = { netherMain, enterNetherCommand, findFortressCommand, findBlazeSpawnerCommand, lootBlazeRodsCommand, craftBlazePowderCommand, exitNetherCommand };
+function craftEnderEyesCommand(bot, state, config) {
+    // No need to be in the Nether for this one so no dimension check
+
+    state.mission.netherMode = config.NETHER_MODES.MANUAL;
+    state.mission.activeProfile = config.PROFILES.NETHER;
+
+    const blazePowderCount = hasRequiredNetherItem(bot, state, config, 'blaze_powder');
+    const enderPearlCount = hasRequiredNetherItem(bot, state, config, 'ender_pearl');
+    if (bot.game && blazePowderCount > 0 && enderPearlCount > 0) {
+        bot.chat('Crafting ender eyes from blaze powder and ender pearls.');
+        state.mission.craftEnderEyesRequested = true;
+        state.mission.enderEyesTargetNumber = Math.min(blazePowderCount, enderPearlCount);
+    } else {
+        bot.chat('Not enough blaze powder or ender pearls to craft ender eyes.');
+        state.mission.craftEnderEyesRequested = false;
+    }
+}
+
+module.exports = { netherMain, enterNetherCommand, findFortressCommand, findBlazeSpawnerCommand, lootBlazeRodsCommand, craftBlazePowderCommand, craftEnderEyesCommand, exitNetherCommand };

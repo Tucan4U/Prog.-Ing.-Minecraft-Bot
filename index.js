@@ -29,6 +29,7 @@ const {
   findBlazeSpawnerCommand ,
   lootBlazeRodsCommand,
   craftBlazePowderCommand,
+  craftEnderEyesCommand,
   exitNetherCommand,
 } = require("./commands/netherCommands");
 
@@ -273,6 +274,11 @@ bot.on("chat", (username, message) => {
   // Craft blaze powder command
   if (message === "craft blaze powder") {
     craftBlazePowderCommand(bot, state, config);
+    startFlag = true;
+  }
+  // Craft ender eyes command
+  if (message === "craft ender eyes") {
+    craftEnderEyesCommand(bot, state, config);
     startFlag = true;
   }
   // Exit nether command

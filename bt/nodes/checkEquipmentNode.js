@@ -14,7 +14,7 @@ class CheckEquipmentNode extends Node {
       return 'SUCCESS';
     }
 
-    bot.chat(`Missing equipment: ${missing.join(', ')}`);
+     bot.chat(`Missing equipment: ${missing.join(', ')}`);
     return 'FAILURE';
   }
 }

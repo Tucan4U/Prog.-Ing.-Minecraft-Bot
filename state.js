@@ -43,7 +43,10 @@ module.exports = {
     blazeHuntingRequested: false,
     // Blaze powder crafting state
     craftBlazePowderRequested: false,
-    blazePowderTargetNumber: 20, // Desired blaze powder count
+    targetBlazePowder: 20, // Desired blaze powder count
+    // Ender eye crafting state
+    craftEnderEyesRequested: false,
+    enderEyesTargetNumber: 12, // Desired ender eye count
 
     // Craft-sequence progress cache used to survive repeated BT ticks.
     craftedItems: null,

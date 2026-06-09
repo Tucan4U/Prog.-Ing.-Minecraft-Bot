@@ -5,6 +5,7 @@ const EquipArmorNode = require('../nodes/equipArmorNode');
 const FindBlockNode = require('../nodes/findBlockNode');
 const MoveToBlockNode = require('../nodes/moveToBlockNode');
 const EnterPortalNode = require('../nodes/enterPortalNode');
+const PreExitNode = require('../nodes/preExitNode');
 const LocateFortressNode = require('../nodes/locateFortressNode');
 const MoveToFortressNode = require('../nodes/moveToFortressNode');
 const MoveToBlazeSpawnerNode = require('../nodes/moveToBlazeSpawnerNode');
@@ -21,7 +22,7 @@ const PickUpItemNode = require('../nodes/pickUpItemNode');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { getClosestEntity, isTargetFloating } = require('../../utils/target');
 
-const { exitNetherScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, barteringScore, craftBlazePowderScore, } = require('../scores/netherScores');
+const { craftEnderEyesScore, exitNetherScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, barteringScore, craftBlazePowderScore, } = require('../scores/netherScores');
 
 // Gold collection and crafting nodes
 const BreakBlockNode = require("../nodes/breakBlockNode");
@@ -46,17 +47,20 @@ function createNetherProfile(config, state) {
       "NETHER_PORTAL",
       "blockTarget",
       config.BLOCKS.NETHER_PORTAL.maxBlockDistance,
+      true,
     ),
     new MoveToBlockNode("blockTarget", 0, 0),
     new EnterPortalNode(200, "the_nether"),
   ]);
 
   const exitSeq = new Sequence([
-    // Exit Nether sequence: find nearest portal and enter it.
+    // Exit Nether sequence: ensure combat/navigation stopped, then find portal and enter it.
+    new PreExitNode(),
     new FindBlockNode(
       "NETHER_PORTAL",
       "blockTarget",
       config.BLOCKS.NETHER_PORTAL.maxBlockDistance,
+      true,
     ),
     new MoveToBlockNode("blockTarget", 0, 0),
     new EnterPortalNode(200, "overworld"),
@@ -154,6 +158,12 @@ function createNetherProfile(config, state) {
     new FindMobNode('BLAZES'),
     new AttackNode(),
   ]);
+  
+  const enderEyesSeq = new Sequence([
+    // Craft ender eye from blaze powder and ender pearls
+    new CraftItemNode('ender_eye', (bot, state) => state.mission.enderEyesTargetNumber),
+  ]);
+
 
   return {
     candidates: [
@@ -226,6 +236,7 @@ function createNetherProfile(config, state) {
       },
 
       { name: 'FindBlazeSpawner', node: blazeSpawnerSeq, scoreFn: findBlazeSpawnerScore },
+      { name: 'CraftEnderEyes', node: enderEyesSeq, scoreFn: craftEnderEyesScore },
       { name: 'Idle', node: new IdleNode(), scoreFn: () => 1 },
     ],
     fallbackNode: new IdleNode(),

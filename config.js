@@ -44,8 +44,10 @@ module.exports = {
 
   //Parametri koji utječu na SUCCESS ili FAILURE unutar BT-a, zbog toga i ime "BT"
   BT: {
-    MOVE_NEAR_DISTANCE: 4,
-    MOVE_SUCCESS_DISTANCE: 5,
+    MOVE_NEAR_DISTANCE: 1,
+    MOVE_SUCCESS_DISTANCE: 2,
+    NEAR_LIQUID_DISTANCE: 1,
+    LIQUID_SUCCESS_DISTANCE: 2,
     ATTACK_RANGE: 4,
     INTERACT_RANGE: 4,
     MOVE_STATUS_THROTTLE_MS: 3000,

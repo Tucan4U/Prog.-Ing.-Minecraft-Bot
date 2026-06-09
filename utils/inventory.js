@@ -20,7 +20,7 @@ async function equipBestWeapon(bot, weapons) {
     console.log(`Checking for ${weapon} in hand...`);
     try {
       await bot.equip(item, "hand").then(() => {
-        bot.chat(`Equipped ${weapon}`);
+        //bot.chat(`Equipped ${weapon}`);
       });
       console.log(`Equipped ${weapon}`);
       return;

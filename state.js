@@ -77,7 +77,6 @@ module.exports = {
 
   hasIronArmor: false,
   hasDiamondArmor: false,
-  hasGoldenHelmet: false,
   hasBucket: false,
   hasWaterBucket: false,
   hasFlint: false,

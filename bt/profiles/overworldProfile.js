@@ -306,7 +306,7 @@ function createOverworldProfile(bot, config) {
 
   const gatherStoneSeq = new Sequence([
     new FindBlockNode("STONE","blockTarget",config.BLOCKS.STONE.maxBlockDistance),
-    new MoveToBlockNode("blockTarget",config.BT.MOVE_NEAR_DISTANCE,config.BT.BREAK_RANGE),
+    new MoveToBlockNode("blockTarget",config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE),
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
   ]);
   const gatherStoneSelector = new Selector([
@@ -379,6 +379,7 @@ function createOverworldProfile(bot, config) {
   const collectWaterSeq = new Sequence([
     new FindBlockNode("WATER", "blockTarget", config.BLOCKS.WATER.maxBlockDistance),
     new MoveToBlockNode("blockTarget", 1, 2),
+    new SetBlockNode("air"),
     new RemoveItemNode("bucket", 1),
     new GiveItemNode(["water_bucket"], 1),
     new EquipItemNode("water_bucket"),
@@ -387,14 +388,42 @@ function createOverworldProfile(bot, config) {
   const obtainObsidianSeq = new Sequence([
     new FindBlockNode("LAVA", "blockTarget", config.BLOCKS.LAVA.maxBlockDistance),
     new DetectLavaPoolNode(),
-    new MoveToBlockNode("blockTarget", 2, 3),
+    new MoveToBlockNode(
+      "blockTarget",
+      config.BT.NEAR_LIQUID_DISTANCE,
+      config.BT.LIQUID_SUCCESS_DISTANCE,
+    ),
     new PlaceWaterNode("blockTarget"),
-    new GiveItemNode(["obsidian"], 10),
+
     
   ]);
 
-  const obtainObsidianSelector = new Selector([
+  const setBlockSeq = new Sequence([
     new SetBlockNode("dirt"),
+    new GiveItemNode(["obsidian"], config.ITEM_THRESHOLDS.OBSIDIAN_MAX),
+  ]);
+
+  const setBlockCond = new conditionNode(
+    "IsNearObsidian",
+    () => {
+      const blocks = bot.findBlocks({
+      maxDistance: 32,
+      matching: 192,
+      count: 5,
+    });
+
+    if(blocks.length > 0) {
+        if(bot.entity.position.distanceTo(bot.blockAt(blocks[0]).position) < 3) {
+           return true; 
+        }
+    }else{console.log("No obsidian blocks found nearby when checking set block condition.");}
+    return false;
+  },
+    setBlockSeq,
+  );
+
+  const obtainObsidianSelector = new Selector([
+    setBlockCond,
     obtainObsidianSeq,
   ]);
 
@@ -445,6 +474,11 @@ function createOverworldProfile(bot, config) {
         name: "GatherObsidian",
         node: obtainObsidianSelector,
         scoreFn: gatherObsidianScore,
+      },
+      {
+        name: "CollectWater",
+        node: collectWaterSeq,
+        scoreFn: collectWaterScore,
       },
       {
         name: "SmeltItems",
@@ -541,16 +575,11 @@ function createOverworldProfile(bot, config) {
         node: pickUpCraftingTableNode,
         scoreFn: pickUpCraftingTableScore,
       },
-      {
-        name: "CollectWater",
-        node: collectWaterSeq,
-        scoreFn: collectWaterScore,
-      },
-      {
-        name: "buildNetherPortal",
-        node: new BuildNetherPortalNode(),
-        scoreFn: () => 1000,
-      },
+      // {
+      //   name: "buildNetherPortal",
+      //   node: new BuildNetherPortalNode(),
+      //   scoreFn: () => 1000,
+      // },
       {
         name: "Idle",
         node: new IdleNode(),

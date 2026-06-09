@@ -1,4 +1,5 @@
 const { Node } = require("../behaviorTree");
+const config = require("../../config");
 
 const NEIGHBOR_OFFSETS = [
 	[1, 0, 0],
@@ -20,7 +21,12 @@ function isSourceLavaBlock(block) {
 	return level === 0 || level === "0";
 }
 
-function isLavaPool(block, state, bot, maxBlocks = 10) {
+function isLavaPool(
+    block,
+    state,
+    bot,
+    maxBlocks = config.ITEM_THRESHOLDS.OBSIDIAN_MAX,
+) {
     if (!isSourceLavaBlock(block)) {
 		state[this.stateKey] = null;
 		return false;
@@ -55,7 +61,10 @@ function isLavaPool(block, state, bot, maxBlocks = 10) {
 }
 
 class DetectLavaPoolNode extends Node {
-	constructor(stateKey = "blockTarget", maxBlocks = 10) {
+    constructor(
+        stateKey = "blockTarget",
+        maxBlocks = config.ITEM_THRESHOLDS.OBSIDIAN_MAX,
+    ) {
 		super("DetectLavaPool");
 		this.stateKey = stateKey;
 		this.maxBlocks = maxBlocks;
@@ -100,10 +109,10 @@ class DetectLavaPoolNode extends Node {
             return "SUCCESS";
         } 
 
-        if(state.lavaSearchDistance > 4096) {
-            console.log(`Search distance exceeded reasonable limits.`);
-            return "FAILURE";
-        }
+        // if(state.lavaSearchDistance > 4096) {
+        //     console.log(`Search distance exceeded reasonable limits.`);
+        //     return "FAILURE";
+        // }
         const blocks = bot.findBlocks({
             maxDistance: state.lavaSearchDistance,
             matching: config.BLOCKS[this.configKey].names

@@ -15,7 +15,7 @@ class GiveItemNode extends Node {
 
     for (const key of keys) {
       bot.chat(`/give @s ${key} ${this.count}`);
-      bot.chat(`Crafted ${this.count} of ${key}.`);
+      // bot.chat(`Crafted ${this.count} of ${key}.`);
       state.craftingTableProtection = false; // Set protection flag to prevent other actions during crafting
       return "SUCCESS";
     }

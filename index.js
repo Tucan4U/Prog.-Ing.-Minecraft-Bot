@@ -87,7 +87,7 @@ async function startLoop() {
       console.log(err);
     }
 
-    await new Promise((r) => setTimeout(r, state.tickSpeed));
+    await new Promise((r) => setTimeout(r, 500));
   }
 }
 
@@ -144,6 +144,7 @@ bot.on("chat", async (username, message) => {
     bot.chat("/clear");
     bot.chat("/give @s iron_ingot 8");
     bot.chat("/give @s gold_ingot 5");
+    bot.chat("/give @s crafting_table 2");
     bot.chat("/give @s coal 9");
     bot.chat("/give @s dirt 16");
     bot.chat("/give @s oak_log 16");

@@ -86,7 +86,7 @@ class PlaceBlockNode extends Node {
             return "SUCCESS";
           }
           console.log("Errrror placing block:", e);
-          bot.chat("Error placing block");
+          bot.chat("Couldn't place block, trying again...");
           state["blockTarget"] = null;
           return "FAILURE";
         }

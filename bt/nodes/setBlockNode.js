@@ -26,11 +26,22 @@ class SetBlockNode extends Node {
       return "FAILURE";
     }
 
+    if(targetBlock.name === this.blockType || keys.includes(targetBlock.name)) {
+        console.log(`[SetBlockNode] Target block is already of type ${targetBlock.name}`);
+        return "SUCCESS";
+    }
+
     const waterBlocks = bot.findBlocks({
       maxDistance: this.maxBlockDistance,
       matching: this.mcData.blocksByName["water"]?.id,
-      count: 32,
+      count: 64,
     });
+
+    if (!waterBlocks.length) {
+      console.log(`[SetBlockNode] No water blocks found nearby to set.`);
+      this.maxBlockDistance *= 2;
+      return "FAILURE";
+    }
 
     const checkLiquidBlock = bot.blockAt(waterBlocks[0]);
 
@@ -44,31 +55,22 @@ class SetBlockNode extends Node {
         }
       }
     }
-
-    const blocks = bot.findBlocks({
-      maxDistance: 10,
-      matching: this.mcData.blocksByName["obsidian"]?.id,
-      count: 5,
-    });
-
-    if(blocks.length > 0) {
-        if(bot.entity.position.distanceTo(bot.blockAt(blocks[0]).position) < 3) {
-            for (const key of keys) {
-                console.log(`Setting block at ${waterBlocks[0]} to ${key}`);
-                if(bot.blockAt(waterBlocks[0])._properties?.level === "0"){ {
-                    bot.chat(`/setblock ${waterBlocks[0].x} ${waterBlocks[0].y} ${waterBlocks[0].z} ${key}`);
-                    return "SUCCESS";
-                }
-            }
-        }
+    for (const key of keys) {
+      if(bot.blockAt(waterBlocks[0])._properties?.level === "0"){ 
+        console.log(`Setting block at ${waterBlocks[0]} to ${key}`);
+        bot.chat(`/setblock ${waterBlocks[0].x} ${waterBlocks[0].y} ${waterBlocks[0].z} ${key}`);
+        return "SUCCESS";       
+      }
     }
+    console.log(`No source liquid block found among nearby blocks to set. Cannot set block.`);
+    return "FAILURE";
 }
 
 
     
 
-    return "FAILURE";
+    
   }
-}
+
 
 module.exports = SetBlockNode;

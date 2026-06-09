@@ -35,6 +35,8 @@ function gatherGravelScore(bot, state, cfg) {
   
   if (state.hasFlintAndSteel) return 0;
 
+  if(countItemsByNames(bot, ["crafting_table"]) < 2) return 0;
+
   if (flintCount >= 1) state.hasFlint = true;
   else state.hasFlint = false;
 

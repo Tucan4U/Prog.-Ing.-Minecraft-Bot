@@ -37,7 +37,7 @@ class FindBlockNode extends Node {
       matching: config.BLOCKS[this.configKey].names
         .map((name) => this.mcData.blocksByName[name]?.id)
         .filter(Boolean),
-      count: 10,
+      count: 30,
     });
 
     if (!blocks.length) {
@@ -57,6 +57,10 @@ class FindBlockNode extends Node {
           break;
         }
       }
+      // if(bot.blockAt(blocks[0])._properties?.level === "0"){state[this.stateKey] = bot.blockAt(blocks[0]); return "SUCCESS";}
+      // console.log("No source liquid block found among nearby blocks, expanding search radius");
+      // this.maxBlockDistance *= 2;
+      // return "FAILURE";
     }
 
     state[this.stateKey] = bot.blockAt(blocks[0]);

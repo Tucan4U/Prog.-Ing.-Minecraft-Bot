@@ -80,6 +80,10 @@ module.exports = {
       ],
       maxBlockDistance: 16,
     },
+    GOLD: {
+      names: ["nether_gold_ore", "gold_ore"],
+      maxBlockDistance: 64,
+    },
     STONE: {
       names: ["cobblestone", "stone"],
       maxBlockDistance: 16,
@@ -142,6 +146,10 @@ module.exports = {
         names: ["end_portal_frame"],
         maxBlockDistance: 96,
     },
+    CRAFTING_TABLE: {
+      names: ["crafting_table"],
+      maxBlockDistance: 32,
+    },
     
   },
   // Furnace / smelting related config
@@ -152,10 +160,6 @@ module.exports = {
     ITEMS_PER_FUEL_UNIT: 8,
     TIME_PER_ITEM_MS: 10000,
     BURN_MS_PER_FUEL_UNIT: 1600,
-    GOLD: {
-      names: ["nether_gold_ore", "gold_ore"],
-      maxBlockDistance: 64,
-    },
   },
   ITEMS: {
     GOLD_NUGGETS: {

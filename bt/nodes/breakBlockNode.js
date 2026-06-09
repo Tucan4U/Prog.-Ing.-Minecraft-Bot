@@ -53,6 +53,11 @@ class BreakBlockNode extends Node {
         state["digTask"] = null;
 
         bot.chat("SUCCESS: Block became air immediately.");
+        if (targetBlock.name === "crafting_table") {
+              console.log("unutra sam");
+              state.mission.placedItems["crafting_table"] -= 1;
+              state.mission.placedItems[this.configKey] = 0;
+            }
         return "SUCCESS";
       }
       return "RUNNING";

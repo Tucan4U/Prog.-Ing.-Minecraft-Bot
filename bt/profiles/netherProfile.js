@@ -22,7 +22,8 @@ const PickUpItemNode = require('../nodes/pickUpItemNode');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { getClosestEntity, isTargetFloating } = require('../../utils/target');
 
-const { craftEnderEyesScore, exitNetherScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, barteringScore, craftBlazePowderScore, } = require('../scores/netherScores');
+const { craftEnderEyesScore, exitNetherScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, barteringScore, craftBlazePowderScore, } = require('../scores/netherScores');
+const {tablePickUpScore, placeTableScore, useTableScore, breakTableScore } = require('../scores/craftingScores');;
 
 // Gold collection and crafting nodes
 const BreakBlockNode = require("../nodes/breakBlockNode");
@@ -79,7 +80,7 @@ function createNetherProfile(config, state) {
     new FindBlockNode(
       "GOLD",
       "blockTarget",
-      config.BLOCKS.maxBlockDistance,
+      config.BLOCKS.GOLD.maxBlockDistance,
     ),
 
     new MoveToBlockNode(
@@ -106,7 +107,38 @@ function createNetherProfile(config, state) {
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
     //pick up crafting table
     new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
-    ]);
+  ]);
+
+  const tablePickUpSeq = new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names);
+
+  const tablePlacingSeq = new Sequence([
+    //find placement
+    new FindInteractiveBlockPlacementNode(),
+    //place block
+    new PlaceBlockNode("crafting_table"),
+  ]);
+
+  const craftingSeq = new Sequence([
+    //find crafting table
+    new FindBlockNode("CRAFTING_TABLE"),
+    //craft item
+    new CraftItemUsingTableNode("gold_ingot"),
+  ]);
+
+  const tableBreakingSeq = new Sequence([
+    //find crafting table
+    new FindBlockNode("CRAFTING_TABLE"),
+    //move to crafting table
+    new MoveToBlockNode(
+      "blockTarget",
+      config.BT.MOVE_NEAR_DISTANCE,
+      config.BT.BREAK_RANGE,
+    ),
+    //break crafting table
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+    //pick up crafting table
+    new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
+  ])
 
     //bot isnt picking up the crafting table after breaking it
 
@@ -122,7 +154,7 @@ function createNetherProfile(config, state) {
     new PickUpItemNode(config.PIGLIN_BARTER.names),
 
     new ToggleBarteringNode(),
-  ])
+  ]);
 
   const blazePowderSeq = new Sequence([
     // Craft blaze powder from collected blaze rods (10 rods -> 20 powder)
@@ -169,8 +201,11 @@ function createNetherProfile(config, state) {
     candidates: [
       { name: 'EnterNether', node: enterSeq, scoreFn: enterNetherScore },
       { name: 'ExitNether', node: exitSeq, scoreFn: exitNetherScore }, 
+      { name: 'PickUpTable', node: tablePickUpSeq, scoreFn: tablePickUpScore },
+      { name: 'PlaceTable', node: tablePlacingSeq, scoreFn: placeTableScore },
+      { name: 'UseTable', node: craftingSeq, scoreFn: useTableScore },
+      { name: 'BreakTable', node: tableBreakingSeq, scoreFn: breakTableScore },
       { name: 'CollectNetherGold', node: goldSeq, scoreFn: getGoldNetherScore },
-      { name: 'CraftNetherGold', node: goldCraftingSeq, scoreFn: craftGoldNetherScore },
       { name: 'MoveToPiglin', node: moveToPiglinSeq, scoreFn: moveToPiglinScore },
       { name: 'BarterWithPiglin', node: barteringSeq, scoreFn: barteringScore },
       { name: 'CraftBlazePowder', node: blazePowderSeq, scoreFn: craftBlazePowderScore },

@@ -113,9 +113,25 @@ function moveToPiglinScore(bot, state, config) {
 }
 
 function barteringScore(bot, state, config){
-  const enderPearlCount = numOfItems(bot, state, config, "ENDER_PEARLS");
+  const enderPearlCount = numOfItems(bot, state, config, "ENDER_PEARLS"); 
+  const droppedGold = findItem(bot, config.ITEMS.GOLD_INGOTS.names); 
 
-  if (state.isBartering && enderPearlCount < 12) return 159;
+  if(!droppedGold){
+    state.isBartering = false;
+  }
+
+  if (state.isBartering && enderPearlCount < 12){
+    if(enderPearlCount !== state.enderPearls){
+      bot.chat(enderPearlCount);
+      state.enderPearls = enderPearlCount;
+    }
+    
+    return 159;
+  } 
+
+  if (enderPearlCount >= 12){
+    state.mission.findFortressRequested = true;
+  }
   return 0;
 }
 

@@ -12,6 +12,8 @@ module.exports = {
   isBartering: false,
   needsGold: true,
   neededGold: 64,
+  tablePlaced: false,
+  enderPearls: null,
 
   hasEnoughLogs: false,
   hasEnoughStone: false,

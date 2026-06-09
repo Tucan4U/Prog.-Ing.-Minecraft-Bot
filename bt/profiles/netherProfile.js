@@ -22,6 +22,7 @@ const { findMobs } = require('../../behaviors/findEnteties');
 const { getClosestEntity, isTargetFloating } = require('../../utils/target');
 
 const { moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, barteringScore, } = require('../scores/netherScores');
+const {tablePickUpScore, placeTableScore, useTableScore, breakTableScore } = require('../scores/craftingScores');;
 
 // Gold collection and crafting nodes
 const BreakBlockNode = require("../nodes/breakBlockNode");
@@ -102,14 +103,14 @@ function createNetherProfile(config) {
 
   const craftingSeq = new Sequence([
     //find crafting table
-    new FindBlockNode("crafting_table"),
+    new FindBlockNode("CRAFTING_TABLE"),
     //craft item
     new CraftItemUsingTableNode("gold_ingot"),
   ]);
 
   const tableBreakingSeq = new Sequence([
     //find crafting table
-    new FindBlockNode("crafting_table"),
+    new FindBlockNode("CRAFTING_TABLE"),
     //move to crafting table
     new MoveToBlockNode(
       "blockTarget",

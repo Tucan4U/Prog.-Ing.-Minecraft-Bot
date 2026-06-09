@@ -42,7 +42,7 @@ class CraftItemUsingTableNode extends Node {
 
     try {
       await bot.craft(recipe, 1, table);
-      bot.chat("Crafted: ", this.configKey);
+      bot.chat(`Crafted: ${this.configKey}`);
       //state.mission.craftedItems[this.configKey] = 1;
       return "SUCCESS";
     } catch (err) {

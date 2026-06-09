@@ -15,7 +15,7 @@ class FindInteractiveBlockPlacementNode extends Node {
     //this script goes trhough every available space in an area around it and return an available position for the table
     //digging straight down causes problems
     //improvements: expanding the search area after a fail, adding a functionality to mine a block thats in the way
-    if (state[this.stateKey]) return "SUCCESS";
+    //if (state[this.stateKey]) return "SUCCESS";
     for (let dy = 0; dy <= this.placementDistance; dy++) {
       for (
         let dx = -this.placementDistance;

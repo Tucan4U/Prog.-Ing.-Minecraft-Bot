@@ -10,7 +10,7 @@ function netherMain(bot, state, config) {
 
     state.mission.activeProfile = config.PROFILES.NETHER;
     state.mission.enterNetherRequested = true;
-    state.mission.findFortressRequested = true;
+    state.mission.findFortressRequested = false;
     state.mission.fortressTarget = null;
     state.mission.findBlazeSpawnerRequested = true;
     state.blazeSpawnerBlock = null;

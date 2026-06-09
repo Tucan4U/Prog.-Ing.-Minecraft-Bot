@@ -16,7 +16,8 @@ class PlaceBlockNode extends Node {
     }
 
     if (state.mission.placedItems[this.configKey]) {
-      console.log("zajeb sa placed items")
+      console.log("zajeb sa placed items");
+      console.log(state.mission.placedItems[this.configKey]);
       return "SUCCESS";
     }
 
@@ -29,7 +30,7 @@ class PlaceBlockNode extends Node {
     let blockAbove = state[this.stateKey];
 
     bot.chat(`${this.configKey}`);
-    bot.chat(`${blockToPlaceId}`);
+    //bot.chat(`${blockToPlaceId}`);
     let blockBelow = bot.blockAt(blockAbove.position.offset(0, -1, 0));
 
     if (!bot.inventory.items().some((item) => item.name === this.configKey)) {

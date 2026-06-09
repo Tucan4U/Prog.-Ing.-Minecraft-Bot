@@ -146,6 +146,10 @@ module.exports = {
         names: ["end_portal_frame"],
         maxBlockDistance: 96,
     },
+    CRAFTING_TABLE: {
+      names: ["crafting_table"],
+      maxBlockDistance: 32,
+    },
     
   },
   // Furnace / smelting related config

@@ -1,6 +1,7 @@
 // Glavni entrypoint: inicijalizira bota, senzore i pokreće top-level BT odluke.
 const mineflayer = require("mineflayer");
 const { pathfinder, Movements } = require("mineflayer-pathfinder");
+const NetherPortalBuilder = require("./bt/nodes/buildNetherPortalNode");
 
 const config = require("./config");
 // State
@@ -50,7 +51,7 @@ bot.loadPlugin(pathfinder);
 let startFlag = false; // kontrola da li bot treba loviti ili ne
 let worldSensors = null;
 
-const overworldProfile = createOverworldProfile(config);
+const overworldProfile = createOverworldProfile(bot, config);
 const hostileCombatProfile = createHostileCombatProfile(config);
 const netherProfile = createNetherProfile(config);
 const endProfile = createEndProfile(config)
@@ -181,10 +182,10 @@ async function loop() {
 }
 
 // CHAT
-bot.on("chat", (username, message) => {
+bot.on("chat", async (username, message) => {
   if (username === bot.username) return;
   if (message === "stop") {
-    bot.chat("Stopping hunt!");
+    bot.chat("Stopping Bot!");
     bot.pathfinder.setGoal(null);
     startFlag = false;
     // Reset state vars and pathfinder
@@ -197,8 +198,48 @@ bot.on("chat", (username, message) => {
   if (message === "logs") {
     bot.chat("/clear");
     bot.chat("/give @s minecraft:diamond_axe");
+    bot.chat("/give @s dirt 10");
+    bot.chat("/give @s oak_log 14");
     startFlag = true;
   }
+  if(message === "clear"){
+    bot.chat("/clear");
+  }
+
+  if(message === "prp"){
+    bot.chat("/clear");
+    bot.chat("/give @s raw_iron 7");
+    bot.chat("/give @s raw_gold 4");
+    bot.chat("/give @s coal 8");
+    bot.chat("/give @s dirt 15");
+    bot.chat("/give @s oak_log 15");
+    bot.chat("/give @s cobblestone 7");
+    bot.chat("/give @s beef 1");
+  }
+
+  if(message === "obsidian"){
+    bot.chat("/clear");
+    bot.chat("/give @s iron_ingot 8");
+    bot.chat("/give @s gold_ingot 5");
+    bot.chat("/give @s crafting_table 2");
+    bot.chat("/give @s coal 9");
+    bot.chat("/give @s dirt 16");
+    bot.chat("/give @s oak_log 16");
+    bot.chat("/give @s cobblestone 8");
+    bot.chat("/give @s furnace");
+    bot.chat("/give @s cooked_beef 4");
+    bot.chat("/give @s golden_helmet");
+    bot.chat("/give @s diamond_chestplate");
+    bot.chat("/give @s diamond_leggings");
+    bot.chat("/give @s diamond_boots");
+    bot.chat("/give @s diamond_pickaxe");
+    bot.chat("/give @s diamond_sword");
+    bot.chat("/give @s stone_axe");
+    bot.chat("/give @s bucket");
+    bot.chat("/give @s shield");
+    bot.chat("/give @s flint_and_steel");
+  }
+
   if (message === "profile overworld") {
     state.mission.activeProfile = config.PROFILES.OVERWORLD;
     bot.chat("Profile switched: OVERWORLD");
@@ -211,27 +252,7 @@ bot.on("chat", (username, message) => {
     state.mission.activeProfile = config.PROFILES.NETHER;
     bot.chat("Profile switched: NETHER");
   }
-  if (message === "entities") {
-    const filter = config.SLIMES;
-    const allowedNames = new Set(filter.names);
-    const entities = state.sensors?.entities || Object.values(bot.entities);
 
-    bot.chat(
-      `Entities: ${entities
-        .filter(
-          (entity) =>
-            entity &&
-            entity.type === filter.type &&
-            allowedNames.has(entity.name),
-        )
-        .map((e) => e.name)
-        .join(", ")}`,
-    );
-
-    const nearest = bot.nearestEntity();
-    bot.chat(`${nearest?.name || "none"}`);
-    bot.chat(`Type: ${nearest?.type || "none"}`);
-  }
   if (message === "inventory") {
     console.log(bot.inventory.items());
   }
@@ -262,16 +283,27 @@ bot.on("chat", (username, message) => {
     findBlazeSpawnerCommand(bot, state, config);
     startFlag = true;
   }
-  // Kill Blazes and loot rods command
-  // Message form: "collect rods x" -> where x is the number of rods to collect
   if (message.startsWith("collect rods")){
     lootBlazeRodsCommand(bot, state, config, message);
     startFlag = true;
   }
-
+  
+  // Give night vision effect
+  if (message === "nv") {
+    bot.chat("/effect give @a minecraft:night_vision infinite 1 true");
+  }
   if (message === "tp") {
     bot.chat("/tp @s " + username);
   }
+  if (message === "clear") {
+    bot.chat("/clear @s");
+  }
+  if (message === "np") {
+    const builder = new NetherPortalBuilder(bot);
+
+    await builder.build();
+  // Kill Blazes and loot rods command
+  // Message form: "collect rods x" -> where x is the number of rods to collect
   if (message === 'profile end') {
     state.mission.activeProfile = config.PROFILES.END
     bot.chat('Profile switched: END')

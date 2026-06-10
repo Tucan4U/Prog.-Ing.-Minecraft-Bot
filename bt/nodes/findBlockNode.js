@@ -14,17 +14,21 @@ class FindBlockNode extends Node {
     if (!this.mcData) {
       this.mcData = mcData(bot.version);
     }
-    const item = state["lootTarget"];
-    if (item) return "SUCCESS";
+    // const item = state["lootTarget"];
+    // if (item) return "SUCCESS";
 
-    let block = state[this.stateKey];
+    let targetBlock = state[this.stateKey];
+    const block = targetBlock ? bot.blockAt(targetBlock.position) : null;
 
-    if (block && !bot.blockAt(block.position)) {
+    if (targetBlock && (!block || block.name.includes("air"))) {
       console.log("Block invalid");
       state[this.stateKey] = null;
+      return "FAILURE";
     }
 
-    if (block) {
+    if (targetBlock && block && config.BLOCKS[this.configKey].names.includes(block.name)) {
+      console.log("Block already targeted");
+      console.log("Target block: ", targetBlock.name);
       return "SUCCESS";
     }
 
@@ -33,7 +37,7 @@ class FindBlockNode extends Node {
       matching: config.BLOCKS[this.configKey].names
         .map((name) => this.mcData.blocksByName[name]?.id)
         .filter(Boolean),
-      count: 1,
+      count: 30,
     });
 
     if (!blocks.length) {
@@ -41,6 +45,24 @@ class FindBlockNode extends Node {
       this.maxBlockDistance *= 2;
       return "FAILURE";
     }
+
+    const checkLiquidBlock = bot.blockAt(blocks[0]);
+
+    if(checkLiquidBlock._properties || checkLiquidBlock._properties !== {}) {
+      for(let block of blocks){
+        let blockInfo = bot.blockAt(block);
+        if(blockInfo._properties?.level === "0"){
+          console.log("Found liquid 'block' at: ", block);
+          blocks[0] = block;
+          break;
+        }
+      }
+      // if(bot.blockAt(blocks[0])._properties?.level === "0"){state[this.stateKey] = bot.blockAt(blocks[0]); return "SUCCESS";}
+      // console.log("No source liquid block found among nearby blocks, expanding search radius");
+      // this.maxBlockDistance *= 2;
+      // return "FAILURE";
+    }
+
     state[this.stateKey] = bot.blockAt(blocks[0]);
     console.log(
       `New block found: ${blocks[0].x}, ${blocks[0].y}, ${blocks[0].z}`,

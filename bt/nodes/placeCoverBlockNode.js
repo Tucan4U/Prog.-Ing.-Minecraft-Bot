@@ -28,7 +28,7 @@ function getSolidAnchorBlock(bot, targetPos) {
 }
 
 class PlaceCoverBlockNode extends Node {
-  constructor(coverBlocksKeyOrNames = ["cobblestone", "dirt", "oak_planks"]) {
+  constructor(coverBlocksKeyOrNames = [ "andesite", "diorite", "granite", "cobblestone", "dirt"]) {
     super("PlaceCoverBlock");
     this.coverBlocksKeyOrNames = coverBlocksKeyOrNames;
   }

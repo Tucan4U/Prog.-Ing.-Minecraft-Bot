@@ -1,61 +1,135 @@
-const { Node } = require('../behaviorTree');
-const { goals } = require('mineflayer-pathfinder');
-const { chatThrottled } = require('../../utils/throttle');
+const { Node } = require("../behaviorTree");
+const { goals } = require("mineflayer-pathfinder");
+const { chatThrottled } = require("../../utils/throttle");
 
 class MoveToMobNode extends Node {
-  constructor(stateKey = 'currentTarget', nearDistance = 2, successDistance = 3, statusThrottleMs = 3000) {
-    super('MoveToMob');
+  constructor(
+    stateKey = "currentTarget",
+    nearDistance = 1,
+    successDistance = 2,
+    statusThrottleMs = 3000,
+    goalRetryMs = 3000,
+    stuckTimeoutMs = 5000
+  ) {
+    super("MoveToMob");
+
     this.stateKey = stateKey;
-    this.nearDistance = nearDistance;
-    this.successDistance = successDistance;
+    this.nearDistance = 1;
+    this.successDistance = 2;
     this.statusThrottleMs = statusThrottleMs;
+
+    this.goalRetryMs = goalRetryMs;
+    this.stuckTimeoutMs = stuckTimeoutMs;
+
     this.lastGoal = null;
+    this.lastGoalSetTime = 0;
+
+    this.lastDistance = Infinity;
+    this.lastProgressTime = Date.now();
+  }
+
+  reset(bot) {
+    bot.pathfinder.setGoal(null);
+    this.lastGoal = null;
+    this.lastGoalSetTime = 0;
+    this.lastDistance = Infinity;
+    this.lastProgressTime = Date.now();
   }
 
   async tick(bot, state) {
     const target = state[this.stateKey];
 
+    //
+    // Nema targeta
+    //
     if (!target) {
-      this.lastGoal = null;
-      return 'FAILURE';
+      this.reset(bot);
+      return "FAILURE";
     }
 
+    //
+    // Target više ne postoji
+    //
     if (!bot.entities[target.id]) {
       state[this.stateKey] = null;
-      this.lastGoal = null;
-      return 'FAILURE';
+      this.reset(bot);
+      return "FAILURE";
     }
 
-    const dist = bot.entity.position.distanceTo(target.position);
+    const currentTarget = bot.entities[target.id];
+    const dist = bot.entity.position.distanceTo(currentTarget.position);
 
+    //
+    // Stigli smo do mete
+    //
     if (dist < this.successDistance) {
-      return 'SUCCESS';
+      this.reset(bot);
+      return "SUCCESS";
     }
 
-    const goalX = Math.floor(target.position.x);
-    const goalY = Math.floor(target.position.y);
-    const goalZ = Math.floor(target.position.z);
-    const goal = `${goalX}:${goalY}:${goalZ}`;
+    const now = Date.now();
 
-    if (this.lastGoal !== goal) {
-      bot.pathfinder.setGoal(new goals.GoalNear(
-        target.position.x,
-        target.position.y,
-        target.position.z,
-        this.nearDistance
-      ));
+    //
+    // Progress detection
+    //
+    if (dist < this.lastDistance - 0.5) {
+      this.lastDistance = dist;
+      this.lastProgressTime = now;
+    }
 
-      this.lastGoal = goal;
+    const goalX = Math.floor(currentTarget.position.x);
+    const goalY = Math.floor(currentTarget.position.y);
+    const goalZ = Math.floor(currentTarget.position.z);
+
+    const goalKey = `${goalX}:${goalY}:${goalZ}`;
+
+    const retryGoal =
+      now - this.lastGoalSetTime > this.goalRetryMs;
+
+    const stuck =
+      now - this.lastProgressTime > this.stuckTimeoutMs;
+
+    //
+    // Novi goal ili retry
+    //
+    if (
+      this.lastGoal !== goalKey ||
+      retryGoal ||
+      stuck
+    ) {
+      if (stuck) {
+        console.log(
+          `[MoveToMob] No progress for ${
+            Math.round((now - this.lastProgressTime) / 1000)
+          }s, retrying path`
+        );
+      }
+
+      bot.pathfinder.setGoal(
+        new goals.GoalNear(
+          currentTarget.position.x,
+          currentTarget.position.y,
+          currentTarget.position.z,
+          this.nearDistance
+        )
+      );
+
+      this.lastGoal = goalKey;
+      this.lastGoalSetTime = now;
+
+      if (stuck) {
+        this.lastProgressTime = now;
+      }
     }
 
     chatThrottled(
       bot,
-      `move:${this.stateKey}:${target.id}`,
-      `Moving towards ${target.name} @ ${Math.round(dist)} blocks`,
+      `move:${this.stateKey}:${currentTarget.id}`,
+      `Moving towards ${currentTarget.name} @ ${Math.round(dist)} blocks`,
       this.statusThrottleMs
     );
 
-    return 'RUNNING';
+    return "RUNNING";
   }
 }
 

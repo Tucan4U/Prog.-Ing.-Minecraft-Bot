@@ -16,9 +16,9 @@ const {
   countItemsByNames,
   findInventoryItemByNames,
   findBestInventoryItemByNames,
+  getTotalFoodCount,
   hasAnyItem,
-  needsFood,
-  numOfBlocks,
+  shouldHuntForFood,
 } = require("../utils/inventory");
 const config = require("../config");
 
@@ -144,6 +144,37 @@ test("inventory helpers count, find, score and classify items", () => {
   assert.equal(findBestInventoryItemByNames(bot, ["oak_log"]).count, 12);
   assert.equal(hasAnyItem(bot, ["bread"]), true);
   assert.equal(hasAnyItem(bot, ["diamond"]), false);
-  assert.equal(needsFood(bot, {}, { FOOD: ["bread"] }), true);
-  assert.equal(numOfBlocks(bot, {}, config, "LOGS"), 18);
+});
+
+test("total food count includes raw and cooked food", () => {
+  const bot = {
+    inventory: {
+      items: () => [
+        { name: "beef", count: 4 },
+        { name: "cooked_beef", count: 6 },
+        { name: "cooked_chicken", count: 2 },
+      ],
+    },
+  };
+
+  assert.equal(getTotalFoodCount(bot, config), 12);
+});
+
+test("hunt hysteresis starts below 10 and stops at 32", () => {
+  const state = { foodHuntActive: false };
+  const bot = {
+    inventory: {
+      items: () => [
+        { name: "beef", count: 4 },
+      ],
+    },
+  };
+
+  assert.equal(shouldHuntForFood(bot, state, config), true);
+
+  bot.inventory.items = () => [{ name: "cooked_beef", count: 20 }];
+  assert.equal(shouldHuntForFood(bot, state, config), true);
+
+  bot.inventory.items = () => [{ name: "cooked_beef", count: 32 }];
+  assert.equal(shouldHuntForFood(bot, state, config), false);
 });

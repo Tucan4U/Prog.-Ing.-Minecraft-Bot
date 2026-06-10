@@ -22,7 +22,7 @@ class ResetFurnaceWorkflowNode extends Node {
   async tick(bot, state, config) {
     // Očisti cijeli furnace/pit workflow state nakon razbijanja peći.
     await this.closeContainerIfNeeded(state);
-
+    
     state.furnaceWorkflowStarted = false;
     state.selectedFurnaceItems = null;
     state.reservedFuel = null;
@@ -41,6 +41,7 @@ class ResetFurnaceWorkflowNode extends Node {
     state.pitStartY = null;
     state.pitTargetY = null;
     state.inPit = false;
+    state.furnaceProtection = false;
 
     console.log("[ResetFurnaceWorkflow] state cleared");
     return "SUCCESS";

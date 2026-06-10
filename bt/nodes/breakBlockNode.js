@@ -9,29 +9,31 @@ class BreakBlockNode extends Node {
   }
 
   async tick(bot, state, config) {
-    const lootTarget = state["lootTarget"];
-    if (lootTarget) return "SUCCESS";
     const targetBlock = state[this.stateKey];
+    
     if (!targetBlock) {
-      //console.log("There is no target block");
+      console.log("There is no target block");
       return "FAILURE";
     }
 
     const block = bot.blockAt(targetBlock.position);
 
-    if (!block || block.name === "air") {
+    if (!block || block.name.includes("air")) {
+      console.log("Block is already air");
       state["digTask"] = null;
-      state[this.stateKey] = null;
+      //state[this.stateKey] = null;
       return "SUCCESS";
     }
 
     const dist = bot.entity.position.distanceTo(block.position);
-    if (dist > this.reachDistance) {
-      console.log("Log too far away");
+    if (dist > this.reachDistance + 1) {
+      console.log("Block too far away");
+      bot.stopDigging();
       state["digTask"] = null;
+      state["blockTarget"] = null;
       return "FAILURE";
     }
-
+    console.log("Ovo je trenutno stanje dig taska: ", state["digTask"]);
     if (!state["digTask"]) {
       bot.pathfinder.setGoal(null);
 
@@ -45,13 +47,17 @@ class BreakBlockNode extends Node {
         })
         .then(() => {
           state["digTask"] = null;
+          //state["blockTarget"] = null;
+          return "SUCCESS";
         });
       console.log("Postavili smo digTask", state["digTask"]);
       // re-check in case block disappeared immediately
       const afterBlock = bot.blockAt(targetBlock.position);
-      if (!afterBlock || (afterBlock.name && afterBlock.name.includes("air"))) {
+      if (
+        !afterBlock ||
+        (afterBlock.name && afterBlock.name.includes("air"))
+      ) {
         state["digTask"] = null;
-
         bot.chat("SUCCESS: Block became air immediately.");
         if (targetBlock.name === "crafting_table") {
               console.log("unutra sam");
@@ -60,22 +66,10 @@ class BreakBlockNode extends Node {
             }
         return "SUCCESS";
       }
+      console.log("Started digging block", block.name);
       return "RUNNING";
     }
-
-    // ako je dig još u toku
-    if (state["digTask"]) {
-      const cur = bot.blockAt(targetBlock.position);
-      if (!cur || (cur.name && cur.name.includes("air"))) {
-        state["digTask"] = null;
-
-        bot.chat("SUCCESS: Block became air.");
-        return "SUCCESS";
-      }
-      console.log("We are still digging.");
-      return "RUNNING";
-    }
-    //console.log(block);
+    console.log("Already digging, waiting for completion");
     return "RUNNING";
   }
 }

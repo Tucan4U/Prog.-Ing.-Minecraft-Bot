@@ -10,8 +10,85 @@ class FindInteractiveBlockPlacementNode extends Node {
   }
 
   async tick(bot, state, config) {
-    const botPos = bot.entity.position;
+    const botPos = bot.entity.position.floored();
 
+    const isAir = (block) => !block || block.name.includes("air");
+    const isSolid = (block) => block && !block.name.includes("air");
+
+    // 1) Pit check: if block 3 below is air and has at least one solid neighbor,
+    // treat that spot as interactive placement target.
+    const pitCheckPos = botPos.offset(0, 3, 0);
+    const pitBlock = bot.blockAt(pitCheckPos);
+    if (isAir(pitBlock)) {
+      const horizontal = [
+        pitCheckPos.offset(1, 0, 0),
+        pitCheckPos.offset(-1, 0, 0),
+        pitCheckPos.offset(0, 0, 1),
+        pitCheckPos.offset(0, 0, -1),
+      ];
+
+      const hasSolidAroundPit = horizontal.some((pos) =>
+        isSolid(bot.blockAt(pos)),
+      );
+
+      if (hasSolidAroundPit) {
+        bot.chat(`Pit interactive target at ${pitCheckPos}`);
+        state[this.stateKey] = pitBlock;
+        return "SUCCESS";
+      }
+    }
+
+    //2) If bot stands on isolated dirt-like support block, dig it and retry next tick.
+    const supportPos = botPos.offset(0, -1, 0);
+    const supportBlock = bot.blockAt(supportPos);
+
+    const isSolidLike =
+      supportBlock &&
+      (!supportBlock.name.includes("air") ||
+        !supportBlock.name.includes("water"));
+
+    if (isSolidLike) {
+      const aroundSupport = [
+        supportPos.offset(1, 0, 0),
+        supportPos.offset(-1, 0, 0),
+        supportPos.offset(0, 0, 1),
+        supportPos.offset(0, 0, -1),
+      ];
+
+      const allAroundAir = aroundSupport.every((pos) =>
+        isAir(bot.blockAt(pos)),
+      );
+
+      if (allAroundAir) {
+        try {
+          bot.pathfinder.setGoal(null);
+          await bot.dig(supportBlock);
+          state[this.stateKey] = null;
+          state.interactiveBlock = null;
+          bot.chat(
+            "Dug isolated support block, retrying interactive placement.",
+          );
+          return "FAILURE";
+        } catch (err) {
+          console.log("Failed to dig isolated support block:", err);
+          return "FAILURE";
+        }
+      }
+    }
+
+    const block = state[this.stateKey];
+    if (block) {
+      // const blockBelow = bot.blockAt(block?.position.offset(0, -1, 0));
+
+      // if (
+      //   block.name.includes("air") &&
+      //   blockBelow &&
+      //   !blockBelow.name.includes("air")
+      // ) {
+      //   state.interactiveBlock = block;
+      return "SUCCESS";
+      //}
+    }
     //this script goes trhough every available space in an area around it and return an available position for the table
     //digging straight down causes problems
     //improvements: expanding the search area after a fail, adding a functionality to mine a block thats in the way

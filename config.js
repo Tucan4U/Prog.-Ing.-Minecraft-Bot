@@ -45,13 +45,20 @@ module.exports = {
     "stone_shovel",
     "wooden_shovel",
   ],
+  ARMOR: {
+    IRON_ARMOR: ["iron_chestplate", "iron_leggings", "iron_boots"],
+    GOLD_ARMOR: ["golden_helmet"],
+    DIAMOND_ARMOR: ["diamond_chestplate", "diamond_leggings", "diamond_boots"],
+  },
 
-  RAWFOOD: ["beef", "porkchop", "chicken", "mutton"],
   //Parametri koji utječu na SUCCESS ili FAILURE unutar BT-a, zbog toga i ime "BT"
   BT: {
-    MOVE_NEAR_DISTANCE: 4,
-    MOVE_SUCCESS_DISTANCE: 5,
+    MOVE_NEAR_DISTANCE: 1,
+    MOVE_SUCCESS_DISTANCE: 2,
+    NEAR_LIQUID_DISTANCE: 1,
+    LIQUID_SUCCESS_DISTANCE: 2,
     ATTACK_RANGE: 4,
+    INTERACT_RANGE: 4,
     MOVE_STATUS_THROTTLE_MS: 3000,
     BREAK_RANGE: 5,
   },
@@ -80,22 +87,6 @@ module.exports = {
       ],
       maxBlockDistance: 16,
     },
-    GOLD: {
-      names: ["nether_gold_ore", "gold_ore"],
-      maxBlockDistance: 64,
-    },
-    STONE: {
-      names: ["cobblestone", "stone"],
-      maxBlockDistance: 16,
-    },
-    NETHER_PORTAL: {
-      names: ["nether_portal"],
-      maxBlockDistance: 64,
-    },
-    BLAZE_SPAWNER: {
-      names: ["spawner", "mob_spawner"],
-      maxBlockDistance: 64,
-    },
     PLANKS: {
       names: [
         "acacia_planks",
@@ -108,6 +99,22 @@ module.exports = {
         "mangrove_planks",
         "warped_planks",
       ],
+    },
+    STONE: {
+      names: ["cobblestone", "stone"],
+      maxBlockDistance: 16,
+    },
+    CRAFTING_TABLE: {
+      names: ["crafting_table"],
+      maxBlockDistance: 16,
+    },
+    NETHER_PORTAL: {
+      names: ["nether_portal"],
+      maxBlockDistance: 64,
+    },
+    BLAZE_SPAWNER: {
+      names: ["spawner", "mob_spawner"],
+      maxBlockDistance: 64,
     },
     FURNACE: {
       names: ["furnace"],
@@ -127,6 +134,38 @@ module.exports = {
     COBBLESTONE: {
         names: ["cobblestone", "stone", "cobbled_deepslate"],
         maxBlockDistance: 16,
+    },
+    GRAVEL: {
+      names: ["gravel"],
+      maxBlockDistance: 64,
+    },
+    COAL: {
+      names: ["coal_ore", "deepslate_coal_ore"],
+      maxBlockDistance: 64,
+    },
+    IRON: {
+      names: ["iron_ore", "deepslate_iron_ore"],
+      maxBlockDistance: 64,
+    },
+    GOLD: {
+      names: ["nether_gold_ore", "gold_ore", "deepslate_gold_ore"],
+      maxBlockDistance: 64,
+    },
+    DIAMOND: {
+      names: ["diamond_ore", "deepslate_diamond_ore"],
+      maxBlockDistance: 64,
+    },
+    OBSIDIAN: {
+      names: ["obsidian"],
+      maxBlockDistance: 16,
+    },
+    WATER: {
+      names: ["water"],
+      maxBlockDistance: 16,
+    },
+    LAVA: {
+      names: ["lava"],
+      maxBlockDistance: 16,
     },
     SCAFFOLDING: [
         "dirt", "grass_block", "coarse_dirt", "podzol", "rooted_dirt",
@@ -152,16 +191,78 @@ module.exports = {
     },
     
   },
+
   // Furnace / smelting related config
   FURNACE: {
     FUEL: {
       names: ["coal"],
     },
+    GOLD_IRON: { //used in SmeltItemsSeq
+      names: ["raw_gold", "raw_iron"],
+    },
+    FOOD_THRESHOLDS: {
+      HUNT_START_AT: 1,
+      HUNT_STOP_AT: 2,
+    },
+    SMELTING_THRESHOLDS: {
+      IRON: 8,
+      GOLD: 5,
+    },
     ITEMS_PER_FUEL_UNIT: 8,
     TIME_PER_ITEM_MS: 10000,
     BURN_MS_PER_FUEL_UNIT: 1600,
   },
+
+ 
   ITEMS: {
+    CRAFTING_TABLE: {
+      names: ["crafting_table"],
+    },
+    RAWFOOD: { //used in CookFoodSeq
+      names: ["beef", "porkchop", "chicken", "mutton"],
+    },
+    COOKEDFOOD: {
+      names: ["cooked_beef", "cooked_porkchop", "cooked_chicken", "cooked_mutton"],
+    },
+    GRAVEL: {
+      names: ["gravel", "flint"],
+    },
+    COAL: {
+      names: ["coal"],
+    },
+    IRON: {
+      names: ["iron_ingot", "raw_iron"],
+    },
+    GOLD: {
+      names: ["gold_nugget", "gold_ingot", "raw_gold"],
+    },
+    DIAMOND: {
+      names: ["diamond"],
+    },
+    OBSIDIAN: {
+      names: ["obsidian"],
+    },
+    BUCKET: {
+      names: ["bucket"],
+    },
+  },
+  //Dynamic state that can be used across the bot, e.g. for tracking progress on multi-step tasks
+  ITEM_THRESHOLDS: { //food and raw iron/gold thresholds are under FURNACE config
+    DIRT_MIN: 2,
+    DIRT_MAX: 16,
+    LOGS_MIN: 2,
+    LOGS_MAX: 16,
+    STONE_MIN: 3,
+    STONE_MAX: 8,
+    COAL_MIN: 5,
+    COAL_MAX: 9,
+    RAW_IRON_MIN: 0,
+    RAW_IRON_MAX: 8,
+    RAW_GOLD_MIN: 0,
+    RAW_GOLD_MAX: 5,
+    DIAMOND_MIN: 0,
+    DIAMOND_MAX: 24,
+    OBSIDIAN_MAX: 10,
     GOLD_NUGGETS: {
       names: [
       "gold_nugget",

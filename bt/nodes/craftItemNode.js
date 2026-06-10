@@ -4,11 +4,15 @@ class CraftItemNode extends Node {
   constructor(configKeyOrItems, numberOfItemsToCraft) {
     super("CraftItem");
     this.configKeyOrItems = configKeyOrItems;
-    this.isCrafting = null;
     this.numberOfItemsToCraft = numberOfItemsToCraft;
+    this.Recipe = null;
+    this.mcData = null;
   }
 
   async tick(bot, state, config) {
+    if (!this.Recipe)
+      this.Recipe = require("prismarine-recipe")(bot.version).Recipe;
+    if (!this.mcData) this.mcData = require("minecraft-data")(bot.version);
     if (!state.mission.craftedItems) {
       state.mission.craftedItems = {};
     }
@@ -28,17 +32,19 @@ class CraftItemNode extends Node {
 
     for (const key in state.mission.craftedItems) {
       if (desiredNames.includes(key)) {
-        if (state.mission.craftedItems[key] >= targetCount) return "SUCCESS";
+        if (state.mission.craftedItems[key] >= targetCount) {
+          return "SUCCESS";
+        }
       }
     }
     console.log(
       "This is being logged in the: ",
       desiredNames,
       "Object values: ",
-      Object.values(state.mission.craftedItems),
+      Object.values(state.craftedItems),
     );
     // If a craft operation is already in progress, wait for it to finish.
-    if (this.isCrafting) return "RUNNING";
+    if (state.isCrafting) return "RUNNING";
 
     // Try to find a recipe for any of the desired items and start crafting once.
     for (const name of desiredNames) {
@@ -48,13 +54,13 @@ class CraftItemNode extends Node {
       const recipe = bot.recipesFor(id, null, 1);
       if (recipe.length > 0) {
         console.log("Found recipe for", name, recipe[0]);
-        this.isCrafting = bot
+        state.isCrafting = bot
           .craft(recipe[0], 1, null)
           .then(() => {
-            this.isCrafting = null;
-            if (!state.mission.craftedItems[name])
-              state.mission.craftedItems[name] = 0;
-            state.mission.craftedItems[name] += recipe[0].result.count;
+            state.isCrafting = null;
+            if (!state.craftedItems[name])
+              state.craftedItems[name] = 0;
+            state.craftedItems[name] += recipe[0].result.count;
             console.log(
               "Bot crafted: ",
               bot.registry.items[recipe[0].result.id]?.displayName,
@@ -66,10 +72,22 @@ class CraftItemNode extends Node {
           })
           .catch((e) => {
             console.log("Error crafting item: ", e);
-            this.isCrafting = null;
+            state.isCrafting = null;
           });
 
         return "RUNNING";
+      } else {
+        console.log(this.Recipe.find(id)[0]);
+        if (this.Recipe.find(id)[0].ingredients) {
+          const missingItemId = this.Recipe.find(id)[0].ingredients[0].id;
+          //console.log("Ingredients: ", missingItemId);
+          console.log("Missing items: ", this.mcData[missingItemId]);
+        }
+        if (this.Recipe.find(id)[0].inShape) {
+          const missingItemId = this.Recipe.find(id)[0].inShape[0][0].id;
+          //console.log("In shape: ", missingItemId);
+          console.log("Missing items: ", this.mcData.items[missingItemId].name);
+        }
       }
     }
 

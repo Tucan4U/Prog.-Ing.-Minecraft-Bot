@@ -160,6 +160,7 @@ function hasAllItems(bot, names) {
 
 module.exports = {
   equipBestWeapon,
+  numOfItems,
   getFoodHuntStartThreshold,
   getFoodHuntStopThreshold,
   getTotalFoodCount,
@@ -171,5 +172,4 @@ module.exports = {
   hasAllItems,
   getOffhandItem,
   checkOffhand,
-  numOfItems,
 };

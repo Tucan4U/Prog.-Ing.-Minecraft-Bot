@@ -2,12 +2,12 @@ const { getMissingEquipment } = require('../../utils/netherEquipment');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { findItem } = require('../../behaviors/loot');
 const { needsGold, numOfBlocks, numOfItems } = require('../../utils/inventory');
+const { checkEnderEyesPosession, hasRequiredNetherItem } = require('../../utils/netherUtils');
 
 
 let blazeCountCache = 0; // Cache for the current blaze rod count to avoid expensive inventory checks every tick.
 // Score function for Nether behavior. Returns high priority only when a Nether request is active and gear is ready.
 function enterNetherScore(bot, state, config) {
-
   if (bot.game && bot.game.dimension === 'the_nether') {
     if (state.mission?.enterNetherRequested) {
       // Clear stale requests when already in the Nether.
@@ -27,6 +27,26 @@ function enterNetherScore(bot, state, config) {
 
   // High priority when requested and gear is ready
   return 200;
+}
+
+function exitNetherScore(bot, state, config) {
+  if (bot.game && bot.game.dimension !== 'the_nether' && 
+    (checkEnderEyesPosession(bot, state, config) || state.mission?.netherMode === config.NETHER_MODES.MANUAL)) {
+    if (state.mission?.exitNetherRequested) {
+      // Clear stale requests when already in the Nether.
+      state.mission.exitNetherRequested = false;
+      bot.chat("Exited Nether, clearing exit request.");
+    }
+    return 0;
+  }
+
+  // Triggered via state flag
+  if (!state.mission?.exitNetherRequested) return 0;
+
+  if (!checkEnderEyesPosession(bot, state, config)) return 0; // Can't exit if we don't have enough ender eyes.
+
+  // High priority when requested and enough ender eyes
+  return 250;
 }
 
 function findFortressScore(bot, state, config) {
@@ -45,28 +65,6 @@ function findFortressScore(bot, state, config) {
 
   // Medium-high priority: run after entering Nether but lower than other potential activities.
   return 150;
-}
-
-function enterNetherScore(bot, state, config) {
-  if (bot.game && bot.game.dimension === 'the_nether') {
-    if (state.mission?.enterNetherRequested) {
-      // Clear stale requests when already in the Nether.
-      state.mission.enterNetherRequested = false;
-    }
-    return 0;
-  }
-
-  // Triggered via state flag
-  if (!state.mission?.enterNetherRequested) return 0;
-
-  const missing = getMissingEquipment(bot);
-  if (missing.length > 0) {
-    bot.chat(`Cannot enter Nether, missing: ${missing.join(', ')}`);
-    return 0;
-  }
-
-  // High priority when requested and gear is ready
-  return 200;
 }
 
 // function hasNearbyGoldItem(state, config) { //ignore for now
@@ -115,9 +113,25 @@ function moveToPiglinScore(bot, state, config) {
 }
 
 function barteringScore(bot, state, config){
-  const enderPearlCount = numOfItems(bot, state, config, "ENDER_PEARLS");
+  const enderPearlCount = numOfItems(bot, state, config, "ENDER_PEARLS"); 
+  const droppedGold = findItem(bot, config.ITEMS.GOLD_INGOTS.names); 
 
-  if (state.isBartering && enderPearlCount < 12) return 159;
+  if(!droppedGold){
+    state.isBartering = false;
+  }
+
+  if (state.isBartering && enderPearlCount < 12){
+    if(enderPearlCount !== state.enderPearls){
+      bot.chat(enderPearlCount);
+      state.enderPearls = enderPearlCount;
+    }
+    
+    return 159;
+  } 
+
+  if (enderPearlCount >= 12){
+    state.mission.findFortressRequested = true;
+  }
   return 0;
 }
 
@@ -173,6 +187,48 @@ function huntBlazeScore(bot, state, config) {
   return blazes.length ? 120 : 0;
 }
 
+function craftBlazePowderScore(bot, state, config) {
+  // Active when craft blaze powder was requested.
+  if (!state.mission?.craftBlazePowderRequested) return 0;
+
+  const craftedPowderCount = state.mission?.craftedItems?.['blaze_powder'] || 0;
+  if (craftedPowderCount >= state.mission.targetBlazePowder) {
+    state.mission.craftBlazePowderRequested = false;
+    const rodsUsed = craftedPowderCount / 2;
+    bot.chat(`Crafted ${craftedPowderCount} blaze powders from ${rodsUsed} blaze rods.`);
+    return 0;
+  }
+
+  // Count blaze rods in inventory
+  const blazeRodCount = hasRequiredNetherItem(bot, state, config, 'blaze_rod');
+
+  // Once crafting is requested, use all available rods (minimum 1)
+  if (blazeRodCount < 1) return 0;
+
+  return 130;
+}
+
+function craftEnderEyesScore(bot, state, config) {
+  // Active when craft ender eyes was requested.
+  if (!state.mission?.craftEnderEyesRequested) return 0;
+
+  const craftedEnderEyesCount = state.mission?.craftedItems?.['ender_eye'] || 0;
+  if (craftedEnderEyesCount >= state.mission.enderEyesTargetNumber) {
+    state.mission.craftEnderEyesRequested = false;
+    bot.chat(`Crafted ${craftedEnderEyesCount} ender eyes from ${craftedEnderEyesCount} blaze powder and ${craftedEnderEyesCount} ender pearls.`);
+    return 0;
+  }
+
+  // Count blaze powder and ender pearls in inventory
+  const blazePowderCount = hasRequiredNetherItem(bot, state, config, 'blaze_powder');
+  const enderPearlCount = hasRequiredNetherItem(bot, state, config, 'ender_pearl');
+
+  if (blazePowderCount < 1 || enderPearlCount < 1) return 0;
+
+  // Very high priority since ender eyes are required to exit the Nether
+  return 300;
+}
+
 
 
 // Function check if there is a need for blaze rods:
@@ -197,4 +253,4 @@ function checkBlazeNeed(bot, state, config) {
   return true; // Needs blaze rods
 }
 
-module.exports = { barteringScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore, lootBlazeRodsScore, huntBlazeScore };
+module.exports = { exitNetherScore, barteringScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, getGoldNetherScore, craftGoldNetherScore, lootBlazeRodsScore, huntBlazeScore, craftBlazePowderScore, craftEnderEyesScore };

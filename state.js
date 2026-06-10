@@ -15,6 +15,8 @@ module.exports = {
   isBartering: false,
   needsGold: true,
   neededGold: 64,
+  tablePlaced: false,
+  enderPearls: null,
 
   hasEnoughLogs: false,
   hasEnoughStone: false,
@@ -39,10 +41,18 @@ module.exports = {
     fortressTarget: null,
     // Mode - AUTONOMOUS or MANUAL
     netherMode : null,
-    
+    // Exit Nether portal request flag.
+    exitNetherRequested: false,
     // Blaze hunting state (Blaze rods collection)
     targetBlazeRods: null,
     blazeHuntingRequested: false,
+    // Blaze powder crafting state
+    craftBlazePowderRequested: false,
+    targetBlazePowder: 20, // Desired blaze powder count
+    // Ender eye crafting state
+    craftEnderEyesRequested: false,
+    enderEyesTargetNumber: 12, // Desired ender eye count
+
     // Craft-sequence progress cache used to survive repeated BT ticks.
     craftedItems: null,
     // Placed-block progress cache used by block placement sequences.

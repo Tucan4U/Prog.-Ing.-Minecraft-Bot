@@ -185,6 +185,10 @@ module.exports = {
         names: ["end_portal_frame"],
         maxBlockDistance: 96,
     },
+    CRAFTING_TABLE: {
+      names: ["crafting_table"],
+      maxBlockDistance: 32,
+    },
     
   },
 
@@ -275,6 +279,11 @@ module.exports = {
     ENDER_PEARLS: {
       names: [
         "ender_pearl",
+      ]
+    },
+    BLAZE_POWDER: {
+      names: [
+        "blaze_powder",
       ]
     }
   },

@@ -5,6 +5,7 @@ const EquipArmorNode = require('../nodes/equipArmorNode');
 const FindBlockNode = require('../nodes/findBlockNode');
 const MoveToBlockNode = require('../nodes/moveToBlockNode');
 const EnterPortalNode = require('../nodes/enterPortalNode');
+const PreExitNode = require('../nodes/preExitNode');
 const LocateFortressNode = require('../nodes/locateFortressNode');
 const MoveToFortressNode = require('../nodes/moveToFortressNode');
 const MoveToBlazeSpawnerNode = require('../nodes/moveToBlazeSpawnerNode');
@@ -21,7 +22,8 @@ const PickUpItemNode = require('../nodes/pickUpItemNode');
 const { findMobs } = require('../../behaviors/findEnteties');
 const { getClosestEntity, isTargetFloating } = require('../../utils/target');
 
-const { moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, craftGoldNetherScore, barteringScore, } = require('../scores/netherScores');
+const { craftEnderEyesScore, exitNetherScore, moveToPiglinScore, enterNetherScore, findFortressScore, findBlazeSpawnerScore, lootBlazeRodsScore, huntBlazeScore, getGoldNetherScore, barteringScore, craftBlazePowderScore, } = require('../scores/netherScores');
+const {tablePickUpScore, placeTableScore, useTableScore, breakTableScore } = require('../scores/craftingScores');;
 
 // Gold collection and crafting nodes
 const BreakBlockNode = require("../nodes/breakBlockNode");
@@ -31,9 +33,11 @@ const CraftItemUsingTableNode = require("../nodes/craftItemUsingTableNode");
 const { ITEMS } = require('../../config');
 const DropItemNode = require('../nodes/dropItemNode');
 const ToggleBarteringNode = require('../nodes/startBarteringNode');
+const CraftItemNode = require('../nodes/craftItemNode');
 
 
-function createNetherProfile(config) {
+
+function createNetherProfile(config, state) {
   const enterSeq = new Sequence([
     // Enter Nether sequence: check if already in Nether,
     // if not check for required equipment, then find nearest portal and enter it.
@@ -44,9 +48,23 @@ function createNetherProfile(config) {
       "NETHER_PORTAL",
       "blockTarget",
       config.BLOCKS.NETHER_PORTAL.maxBlockDistance,
+      true,
     ),
     new MoveToBlockNode("blockTarget", 0, 0),
-    new EnterPortalNode(200),
+    new EnterPortalNode(200, "the_nether"),
+  ]);
+
+  const exitSeq = new Sequence([
+    // Exit Nether sequence: ensure combat/navigation stopped, then find portal and enter it.
+    new PreExitNode(),
+    new FindBlockNode(
+      "NETHER_PORTAL",
+      "blockTarget",
+      config.BLOCKS.NETHER_PORTAL.maxBlockDistance,
+      true,
+    ),
+    new MoveToBlockNode("blockTarget", 0, 0),
+    new EnterPortalNode(200, "overworld"),
   ]);
 
   const fortressSeq = new Sequence([
@@ -58,20 +76,20 @@ function createNetherProfile(config) {
     new MoveToFortressNode(400, 5),
   ]);
 
-  // const goldSeq = new Sequence([
-  //   new FindBlockNode(
-  //     "GOLD",
-  //     "blockTarget",
-  //     config.BLOCKS.GOLD.maxBlockDistance,
-  //   ),
+  const goldSeq = new Sequence([
+    new FindBlockNode(
+      "GOLD",
+      "blockTarget",
+      config.BLOCKS.GOLD.maxBlockDistance,
+    ),
 
-  //   new MoveToBlockNode(
-  //     "blockTarget",
-  //     config.BT.MOVE_NEAR_DISTANCE,
-  //     config.BT.BREAK_RANGE,
-  //   ),
+    new MoveToBlockNode(
+      "blockTarget",
+      config.BT.MOVE_NEAR_DISTANCE,
+      config.BT.BREAK_RANGE,
+    ),
 
-  //   new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "PICKAXES"),
 
     new PickUpItemNode(config.ITEMS.GOLD_NUGGETS.names),
   ]);
@@ -89,7 +107,38 @@ function createNetherProfile(config) {
     new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
     //pick up crafting table
     new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
-    ]);
+  ]);
+
+  const tablePickUpSeq = new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names);
+
+  const tablePlacingSeq = new Sequence([
+    //find placement
+    new FindInteractiveBlockPlacementNode(),
+    //place block
+    new PlaceBlockNode("crafting_table"),
+  ]);
+
+  const craftingSeq = new Sequence([
+    //find crafting table
+    new FindBlockNode("CRAFTING_TABLE"),
+    //craft item
+    new CraftItemUsingTableNode("gold_ingot"),
+  ]);
+
+  const tableBreakingSeq = new Sequence([
+    //find crafting table
+    new FindBlockNode("CRAFTING_TABLE"),
+    //move to crafting table
+    new MoveToBlockNode(
+      "blockTarget",
+      config.BT.MOVE_NEAR_DISTANCE,
+      config.BT.BREAK_RANGE,
+    ),
+    //break crafting table
+    new BreakBlockNode("blockTarget", config.BT.BREAK_RANGE, "AXES"),
+    //pick up crafting table
+    new PickUpItemNode(config.ITEMS.CRAFTING_TABLE.names),
+  ])
 
     //bot isnt picking up the crafting table after breaking it
 
@@ -105,7 +154,12 @@ function createNetherProfile(config) {
     new PickUpItemNode(config.PIGLIN_BARTER.names),
 
     new ToggleBarteringNode(),
-  ])
+  ]);
+
+  const blazePowderSeq = new Sequence([
+    // Craft blaze powder from collected blaze rods (10 rods -> 20 powder)
+    new CraftItemNode('blaze_powder', (bot, state) => state.mission.targetBlazePowder),
+  ]);
 
   const blazeSpawnerSeq = new Sequence([
     // Blaze spawner search sequence: equip gear, then find blaze spawner by looking for spawner blocks,
@@ -136,14 +190,25 @@ function createNetherProfile(config) {
     new FindMobNode('BLAZES'),
     new AttackNode(),
   ]);
+  
+  const enderEyesSeq = new Sequence([
+    // Craft ender eye from blaze powder and ender pearls
+    new CraftItemNode('ender_eye', (bot, state) => state.mission.enderEyesTargetNumber),
+  ]);
+
 
   return {
     candidates: [
       { name: 'EnterNether', node: enterSeq, scoreFn: enterNetherScore },
+      { name: 'ExitNether', node: exitSeq, scoreFn: exitNetherScore }, 
+      { name: 'PickUpTable', node: tablePickUpSeq, scoreFn: tablePickUpScore },
+      { name: 'PlaceTable', node: tablePlacingSeq, scoreFn: placeTableScore },
+      { name: 'UseTable', node: craftingSeq, scoreFn: useTableScore },
+      { name: 'BreakTable', node: tableBreakingSeq, scoreFn: breakTableScore },
       { name: 'CollectNetherGold', node: goldSeq, scoreFn: getGoldNetherScore },
-      { name: 'CraftNetherGold', node: goldCraftingSeq, scoreFn: craftGoldNetherScore },
       { name: 'MoveToPiglin', node: moveToPiglinSeq, scoreFn: moveToPiglinScore },
       { name: 'BarterWithPiglin', node: barteringSeq, scoreFn: barteringScore },
+      { name: 'CraftBlazePowder', node: blazePowderSeq, scoreFn: craftBlazePowderScore },
       { name: 'FindFortress', node: fortressSeq, scoreFn: findFortressScore },
       { name: 'LootBlazeRod', node: lootRodSeq, scoreFn: lootBlazeRodsScore },
 
@@ -206,6 +271,7 @@ function createNetherProfile(config) {
       },
 
       { name: 'FindBlazeSpawner', node: blazeSpawnerSeq, scoreFn: findBlazeSpawnerScore },
+      { name: 'CraftEnderEyes', node: enderEyesSeq, scoreFn: craftEnderEyesScore },
       { name: 'Idle', node: new IdleNode(), scoreFn: () => 1 },
     ],
     fallbackNode: new IdleNode(),

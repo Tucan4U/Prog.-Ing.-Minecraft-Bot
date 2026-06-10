@@ -28,7 +28,10 @@ const {
   enterNetherCommand,
   findFortressCommand,
   findBlazeSpawnerCommand ,
-  lootBlazeRodsCommand
+  lootBlazeRodsCommand,
+  craftBlazePowderCommand,
+  craftEnderEyesCommand,
+  exitNetherCommand,
 } = require("./commands/netherCommands");
 
 // PvP, auto-eat and Hawkeye plugins
@@ -53,7 +56,7 @@ let worldSensors = null;
 
 const overworldProfile = createOverworldProfile(bot, config);
 const hostileCombatProfile = createHostileCombatProfile(config);
-const netherProfile = createNetherProfile(config);
+const netherProfile = createNetherProfile(config, state);
 const endProfile = createEndProfile(config)
 
 const utilityTreesByProfile = {
@@ -287,6 +290,23 @@ bot.on("chat", async (username, message) => {
     lootBlazeRodsCommand(bot, state, config, message);
     startFlag = true;
   }
+  // Craft blaze powder command
+  if (message === "craft blaze powder") {
+    craftBlazePowderCommand(bot, state, config);
+    startFlag = true;
+  }
+  // Craft ender eyes command
+  if (message === "craft ender eyes") {
+    craftEnderEyesCommand(bot, state, config);
+    startFlag = true;
+  }
+  // Exit nether command
+  if (message === "exit nether") {
+    exitNetherCommand(bot, state, config);
+    startFlag = true;
+  }
+  
+
   
   // Give night vision effect
   if (message === "nv") {

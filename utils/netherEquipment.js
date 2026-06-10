@@ -96,10 +96,16 @@ function giveNetherEquipment(bot) {
     bot.chat('/give ' + bot.username + ' shield'); // Give shield
     bot.chat('/give ' + bot.username + ' cooked_beef 64'); // Added food for auto-eat plugin
     bot.chat('/give ' + bot.username + ' dirt 64'); // For building temporary structures if needed.
+    bot.chat('/give ' + bot.username + ' crafting_table 1'); 
+    bot.chat('/give ' + bot.username + ' iron_axe');
 
     // Ranged attack
     bot.chat('/give ' + bot.username + ' bow');
     bot.chat('/give ' + bot.username + ' arrow 64');
+
+    // Testing
+    bot.chat('/give ' + bot.username + ' blaze_rod 5'); // For testing blaze rod collection and fortress searching without needing to hunt blazes.
+    bot.chat('/give ' + bot.username + ' ender_pearl 12'); // For testing ender pearl usage and ender eye crafting without needing to hunt endermen.
   } catch (err) {
     // ignore
   }

@@ -1,10 +1,13 @@
 const {
   findInventoryItemByNames,
+  numOfItems,
   countItemsByNames,
   hasAllItems,
   hasAnyItem,
   checkOffhand,
 } = require("../../utils/inventory");
+const { findItem } = require('../../behaviors/loot');
+
 
 function hasNearbyCraftingTableItem(state, config) {
   const items = state.sensors?.items || [];
@@ -244,12 +247,79 @@ function craftDiamondArmorScore(bot, state, config) {
   return 34;
 }
 
+function tablePickUpScore(bot, state, config) {
+  const droppedTable = findItem(bot, config.ITEMS.CRAFTING_TABLE.names);
+  return droppedTable ? 190 : 0; 
+
+}
+
+function placeTableScore(bot, state, config){
+  if (!state.needsGold) return 0;
+
+  const tableCount = numOfItems(bot, state, config, "CRAFTING_TABLE");
+
+  if (tableCount === 0) return 0;
+
+  const goldCountNuggets = numOfItems(bot, state, config, "GOLD_NUGGETS");
+
+  const goldCountIngots = numOfItems(bot, state, config, "GOLD_INGOTS");
+
+  if (goldCountNuggets >= 9 && goldCountIngots < state.neededGold){
+    return 189;
+  }else if (goldCountIngots >= state.neededGold){
+    state.needsGold = false;
+    state.neededGold = 16;
+    return 0;
+  }else{
+    return 0;
+  }
+}
+
+function useTableScore(bot, state, config){
+  if (!state.needsGold) return 0;
+
+  const goldCountNuggets = numOfItems(bot, state, config, "GOLD_NUGGETS");
+
+  const goldCountIngots = numOfItems(bot, state, config, "GOLD_INGOTS");
+
+  if (goldCountNuggets >= 9 && goldCountIngots < state.neededGold){
+    bot.chat(`I have ${goldCountIngots} golden ingots`);
+    return 188;
+  }else if (goldCountIngots >= state.neededGold){
+    state.needsGold = false;
+    state.neededGold = 16;
+    return 0;
+  }else{
+    return 0;
+  }
+}
+
+function breakTableScore(bot, state, config){
+  if (!state.needsGold) return 0;
+
+  
+
+  const tableCount = numOfItems(bot, state, config, "CRAFTING_TABLE");
+
+  if (tableCount === 0) {
+    state.mission.placedItems["crafting_table"] = 0;
+    return 187;
+  }
+
+  return 0;
+
+}
+
 module.exports = {
   craftCraftingTableScore,
   craftFurnaceScore,
   pickUpCraftingTableScore,
   craftWoodenPickaxeScore,
   craftStonePickaxeScore,
+  tablePickUpScore,
+  placeTableScore,
+  useTableScore,
+  breakTableScore,
   craftStoneAxeScore,
   craftIronPickaxeScore,
   craftDiamondPickaxeScore,

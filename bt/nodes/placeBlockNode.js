@@ -16,6 +16,11 @@ class PlaceBlockNode extends Node {
       return "SUCCESS";
     }
 
+    if (state.mission.placedItems[this.configKey]) {
+      console.log("zajeb sa placed items");
+      console.log(state.mission.placedItems[this.configKey]);
+      return "SUCCESS";
+    }
     let blockAbove = state[this.stateKey];
 
     if (!blockAbove || !blockAbove.position) {
@@ -37,6 +42,9 @@ class PlaceBlockNode extends Node {
       this.mcData = mcData(bot.version);
     }
 
+    bot.chat(`${this.configKey}`);
+    //bot.chat(`${blockToPlaceId}`);
+    let blockBelow = bot.blockAt(blockAbove.position.offset(0, -1, 0));
     const blockToPlace = findInventoryItemByNames(bot, [this.configKey]);
 
     if (!blockToPlace) {

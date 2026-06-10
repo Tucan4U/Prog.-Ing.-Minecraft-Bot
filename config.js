@@ -19,6 +19,15 @@ module.exports = {
     "wooden_pickaxe",
   ],
 
+  RANGED_WEAPONS: [
+    "bow",
+    "crossbow",
+  ],
+  AMMO : [
+    "arrow",
+    "spectral_arrow",
+  ],
+
   AXES: ["diamond_axe", "iron_axe", "golden_axe", "stone_axe", "wooden_axe"],
 
   PICKAXES: [
@@ -60,6 +69,7 @@ module.exports = {
     OVERWORLD: "OVERWORLD",
     HOSTILE_COMBAT: "HOSTILE_COMBAT",
     NETHER: "NETHER",
+    END: "END",
   },
   NETHER_MODES: {
     AUTONOMOUS: "AUTONOMOUS",
@@ -109,9 +119,21 @@ module.exports = {
     FURNACE: {
       names: ["furnace"],
     },
+    PUMPKINS: {
+        names: ["pumpkin"],
+        maxBlockDistance: 128,
+    },
+    CARVED_PUMPKINS: {
+        names: ["carved_pumpkin"],
+        maxBlockDistance: 128,
+    },
     DIRT: {
-      names: ["dirt"],
-      maxBlockDistance: 16,
+        names: ["dirt", "grass_block", "coarse_dirt", "podzol", "rooted_dirt"],
+        maxBlockDistance: 16,
+    },
+    COBBLESTONE: {
+        names: ["cobblestone", "stone", "cobbled_deepslate"],
+        maxBlockDistance: 16,
     },
     GRAVEL: {
       names: ["gravel"],
@@ -145,6 +167,25 @@ module.exports = {
       names: ["lava"],
       maxBlockDistance: 16,
     },
+    SCAFFOLDING: [
+        "dirt", "grass_block", "coarse_dirt", "podzol", "rooted_dirt",
+        "cobblestone", "stone", "cobbled_deepslate",
+        "oak_log", "birch_log", "spruce_log", "jungle_log", "acacia_log", "dark_oak_log",
+        "oak_planks", "birch_planks", "spruce_planks",
+        "netherrack", "end_stone",
+    ],
+    GATHER_BLOCKS: {
+        names: [
+            "dirt", "grass_block", "cobblestone", "stone", "cobbled_deepslate", "oak_log", "birch_log", 
+            "spruce_log", "jungle_log", "acacia_log", "dark_oak_log", "netherrack"
+        ],
+        maxBlockDistance: 32,
+    },
+    END_PORTAL_FRAMES: {
+        names: ["end_portal_frame"],
+        maxBlockDistance: 96,
+    },
+    
   },
 
   // Furnace / smelting related config
@@ -218,6 +259,53 @@ module.exports = {
     DIAMOND_MIN: 0,
     DIAMOND_MAX: 24,
     OBSIDIAN_MAX: 10,
+    GOLD_NUGGETS: {
+      names: [
+      "gold_nugget",
+      ]
+    },
+    GOLD_INGOTS: {
+      names: [
+      "gold_ingot",
+      ]
+    },
+    CRAFTING_TABLE: {
+      names: ["crafting_table"],
+    },
+    ENDER_PEARLS: {
+      names: [
+        "ender_pearl",
+      ]
+    }
+  },
+  BLAZE_RODS: {
+    names: ["blaze_rod"],
+  },
+  PIGLIN_BARTER: {
+    names: [
+      "blackstone",
+      "gravel",
+      "soul_sand",
+      "nether_brick",
+      "string",
+      "nether_quartz",
+      "fire_charge",
+      "leather",
+      "spectral_arrow",
+      "arrow",
+      "obsidian",
+      "crying_obsidian",
+      "ender_pearl",
+      "magma_cream",
+      "glowstone_dust",
+      "iron_nugget",
+      "potion",
+      "splash_potion",
+      "enchanted_book",
+      "iron_boots",
+      "water_bottle",
+      "dried_ghast",
+    ],
   },
 
   // MOBOVI
@@ -229,7 +317,6 @@ module.exports = {
     type: "animal",
     names: ["pig", "cow", "sheep", "chicken"],
   },
-
   HOSTILES: {
     type: "hostile",
     names: ["zombie", "skeleton", "spider", "creeper"],
@@ -238,4 +325,30 @@ module.exports = {
     type: "mob",
     names: ["slime"],
   },
+  BLAZES: {
+    type: "hostile",
+    names: ["blaze"],
+  },
+  PIGLINS: {
+    type: "hostile",
+    names: ["piglin"],
+  },
+  GATHER_BLOCK_ITEMS: [
+      "dirt", "cobblestone", "cobbled_deepslate", "oak_log", "birch_log", "spruce_log", 
+      "jungle_log", "acacia_log", "dark_oak_log", "oak_planks", "birch_planks", "spruce_planks", "jungle_planks", 
+      "acacia_planks", "dark_oak_planks", "netherrack"
+  ],
+  
+  
+  //RADI lakse implemetacije findAndKillChicken i Spider
+  CHICKENS: {
+      type: "animal",
+      names: ["chicken"],
+  },
+
+  SPIDERS: {
+      type: "mob",
+      names: ["spider", "cave_spider"],
+  },
+    
 };

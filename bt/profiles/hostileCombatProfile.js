@@ -11,13 +11,7 @@ const { huntHostileScore } = require('../scores/combatScores');
 function createHostileCombatProfile(config) {
   const huntHostilesNode = new Sequence([
     new FindMobNode('HOSTILES'),
-    new MoveToMobNode(
-      'currentTarget',
-      config.BT.MOVE_NEAR_DISTANCE,
-      config.BT.MOVE_SUCCESS_DISTANCE,
-      config.BT.MOVE_STATUS_THROTTLE_MS
-    ),
-    new AttackNode(),
+    new AttackNode(), // The PvP plugin handles the movement natively
   ]);
 
   return {

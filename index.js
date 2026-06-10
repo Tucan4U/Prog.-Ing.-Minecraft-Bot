@@ -14,6 +14,7 @@ const {
   createHostileCombatProfile,
 } = require("./bt/profiles/hostileCombatProfile");
 const { createNetherProfile } = require("./bt/profiles/netherProfile");
+const { createEndProfile } = require('./bt/profiles/endProfile')
 const { startWorldSensors } = require("./sensors/worldSensors");
 
 // Decorators
@@ -26,14 +27,25 @@ const {
   netherMain,
   enterNetherCommand,
   findFortressCommand,
-  findBlazeSpawnerCommand,
+  findBlazeSpawnerCommand ,
+  lootBlazeRodsCommand
 } = require("./commands/netherCommands");
+
+// PvP, auto-eat and Hawkeye plugins
+const autoEat = require("mineflayer-auto-eat").loader;
+const pvp = require("mineflayer-pvp").plugin;
+const minecraftHawkEye = require("minecrafthawkeye").default;
 
 const bot = mineflayer.createBot({
   host: "localhost",
   port: 25565,
   username: "IndexBot",
 });
+
+// Loading plugins
+bot.loadPlugin(autoEat);
+bot.loadPlugin(pvp);
+bot.loadPlugin(minecraftHawkEye);
 
 bot.loadPlugin(pathfinder);
 let startFlag = false; // kontrola da li bot treba loviti ili ne
@@ -42,6 +54,7 @@ let worldSensors = null;
 const overworldProfile = createOverworldProfile(bot, config);
 const hostileCombatProfile = createHostileCombatProfile(config);
 const netherProfile = createNetherProfile(config);
+const endProfile = createEndProfile(config)
 
 const utilityTreesByProfile = {
   [config.PROFILES.OVERWORLD]: new UtilitySelectorNode(
@@ -59,6 +72,11 @@ const utilityTreesByProfile = {
     netherProfile.candidates,
     netherProfile.fallbackNode,
   ),
+  [config.PROFILES.END]: new UtilitySelectorNode(
+    'EndUtility',
+    endProfile.candidates,
+    endProfile.fallbackNode,
+  ),
 };
 
 state.mission.activeProfile = config.PROFILES.OVERWORLD;
@@ -67,17 +85,76 @@ bot.once("spawn", () => {
   const mcData = require("minecraft-data")(bot.version);
   const defaultMove = new Movements(bot, mcData);
 
+  // Set up pathfinding
+  const logBlockIds = config.BLOCKS.LOGS.names
+    .map((name) => bot.registry.itemsByName[name]?.id)
+    .filter((id) => id !== undefined);
+  logBlockIds.forEach((el) => defaultMove.scafoldingBlocks.push(el));
+
+  // Dozvoli botu da koristi logove kao scaffolding ako mora
+  // Dodaj sve scaffolding blokove (dirt, cobble, logs, end_stone...) u movements
+  const scaffoldingIds = config.BLOCKS.SCAFFOLDING
+    .map(name => bot.registry.itemsByName[name]?.id)
+    .filter(id => id !== undefined)
+  scaffoldingIds.forEach(id => defaultMove.scafoldingBlocks.push(id))
+
   bot.pathfinder.setMovements(defaultMove);
+
+
+
+  // Passing movements to PvP plugin
+  bot.pvp.movements = defaultMove;
+
+  // --- NEW AUTO-EAT V4 CONFIGURATION ---
+  bot.autoEat.setOpts({
+    priority: "foodPoints",
+    minHunger: 19,
+    minHealth: 0,
+    bannedFood: ["rotten_flesh", "pufferfish", "spider_eye"],
+    offhand: false,
+  });
+  // MUST be explicitly enabled in v4!
+  bot.autoEat.enableAuto();
+
+  // Listeners update the centralized state module cleanly
+  bot.autoEat.on("autoeat_started", (item) => {
+    console.log(`[AUTO-EAT] Started eating ${item.name}`);
+    state.isEating = true; // Updates the state module
+    bot.pathfinder.setGoal(null); // Instantly stops pathfinding conflicts
+  });
+
+  bot.autoEat.on("autoeat_stopped", () => {
+    console.log("[AUTO-EAT] Finished eating.");
+    state.isEating = false; // Resets the state module
+  });
 
   worldSensors = startWorldSensors(bot, state, {
     intervalMs: config.SENSORS.WORLD_UPDATE_MS,
   });
 
-  console.log("Bot spawned");
-  console.log("");
+  console.log("Bot spawned. Survival plugins active.");
 
   startLoop();
 });
+
+bot.on('spawn', () => {
+    console.log('[DIMENSION]', bot.game.dimension)
+
+    if (bot.game.dimension === 'the_end') {
+        state.mission.phase = 'END_FIGHT'
+        state.mission.activeProfile = config.PROFILES.END
+        bot.chat('Entered The End. Switching to End fight phase.')
+    }
+})
+
+//???????? MAKRO
+bot.on('entityHurt', (entity, source) => {
+    if (entity !== bot.entity) return
+    if (!source) return
+
+    state.attackerTarget = source
+    console.log('[DEFENSE] Attacked by:', source.name)
+})
 
 async function startLoop() {
   while (true) {
@@ -206,6 +283,11 @@ bot.on("chat", async (username, message) => {
     findBlazeSpawnerCommand(bot, state, config);
     startFlag = true;
   }
+  if (message.startsWith("collect rods")){
+    lootBlazeRodsCommand(bot, state, config, message);
+    startFlag = true;
+  }
+  
   // Give night vision effect
   if (message === "nv") {
     bot.chat("/effect give @a minecraft:night_vision infinite 1 true");
@@ -220,6 +302,14 @@ bot.on("chat", async (username, message) => {
     const builder = new NetherPortalBuilder(bot);
 
     await builder.build();
+  // Kill Blazes and loot rods command
+  // Message form: "collect rods x" -> where x is the number of rods to collect
+  if (message === 'profile end') {
+    state.mission.activeProfile = config.PROFILES.END
+    bot.chat('Profile switched: END')
+  }
+  if (message === 'help') {
+    bot.chat('Commands: start, stop, profile end, inventory, tp')
   }
 });
 
@@ -232,5 +322,34 @@ bot.on("end", () => {
   }
   console.log("Bot disconnect!");
 });
+
+bot.on('kicked', (reason, loggedIn) => {
+    console.log('KICKED:', reason)
+    console.log('loggedIn:', loggedIn)
+})
+
+bot._client.on('end', (reason) => {
+    console.log('CLIENT END:', reason)
+})
+
+bot._client.on('error', (err) => {
+    console.log('CLIENT ERROR:', err)
+})
+
+
+
+
+// DEBUG For health, hunger and saturation monitoring in terminal 
+// bot.on('physicsTick', () => {
+//   // Only log if the bot is actually spawned and has health data available
+//   if (bot.health !== undefined) {
+//     const health = bot.health;
+//     const hunger = bot.food;
+//     const saturation = bot.foodSaturation;
+
+//     // Printing to your terminal console instead of game chat
+//     console.log(`[STATUS] Health: ${health.toFixed(1)} | Hunger: ${hunger} | Saturation: ${saturation.toFixed(1)}`);
+//   }
+// });
 
 console.log("=== BOT 1.21.11 ===");

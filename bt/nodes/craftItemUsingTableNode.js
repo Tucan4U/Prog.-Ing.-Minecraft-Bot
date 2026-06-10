@@ -6,7 +6,7 @@ class CraftItemUsingTableNode extends Node {
   constructor(configKey, stateKey = "lootTarget") {
     super("CraftItemUsingTable");
     this.mcData = null;
-    this.configKey = configKey; //ime itema za craftanje
+    this.configKey = configKey; //name of the crafting item
     this.stateKey = stateKey;
   }
 

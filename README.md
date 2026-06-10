@@ -277,6 +277,7 @@ Additional and detailed project documentation is available in the GitHub Wiki, i
 * Code Profiling Report
 * Development Workflow
 * Installation and Usage
+* Object-Oriented Metrics 
 * System Design
 * WBS and PERT diagrams
 * Software Architectural Patterns

@@ -9,9 +9,23 @@ module.exports = {
   netherPortalBuilt : false, //Flag koji označava da je portal izgrađen, koristi se za pokretanje fortress searcha nakon gradnje portala
   // Block target specifically for blaze spawner searches.
   blazeSpawnerBlock: null,
-  
+  // State flag for eating action
+  isEating: false,
+
+  isBartering: false,
+  needsGold: true,
+  neededGold: 64,
+
+  hasEnoughLogs: false,
+  hasEnoughStone: false,
+  hasEnoughDirt: false,
   mission: {
-    craftStage: null,
+    activeProfile: "OVERWORLD",
+    phase: "END_PREP",
+    // This is connected to the craftingTableSequence and it's scoring system
+    hasCraftingTable: false,
+    // This is connected to the scoring system of the craftWoodenPickaxe
+    hasWoodenPickaxe: false,
 
     activeProfile: "OVERWORLD",
     // Nether portal entry request flag.
@@ -24,7 +38,13 @@ module.exports = {
     // y is the surface level (block.y + 1) so the bot aims for the walkable height.
     fortressTarget: null,
     // Mode - AUTONOMOUS or MANUAL
-    netherMode: null,
+    netherMode : null,
+    
+    // Blaze hunting state (Blaze rods collection)
+    targetBlazeRods: null,
+    blazeHuntingRequested: false,
+    // Craft-sequence progress cache used to survive repeated BT ticks.
+    craftedItems: null,
     // Placed-block progress cache used by block placement sequences.
     placedItems: null,
   },

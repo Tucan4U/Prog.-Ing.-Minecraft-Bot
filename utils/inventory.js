@@ -60,7 +60,13 @@ function shouldHuntForFood(bot, state, config) {
   return state.foodHuntActive;
 }
 
-
+function numOfItems(bot, state, config, itemsKey) {
+  const itemCount = bot.inventory
+    .items()
+    .filter((item) => config.ITEMS[itemsKey]?.names.includes(item.name))
+    .reduce((count, item) => count + item.count, 0);
+  return itemCount || 0;
+}
 
 function countItemsByNames(bot, names) {
   const nameSet = new Set(names || []);
@@ -165,4 +171,5 @@ module.exports = {
   hasAllItems,
   getOffhandItem,
   checkOffhand,
+  numOfItems,
 };

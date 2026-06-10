@@ -21,7 +21,7 @@ class PickUpItemNode extends Node {
       : config?.[this.configKeyOrItems];
 
     const item = findItem(bot, items, itemsCache);
-
+    //console.log("PickupItemNode looking for items:", items, "Found:", item);
     if (!item && state.lootTarget) {
       state["lootTarget"] = null;
       state["blockTarget"] = null;
@@ -72,6 +72,13 @@ class PickUpItemNode extends Node {
       this.lastBotPosition = botPosition;
       this.lastProgressTime = Date.now();
     }
+
+    // const dist = bot.entity.position.distanceTo(item.position);
+
+    // if (dist < 1.5) {
+    //   state.lootTarget = null;
+    //   return "SUCCESS";
+    // }
 
     return "RUNNING";
   }

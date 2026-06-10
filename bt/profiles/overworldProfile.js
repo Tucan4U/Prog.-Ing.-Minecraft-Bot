@@ -38,6 +38,10 @@ const {
   equipGearScore,
   collectWaterScore,
 } = require("../scores/survivalScores");
+const ShearPumpkinNode = require('../nodes/shearPumpkinNode')
+const EquipPumpkinNode = require('../nodes/equipPumpkinNode')
+
+const { getPumpkinHelmetScore } = require('../scores/endPrepScores')
 const { huntAnimalsScore } = require("../scores/combatScores");
 const {
   gatherLogsScore,
@@ -402,6 +406,20 @@ function createOverworldProfile(bot, config) {
     new SetBlockNode("dirt"),
     new GiveItemNode(["obsidian"], config.ITEM_THRESHOLDS.OBSIDIAN_MAX),
   ]);
+  // Pumpkin part 3
+  const getPumpkinHelmetNode = new Sequence([
+        new FindBlockNode('PUMPKINS', 'blockTarget', config.BLOCKS.PUMPKINS.maxBlockDistance),
+        new MoveToBlockNode('blockTarget', config.BT.MOVE_NEAR_DISTANCE, config.BT.BREAK_RANGE),
+        new ShearPumpkinNode('blockTarget'),
+        new BreakBlockNode('blockTarget', config.BT.BREAK_RANGE, 'AXES'),
+        new PickUpItemNode(['carved_pumpkin']),
+        new EquipPumpkinNode(),
+    ])
+
+  // const craftCraftingTable = new Sequence([
+  //   new CraftItemNode(config.BLOCKS.PLANKS.names),
+  //   new CraftItemNode(["crafting_table"]),
+  // ]);
 
   const setBlockCond = new conditionNode(
     "IsNearObsidian",
@@ -584,6 +602,9 @@ function createOverworldProfile(bot, config) {
         name: "Idle",
         node: new IdleNode(),
         scoreFn: resetScore,
+      },
+      { // Pumpkin part 4
+        name: 'GetPumpkinHelmet', node: getPumpkinHelmetNode, scoreFn: getPumpkinHelmetScore
       },
     ],
     fallbackNode: new IdleNode(),
